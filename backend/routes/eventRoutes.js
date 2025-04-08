@@ -4,7 +4,7 @@ const Event = require("../models/event");
 const { authenticateAdmin } = require("../middleware/auth");
 const QRCode = require("qrcode");
 
-// POST /api/events - Create new event (Admin only)
+// (Admin only)
 router.post("/", authenticateAdmin, async (req, res) => {
   try {
     const { name, date, location, description } = req.body;
@@ -15,7 +15,6 @@ router.post("/", authenticateAdmin, async (req, res) => {
       `https://yourapp.com/checkin/${encodeURIComponent(name)}`
     );
 
-    // Save to database
     const event = new Event({
       name,
       date,
@@ -33,7 +32,6 @@ router.post("/", authenticateAdmin, async (req, res) => {
   }
 });
 
-// GET /api/events - Get all events
 router.get("/", async (req, res) => {
   try {
     const events = await Event.find();
