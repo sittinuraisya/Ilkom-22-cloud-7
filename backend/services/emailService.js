@@ -1,5 +1,5 @@
 const sgMail = require("@sendgrid/mail");
-sgMail.setApiKey(process.env.SENDGRID_API_KEY); // Gunakan .env untuk keamanan
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 function sendConfirmationEmail(email, eventName) {
   const msg = {
