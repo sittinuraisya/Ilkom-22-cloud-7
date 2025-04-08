@@ -23,7 +23,6 @@ for (const envVar of requiredEnvVars) {
   }
 }
 
-// Configure SendGrid
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 // Rate limiting configuration
