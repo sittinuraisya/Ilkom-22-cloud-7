@@ -6,7 +6,7 @@ const eventSchema = new mongoose.Schema({
   location: String,
   description: String,
   createdBy: String, 
-  qrCodeUrl: String, // Link/URL QR Code
+  qrCodeUrl: String, 
 });
 
 module.exports = mongoose.model("Event", eventSchema);
