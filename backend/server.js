@@ -15,7 +15,6 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Verify required environment variables
 const requiredEnvVars = ["SENDGRID_API_KEY", "SENDER_EMAIL"];
 for (const envVar of requiredEnvVars) {
   if (!process.env[envVar]) {
