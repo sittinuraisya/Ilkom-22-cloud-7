@@ -7,7 +7,6 @@ const sgMail = require("@sendgrid/mail");
 const { v4: uuidv4 } = require("uuid");
 const rateLimit = require("express-rate-limit");
 
-// Initialize Express app
 const app = express();
 
 // Security and configuration middleware
