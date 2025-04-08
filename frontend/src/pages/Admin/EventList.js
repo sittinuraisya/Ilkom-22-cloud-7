@@ -5,7 +5,9 @@ function EventList() {
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
-    axios.get("/api/events").then((res) => setEvents(res.data));
+    axios.get("http://localhost:5000/api/events")
+      .then((res) => setEvents(res.data))
+      .catch((err) => console.error("Gagal mengambil data:", err));
   }, []);
 
   return (
@@ -21,3 +23,5 @@ function EventList() {
     </div>
   );
 }
+
+export default EventList;
