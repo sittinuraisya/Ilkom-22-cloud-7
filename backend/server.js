@@ -25,7 +25,6 @@ for (const envVar of requiredEnvVars) {
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-// Rate limiting configuration
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
