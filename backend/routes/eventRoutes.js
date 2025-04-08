@@ -1,19 +1,21 @@
 const express = require("express");
 const router = express.Router();
 const Event = require("../models/event");
+const { authenticateAdmin } = require("../middleware/auth");
 const QRCode = require("qrcode");
-const qrCodeUrl = await QRCode.toDataURL(`http://yourapp.com/checkin/${eventId}`);
 
-router.post("/", async (req, res) => {
+// POST /api/events - Create new event (Admin only)
+router.post("/", authenticateAdmin, async (req, res) => {
   try {
-    const { name, date, location, description, createdBy } = req.body;
+    const { name, date, location, description } = req.body;
+    const createdBy = req.user.email; // From authenticated admin
 
     // Generate QR Code
     const qrCodeUrl = await QRCode.toDataURL(
-      `http://localhost:3000/checkin?event=${name}`
+      `https://yourapp.com/checkin/${encodeURIComponent(name)}`
     );
 
-    // Simpan ke database
+    // Save to database
     const event = new Event({
       name,
       date,
@@ -26,17 +28,19 @@ router.post("/", async (req, res) => {
     await event.save();
     res.status(201).json(event);
   } catch (err) {
-    res.status(500).json({ error: "Gagal membuat acara" });
+    console.error(err);
+    res.status(500).json({ error: "Failed to create event" });
   }
 });
 
-// Ambil Daftar Acara
+// GET /api/events - Get all events
 router.get("/", async (req, res) => {
   try {
     const events = await Event.find();
     res.json(events);
   } catch (err) {
-    res.status(500).json({ error: "Gagal mengambil data" });
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch events" });
   }
 });
 
