@@ -8,7 +8,7 @@ const QRCode = require("qrcode");
 router.post("/", authenticateAdmin, async (req, res) => {
   try {
     const { name, date, location, description } = req.body;
-    const createdBy = req.user.email; // From authenticated admin
+    const createdBy = req.user.email; 
 
     // Generate QR Code
     const qrCodeUrl = await QRCode.toDataURL(
