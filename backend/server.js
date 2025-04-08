@@ -9,7 +9,6 @@ const rateLimit = require("express-rate-limit");
 
 const app = express();
 
-// Security and configuration middleware
 app.use(cors({
   origin: process.env.ALLOWED_ORIGINS?.split(",") || "*"
 }));
