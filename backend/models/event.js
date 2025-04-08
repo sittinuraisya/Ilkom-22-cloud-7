@@ -5,7 +5,7 @@ const eventSchema = new mongoose.Schema({
   date: Date,
   location: String,
   description: String,
-  createdBy: String, // Email admin pembuat acara
+  createdBy: String, 
   qrCodeUrl: String, // Link/URL QR Code
 });
 
