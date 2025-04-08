@@ -31,7 +31,6 @@ const apiLimiter = rateLimit({
   message: "Too many requests from this IP, please try again later"
 });
 
-// Data storage (in-memory for development)
 const events = new Map();
 const attendees = new Map();
 
