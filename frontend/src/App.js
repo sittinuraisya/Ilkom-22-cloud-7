@@ -6,7 +6,6 @@ import AdminPage from './pages/Admin/AdminPage';
 import CheckInPage from './pages/Peserta/CheckInPage';
 import Navbar from './components/Navbar';
 
-// Create a Material-UI theme
 const theme = createTheme({
   palette: {
     primary: {
