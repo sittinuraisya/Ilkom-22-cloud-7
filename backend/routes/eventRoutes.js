@@ -4,7 +4,7 @@ const Event = require("../models/event");
 const { authenticateAdmin } = require("../middleware/auth");
 const QRCode = require("qrcode");
 
-// (Admin only)
+// (Hanya Admin)
 router.post("/", authenticateAdmin, async (req, res) => {
   try {
     const { name, date, location, description } = req.body;
