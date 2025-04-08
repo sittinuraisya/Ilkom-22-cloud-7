@@ -34,7 +34,6 @@ const apiLimiter = rateLimit({
 const events = new Map();
 const attendees = new Map();
 
-// Helper functions
 const errorResponse = (res, status, message) => {
   return res.status(status).json({ 
     success: false,
