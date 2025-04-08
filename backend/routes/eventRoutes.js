@@ -2,8 +2,8 @@ const express = require("express");
 const router = express.Router();
 const Event = require("../models/event");
 const QRCode = require("qrcode");
+const qrCodeUrl = await QRCode.toDataURL(`http://yourapp.com/checkin/${eventId}`);
 
-// Buat Acara Baru
 router.post("/", async (req, res) => {
   try {
     const { name, date, location, description, createdBy } = req.body;
