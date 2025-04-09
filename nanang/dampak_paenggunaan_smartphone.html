@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dampak Penggunaan Handphone</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #e3f2fd;
+      padding: 30px;
+    }
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #1565c0;
+    }
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 15px;
+      width: 100%;
+      padding: 12px;
+      background-color: #1565c0;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #0d47a1;
+    }
+    .catatan-list {
+      margin-top: 25px;
+    }
+    .catatan-item {
+      background-color: #bbdefb;
+      border: 1px solid #90caf9;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Dampak Penggunaan Handphone</h2>
+
+    <label for="aktivitas">Aktivitas/ Penggunaan:</label>
+    <input type="text" id="aktivitas" placeholder="Contoh: Bermain game, Belajar online">
+
+    <label for="durasi">Durasi (menit):</label>
+    <input type="number" id="durasi" placeholder="Contoh: 60">
+
+    <label for="dampak">Jenis Dampak:</label>
+    <select id="dampak">
+      <option value="">-- Pilih Dampak --</option>
+      <option value="Positif">Positif</option>
+      <option value="Negatif">Negatif</option>
+    </select>
+
+    <label for="catatan">Catatan Dampak:</label>
+    <textarea id="catatan" rows="3" placeholder="Contoh: Membantu belajar, Mengganggu tidur, dll."></textarea>
+
+    <button onclick="tambahCatatan()">Tambah Catatan</button>
+
+    <div class="catatan-list" id="daftarCatatan"></div>
+  </div>
+
+  <script>
+    const daftarCatatan = [];
+    const daftarDiv = document.getElementById("daftarCatatan");
+
+    function renderCatatan() {
+      daftarDiv.innerHTML = "";
+      daftarCatatan.forEach((item) => {
+        const div = document.createElement("div");
+        div.className = "catatan-item";
+        div.innerHTML = `
+          <strong>${item.aktivitas}</strong> (${item.durasi} menit) - <em>Dampak: ${item.dampak}</em><br>
+          Catatan: ${item.catatan}
+        `;
+        daftarDiv.appendChild(div);
+      });
+    }
+
+    function tambahCatatan() {
+      const aktivitas = document.getElementById("aktivitas").value.trim();
+      const durasi = document.getElementById("durasi").value.trim();
+      const dampak = document.getElementById("dampak").value;
+      const catatan = document.getElementById("catatan").value.trim();
+
+      if (!aktivitas || !durasi || !dampak || !catatan) {
+        alert("Harap isi semua kolom!");
+        return;
+      }
+
+      daftarCatatan.push({ aktivitas, durasi, dampak, catatan });
+
+      document.getElementById("aktivitas").value = "";
+      document.getElementById("durasi").value = "";
+      document.getElementById("dampak").value = "";
+      document.getElementById("catatan").value = "";
+
+      renderCatatan();
+    }
+  </script>
+</body>
+</html>
