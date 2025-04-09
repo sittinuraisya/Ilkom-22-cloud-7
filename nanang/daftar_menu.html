@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daftar Menu</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #fefce8;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #d97706;
+    }
+    .menu-section {
+      margin-bottom: 20px;
+    }
+    .menu-section h2 {
+      color: #ca8a04;
+      border-bottom: 1px solid #facc15;
+      padding-bottom: 5px;
+    }
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    li {
+      padding: 8px 0;
+      border-bottom: 1px solid #fef3c7;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Daftar Menu</h1>
+
+    <div class="menu-section">
+      <h2>Makanan</h2>
+      <ul id="makanan-list"></ul>
+    </div>
+
+    <div class="menu-section">
+      <h2>Minuman</h2>
+      <ul id="minuman-list"></ul>
+    </div>
+  </div>
+
+  <script>
+    const makanan = [
+      "Nasi Goreng Sehat",
+      "Salad Sayur",
+      "Ayam Panggang Rempah",
+      "Tumis Tahu Brokoli"
+    ];
+
+    const minuman = [
+      "Jus Jeruk Segar",
+      "Air Infused Lemon",
+      "Smoothie Alpukat",
+      "Teh Hijau Dingin"
+    ];
+
+    const makananList = document.getElementById("makanan-list");
+    const minumanList = document.getElementById("minuman-list");
+
+    makanan.forEach(item => {
+      const li = document.createElement("li");
+      li.textContent = item;
+      makananList.appendChild(li);
+    });
+
+    minuman.forEach(item => {
+      const li = document.createElement("li");
+      li.textContent = item;
+      minumanList.appendChild(li);
+    });
+  </script>
+</body>
+</html>
