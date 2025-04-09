@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kecerdasan Emosional</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #fff3e0;
+      padding: 30px;
+    }
+    .container {
+      max-width: 700px;
+      background: white;
+      margin: auto;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #fb8c00;
+    }
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 15px;
+      width: 100%;
+      padding: 12px;
+      background-color: #fb8c00;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #e65100;
+    }
+    .log-list {
+      margin-top: 25px;
+    }
+    .log-item {
+      background-color: #ffe0b2;
+      border: 1px solid #ffcc80;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Catatan Kecerdasan Emosional</h2>
+
+    <label for="emosi">Apa yang Anda rasakan?</label>
+    <input type="text" id="emosi" placeholder="Contoh: Sedih, Marah, Senang">
+
+    <label for="situasi">Apa yang menyebabkan emosi tersebut?</label>
+    <textarea id="situasi" rows="3" placeholder="Contoh: Dimarahi, Mendapat kabar baik, dll."></textarea>
+
+    <label for="respon">Bagaimana Anda merespon atau mengelola emosi tersebut?</label>
+    <textarea id="respon" rows="3" placeholder="Contoh: Bernapas dalam-dalam, curhat ke teman, meditasi"></textarea>
+
+    <button onclick="tambahCatatan()">Tambah Catatan</button>
+
+    <div class="log-list" id="daftarLog"></div>
+  </div>
+
+  <script>
+    const daftarLog = [];
+    const daftarDiv = document.getElementById("daftarLog");
+
+    function renderLog() {
+      daftarDiv.innerHTML = "";
+      daftarLog.forEach((log) => {
+        const div = document.createElement("div");
+        div.className = "log-item";
+        div.innerHTML = `
+          <strong>Emosi:</strong> ${log.emosi}<br>
+          <strong>Situasi:</strong> ${log.situasi}<br>
+          <strong>Respon:</strong> ${log.respon}
+        `;
+        daftarDiv.appendChild(div);
+      });
+    }
+
+    function tambahCatatan() {
+      const emosi = document.getElementById("emosi").value.trim();
+      const situasi = document.getElementById("situasi").value.trim();
+      const respon = document.getElementById("respon").value.trim();
+
+      if (!emosi || !situasi || !respon) {
+        alert("Harap isi semua kolom!");
+        return;
+      }
+
+      daftarLog.push({ emosi, situasi, respon });
+
+      document.getElementById("emosi").value = "";
+      document.getElementById("situasi").value = "";
+      document.getElementById("respon").value = "";
+
+      renderLog();
+    }
+  </script>
+</body>
+</html>
