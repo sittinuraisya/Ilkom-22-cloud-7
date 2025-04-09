@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>SURAT CUTI - {{ cuti.username }}</title>
+    <style>
+        /* Gaya Utama */
+        body { 
+            font-family: "Times New Roman", Times, serif;
+            margin: 2cm;
+            line-height: 1.5;
+            font-size: 12pt;
+        }
+        
+        /* Kop Surat */
+        .kop-surat { 
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #000;
+            padding-bottom: 10px;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 5px;
+        }
+        
+        .logo {
+            height: 80px;
+            margin-right: 20px;
+        }
+        
+        .instansi {
+            text-align: center;
+        }
+        
+        .instansi-utama {
+            font-size: 14pt;
+            font-weight: bold;
+            margin: 0;
+        }
+        
+        .instansi-sub {
+            font-size: 16pt;
+            font-weight: bold;
+            margin: 0;
+        }
+        
+        .instansi-alamat {
+            font-size: 10pt;
+            margin: 0;
+        }
+        
+        /* Header Surat */
+        .header-surat {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .nomor-surat {
+            text-align: left;
+        }
+        
+        .tanggal-surat {
+            text-align: right;
+        }
+        
+        /* Isi Surat */
+        .tujuan-surat {
+            margin-bottom: 15px;
+        }
+        
+        .salam {
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .isi-surat {
+            text-align: justify;
+            margin: 10px 0;
+        }
+        
+        .data-diri {
+            margin-left: 50px;
+            margin: 15px 0;
+        }
+        
+        /* Tanda Tangan */
+        .ttd-container {
+            margin-top: 50px;
+            text-align: right;
+        }
+        
+        .ttd {
+            display: inline-block;
+            text-align: center;
+            width: 300px;
+        }
+        
+        /* Tombol Aksi */
+        .no-print {
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .btn {
+            padding: 8px 15px;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0 5px;
+        }
+        
+        .btn-print {
+            background-color: #007bff;
+        }
+        
+        .btn-back {
+            background-color: #6c757d;
+        }
+        
+        /* Media Print */
+        @media print {
+            .no-print {
+                display: none;
+            }
+            body {
+                margin: 1.5cm;
+            }
+            .btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Kop Surat Resmi -->
+    <div class="kop-surat">
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='images/logo_sultra.png') }}" 
+                 class="logo" 
+                 alt="Logo Pemprov Sultra">
+            <div class="instansi">
+                <p class="instansi-utama">PEMERINTAH PROVINSI SULAWESI TENGGARA</p>
+                <p class="instansi-sub">SEKRETARIAT DAERAH</p>
+                <p class="instansi-alamat">
+                    Kompleks Bumi Praja Anduonohu Kec. Poasia, Kota Kendari, Sulawesi Tenggara 93231<br>
+                    Telp. (0401) 391609, Faksimile (0401) 391614 39232
+                </p>
+            </div>
+        </div>
+        <div style="border-top: 3px solid #000; margin-top: 10px;"></div>
+        <div style="border-top: 1px solid #000; margin-top: 2px;"></div>
+    </div>
+
+    <!-- Header Surat -->
+    <div class="header-surat">
+        <div class="nomor-surat">
+            <p style="margin: 0;">Nomor &nbsp;&nbsp;&nbsp;: {{ cuti.id }}/SETDA/{{ cuti.tanggal_mulai[:4] }}</p>
+            <p style="margin: 0;">Lamp &nbsp;&nbsp;&nbsp;&nbsp;: -</p>
+            <p style="margin: 0;">Perihal &nbsp;: <strong>Permohonan Izin Cuti</strong></p>
+        </div>
+        <div class="tanggal-surat">
+            <p style="margin: 0;">Kendari, {{ cuti.tanggal_mulai|format_tanggal }}</p>
+        </div>
+    </div>
+
+    <!-- Tujuan Surat -->
+    <div class="tujuan-surat">
+        <p style="margin: 0;">
+            Kepada Yth.<br>
+            Kepala Biro Organisasi<br>
+            Setda Provinsi Sulawesi Tenggara<br>
+            di<br>
+            <span style="margin-left: 50px;">Tempat</span>
+        </p>
+    </div>
+
+    <!-- Salam Pembuka -->
+    <p class="salam">Assalamu'alaikum Warahmatullahi Wabarakatuh</p>
+
+    <!-- Isi Surat -->
+    <div class="isi-surat">
+        <p>
+            Dengan hormat, semoga Bapak/Ibu selalu dalam lindungan Allah SWT serta diberikan kemudahan dalam menjalankan tugas sehari-hari.
+        </p>
+
+        <p>
+            Sehubungan dengan keperluan pribadi, saya yang bertanda tangan di bawah ini:
+        </p>
+
+        <!-- Data Diri -->
+        <div class="data-diri">
+            <table>
+                <tr><td><strong>Nama</strong></td><td>: {{ cuti.username }}</td></tr>
+                <tr><td><strong>NIP</strong></td><td>: {{ cuti.nip }}</td></tr>
+                <tr><td><strong>Jabatan</strong></td><td>: {{ cuti.jabatan }}</td></tr>
+                <tr><td><strong>Unit Kerja</strong></td><td>: Biro Organisasi Setda Prov. Sultra</td></tr>
+            </table>
+        </div>
+
+        <p>
+            Dengan ini mengajukan permohonan cuti <strong>{{ cuti.jenis_cuti|lower }}</strong> selama 
+            <strong>{{ cuti.jumlah_hari }} hari kerja</strong>, terhitung mulai tanggal 
+            <strong>{{ cuti.tanggal_mulai|format_tanggal }}</strong> sampai dengan 
+            <strong>{{ cuti.tanggal_selesai|format_tanggal }}</strong> dengan alasan:
+        </p>
+
+        <div style="margin-left: 30px; margin-top: 10px;">
+            <p><em>{{ cuti.perihal_cuti }}</em></p>
+        </div>
+
+        <p>
+            Demikian permohonan ini saya sampaikan. Atas perhatian dan kebijaksanaan Bapak/Ibu, saya ucapkan terima kasih.
+        </p>
+    </div>
+
+    <!-- Salam Penutup -->
+    <p class="salam">Wassalamu'alaikum Warahmatullahi Wabarakatuh</p>
+
+    <!-- Tanda Tangan -->
+    <div class="ttd-container">
+        <div class="ttd">
+            <p>Hormat saya,</p>
+            <br><br><br>
+            <p><strong><u>{{ cuti.username }}</u></strong></p>
+            <p>NIP. {{ cuti.nip }}</p>
+        </div>
+    </div>
+
+    <!-- Tombol Aksi -->
+    <div class="no-print">
+        <button onclick="window.print()" class="btn btn-print">Cetak Surat</button>
+        <a href="{{ url_for('status_cuti') }}" class="btn btn-back">Kembali</a>
+    </div>
+
+    <script>
+        // Auto focus pada tombol cetak
+        window.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelector('.btn-print').focus();
+        });
+    </script>
+</body>
+</html>
