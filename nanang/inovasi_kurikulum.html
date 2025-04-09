@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inovasi Kurikulum</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f0f9ff;
+      padding: 30px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #0ea5e9;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 15px;
+      width: 100%;
+      padding: 10px;
+      background-color: #0ea5e9;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0284c7;
+    }
+    .inovasi-list {
+      margin-top: 20px;
+    }
+    .inovasi-item {
+      padding: 10px;
+      background: #e0f2fe;
+      border: 1px solid #bae6fd;
+      margin-bottom: 10px;
+      border-radius: 8px;
+    }
+    .inovasi-item h4 {
+      margin: 0 0 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Inovasi Kurikulum</h2>
+    <label for="judul">Judul Inovasi:</label>
+    <input type="text" id="judul" placeholder="Masukkan judul inovasi">
+
+    <label for="kategori">Kategori:</label>
+    <select id="kategori">
+      <option value="Pembelajaran">Pembelajaran</option>
+      <option value="Penilaian">Penilaian</option>
+      <option value="Pengembangan Kompetensi">Pengembangan Kompetensi</option>
+    </select>
+
+    <label for="uraian">Uraian Inovasi:</label>
+    <textarea id="uraian" rows="3" placeholder="Tuliskan uraian inovasi"></textarea>
+
+    <button onclick="tambahInovasi()">Tambahkan Inovasi</button>
+
+    <div class="inovasi-list" id="daftarInovasi"></div>
+  </div>
+
+  <script>
+    const daftarInovasi = [];
+    const daftarInovasiDiv = document.getElementById("daftarInovasi");
+
+    function renderInovasi() {
+      daftarInovasiDiv.innerHTML = "";
+      daftarInovasi.forEach((item) => {
+        const div = document.createElement("div");
+        div.className = "inovasi-item";
+        div.innerHTML = `
+          <h4>${item.judul} - ${item.kategori}</h4>
+          <p>${item.uraian}</p>
+        `;
+        daftarInovasiDiv.appendChild(div);
+      });
+    }
+
+    function tambahInovasi() {
+      const judul = document.getElementById("judul").value.trim();
+      const kategori = document.getElementById("kategori").value;
+      const uraian = document.getElementById("uraian").value.trim();
+
+      if (judul === "" || uraian === "") return alert("Semua bidang harus diisi.");
+
+      daftarInovasi.push({ judul, kategori, uraian });
+      document.getElementById("judul").value = "";
+      document.getElementById("uraian").value = "";
+
+      renderInovasi();
+    }
+  </script>
+</body>
+</html>
