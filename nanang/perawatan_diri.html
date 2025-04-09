@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Perawatan Diri</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fce4ec;
+      padding: 30px;
+    }
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #d81b60;
+    }
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 15px;
+      width: 100%;
+      padding: 12px;
+      background-color: #d81b60;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #ad1457;
+    }
+    .list {
+      margin-top: 25px;
+    }
+    .item {
+      background-color: #f8bbd0;
+      border: 1px solid #f48fb1;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Perawatan Diri</h2>
+
+    <label for="kegiatan">Nama Kegiatan:</label>
+    <input type="text" id="kegiatan" placeholder="Contoh: Meditasi, Tidur cukup, Olahraga">
+
+    <label for="kategori">Kategori:</label>
+    <select id="kategori">
+      <option value="">-- Pilih Kategori --</option>
+      <option value="Fisik">Fisik</option>
+      <option value="Mental">Mental</option>
+      <option value="Emosional">Emosional</option>
+      <option value="Sosial">Sosial</option>
+    </select>
+
+    <label for="catatan">Catatan/Deskripsi:</label>
+    <textarea id="catatan" rows="3" placeholder="Deskripsi singkat tentang kegiatan ini..."></textarea>
+
+    <button onclick="tambahPerawatan()">Tambah Kegiatan</button>
+
+    <div class="list" id="daftarPerawatan"></div>
+  </div>
+
+  <script>
+    const daftarPerawatan = [];
+    const daftarDiv = document.getElementById("daftarPerawatan");
+
+    function renderList() {
+      daftarDiv.innerHTML = "";
+      daftarPerawatan.forEach((item) => {
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `
+          <strong>${item.kegiatan}</strong> - <em>${item.kategori}</em><br>
+          ${item.catatan}
+        `;
+        daftarDiv.appendChild(div);
+      });
+    }
+
+    function tambahPerawatan() {
+      const kegiatan = document.getElementById("kegiatan").value.trim();
+      const kategori = document.getElementById("kategori").value;
+      const catatan = document.getElementById("catatan").value.trim();
+
+      if (!kegiatan || !kategori || !catatan) {
+        alert("Harap isi semua kolom!");
+        return;
+      }
+
+      daftarPerawatan.push({ kegiatan, kategori, catatan });
+
+      document.getElementById("kegiatan").value = "";
+      document.getElementById("kategori").value = "";
+      document.getElementById("catatan").value = "";
+
+      renderList();
+    }
+  </script>
+</body>
+</html>
