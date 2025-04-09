@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pengembangan Profesionalitas</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #fefce8;
+      padding: 30px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #ca8a04;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 15px;
+      width: 100%;
+      padding: 10px;
+      background-color: #eab308;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #ca8a04;
+    }
+    .kegiatan-list {
+      margin-top: 20px;
+    }
+    .kegiatan-item {
+      padding: 10px;
+      background: #fef9c3;
+      border: 1px solid #facc15;
+      margin-bottom: 10px;
+      border-radius: 8px;
+    }
+    .kegiatan-item h4 {
+      margin: 0 0 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Pengembangan Profesionalitas</h2>
+    <label for="nama">Nama:</label>
+    <input type="text" id="nama" placeholder="Masukkan nama Anda">
+
+    <label for="kegiatan">Jenis Kegiatan:</label>
+    <select id="kegiatan">
+      <option value="Pelatihan">Pelatihan</option>
+      <option value="Workshop">Workshop</option>
+      <option value="Seminar">Seminar</option>
+      <option value="Studi Lanjut">Studi Lanjut</option>
+    </select>
+
+    <label for="deskripsi">Deskripsi Kegiatan:</label>
+    <textarea id="deskripsi" rows="3" placeholder="Tuliskan deskripsi kegiatan"></textarea>
+
+    <button onclick="tambahKegiatan()">Tambahkan Kegiatan</button>
+
+    <div class="kegiatan-list" id="daftarKegiatan"></div>
+  </div>
+
+  <script>
+    const daftarKegiatan = [];
+    const daftarKegiatanDiv = document.getElementById("daftarKegiatan");
+
+    function renderKegiatan() {
+      daftarKegiatanDiv.innerHTML = "";
+      daftarKegiatan.forEach((item) => {
+        const div = document.createElement("div");
+        div.className = "kegiatan-item";
+        div.innerHTML = `
+          <h4>${item.nama} - ${item.kegiatan}</h4>
+          <p>${item.deskripsi}</p>
+        `;
+        daftarKegiatanDiv.appendChild(div);
+      });
+    }
+
+    function tambahKegiatan() {
+      const nama = document.getElementById("nama").value.trim();
+      const kegiatan = document.getElementById("kegiatan").value;
+      const deskripsi = document.getElementById("deskripsi").value.trim();
+
+      if (nama === "" || deskripsi === "") return alert("Semua bidang harus diisi.");
+
+      daftarKegiatan.push({ nama, kegiatan, deskripsi });
+      document.getElementById("nama").value = "";
+      document.getElementById("deskripsi").value = "";
+
+      renderKegiatan();
+    }
+  </script>
+</body>
+</html>
