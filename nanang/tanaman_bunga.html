@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Tanaman Bunga</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fff0f5;
+      padding: 30px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #c2185b;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px;
+      background-color: #c2185b;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+    }
+    button:hover {
+      background-color: #880e4f;
+    }
+    .bunga-list {
+      margin-top: 20px;
+    }
+    .bunga-item {
+      background: #f8bbd0;
+      border: 1px solid #f48fb1;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Data Tanaman Bunga</h2>
+    <label for="nama">Nama Bunga:</label>
+    <input type="text" id="nama" placeholder="Contoh: Mawar">
+
+    <label for="warna">Warna:</label>
+    <input type="text" id="warna" placeholder="Contoh: Merah">
+
+    <label for="deskripsi">Deskripsi:</label>
+    <textarea id="deskripsi" rows="3" placeholder="Tuliskan informasi tentang bunga ini"></textarea>
+
+    <button onclick="tambahBunga()">Tambah Bunga</button>
+
+    <div class="bunga-list" id="daftarBunga"></div>
+  </div>
+
+  <script>
+    const daftarBunga = [];
+    const daftarBungaDiv = document.getElementById("daftarBunga");
+
+    function renderBunga() {
+      daftarBungaDiv.innerHTML = "";
+      daftarBunga.forEach((bunga) => {
+        const div = document.createElement("div");
+        div.className = "bunga-item";
+        div.innerHTML = `
+          <strong>${bunga.nama}</strong> (Warna: ${bunga.warna})
+          <p>${bunga.deskripsi}</p>
+        `;
+        daftarBungaDiv.appendChild(div);
+      });
+    }
+
+    function tambahBunga() {
+      const nama = document.getElementById("nama").value.trim();
+      const warna = document.getElementById("warna").value.trim();
+      const deskripsi = document.getElementById("deskripsi").value.trim();
+
+      if (nama === "" || warna === "" || deskripsi === "") {
+        alert("Harap isi semua data dengan lengkap!");
+        return;
+      }
+
+      daftarBunga.push({ nama, warna, deskripsi });
+      document.getElementById("nama").value = "";
+      document.getElementById("warna").value = "";
+      document.getElementById("deskripsi").value = "";
+
+      renderBunga();
+    }
+  </script>
+</body>
+</html>
