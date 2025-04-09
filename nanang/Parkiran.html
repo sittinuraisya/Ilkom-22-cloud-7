@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parkiran Sederhana</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f0f9ff;
+      padding: 30px;
+    }
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #0ea5e9;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    .buttons {
+      display: flex;
+      gap: 10px;
+    }
+    button {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+    }
+    .masuk { background-color: #22c55e; }
+    .keluar { background-color: #ef4444; }
+    ul {
+      margin-top: 20px;
+      list-style: none;
+      padding-left: 0;
+    }
+    li {
+      padding: 8px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Parkiran Sederhana</h2>
+    <input type="text" id="platInput" placeholder="Masukkan nomor plat">
+    <div class="buttons">
+      <button class="masuk" onclick="masukParkir()">Masuk</button>
+      <button class="keluar" onclick="keluarParkir()">Keluar</button>
+    </div>
+    <ul id="daftarParkir"></ul>
+  </div>
+
+  <script>
+    const daftarParkir = [];
+    const daftarParkirList = document.getElementById("daftarParkir");
+
+    function renderParkir() {
+      daftarParkirList.innerHTML = "";
+      daftarParkir.forEach((plat, i) => {
+        const li = document.createElement("li");
+        li.textContent = plat;
+        daftarParkirList.appendChild(li);
+      });
+    }
+
+    function masukParkir() {
+      const input = document.getElementById("platInput");
+      const plat = input.value.trim();
+      if (plat === "") return alert("Nomor plat tidak boleh kosong");
+      if (daftarParkir.includes(plat)) return alert("Kendaraan sudah masuk parkir");
+
+      daftarParkir.push(plat);
+      input.value = "";
+      renderParkir();
+    }
+
+    function keluarParkir() {
+      const input = document.getElementById("platInput");
+      const plat = input.value.trim();
+      const index = daftarParkir.indexOf(plat);
+      if (index === -1) return alert("Nomor plat tidak ditemukan di parkiran");
+
+      daftarParkir.splice(index, 1);
+      input.value = "";
+      renderParkir();
+    }
+  </script>
+</body>
+</html>
