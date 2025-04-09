@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rutinitas Pagi</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #e1f5fe;
+      padding: 30px;
+    }
+    .container {
+      max-width: 600px;
+      background: white;
+      margin: auto;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #0288d1;
+    }
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 15px;
+      width: 100%;
+      padding: 12px;
+      background-color: #0288d1;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #01579b;
+    }
+    .rutin-list {
+      margin-top: 25px;
+    }
+    .rutin-item {
+      background-color: #b3e5fc;
+      border: 1px solid #81d4fa;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Rutinitas Pagi</h2>
+
+    <label for="aktivitas">Nama Aktivitas:</label>
+    <input type="text" id="aktivitas" placeholder="Contoh: Minum air putih">
+
+    <label for="jam">Jam Aktivitas:</label>
+    <input type="time" id="jam">
+
+    <button onclick="tambahAktivitas()">Tambah Aktivitas</button>
+
+    <div class="rutin-list" id="daftarRutin"></div>
+  </div>
+
+  <script>
+    const daftarRutin = [];
+    const daftarDiv = document.getElementById("daftarRutin");
+
+    function renderRutin() {
+      daftarDiv.innerHTML = "";
+      daftarRutin.forEach((item) => {
+        const div = document.createElement("div");
+        div.className = "rutin-item";
+        div.innerHTML = `
+          <strong>${item.jam}</strong> - ${item.aktivitas}
+        `;
+        daftarDiv.appendChild(div);
+      });
+    }
+
+    function tambahAktivitas() {
+      const aktivitas = document.getElementById("aktivitas").value.trim();
+      const jam = document.getElementById("jam").value;
+
+      if (!aktivitas || !jam) {
+        alert("Harap isi nama aktivitas dan jam!");
+        return;
+      }
+
+      daftarRutin.push({ aktivitas, jam });
+
+      document.getElementById("aktivitas").value = "";
+      document.getElementById("jam").value = "";
+
+      renderRutin();
+    }
+  </script>
+</body>
+</html>
