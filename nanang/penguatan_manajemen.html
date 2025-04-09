@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Penguatan Manajemen</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #fef2f2;
+      padding: 30px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #dc2626;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 15px;
+      width: 100%;
+      padding: 10px;
+      background-color: #dc2626;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #b91c1c;
+    }
+    .manajemen-list {
+      margin-top: 20px;
+    }
+    .manajemen-item {
+      padding: 10px;
+      background: #fee2e2;
+      border: 1px solid #fecaca;
+      margin-bottom: 10px;
+      border-radius: 8px;
+    }
+    .manajemen-item h4 {
+      margin: 0 0 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Penguatan Manajemen</h2>
+    <label for="aspek">Aspek Manajemen:</label>
+    <input type="text" id="aspek" placeholder="Contoh: Kepemimpinan, Administrasi, dll">
+
+    <label for="strategi">Strategi Penguatan:</label>
+    <textarea id="strategi" rows="3" placeholder="Tuliskan strategi penguatan"></textarea>
+
+    <button onclick="tambahManajemen()">Tambah Strategi</button>
+
+    <div class="manajemen-list" id="daftarManajemen"></div>
+  </div>
+
+  <script>
+    const daftarManajemen = [];
+    const daftarManajemenDiv = document.getElementById("daftarManajemen");
+
+    function renderManajemen() {
+      daftarManajemenDiv.innerHTML = "";
+      daftarManajemen.forEach((item) => {
+        const div = document.createElement("div");
+        div.className = "manajemen-item";
+        div.innerHTML = `
+          <h4>${item.aspek}</h4>
+          <p>${item.strategi}</p>
+        `;
+        daftarManajemenDiv.appendChild(div);
+      });
+    }
+
+    function tambahManajemen() {
+      const aspek = document.getElementById("aspek").value.trim();
+      const strategi = document.getElementById("strategi").value.trim();
+
+      if (aspek === "" || strategi === "") return alert("Semua bidang harus diisi.");
+
+      daftarManajemen.push({ aspek, strategi });
+      document.getElementById("aspek").value = "";
+      document.getElementById("strategi").value = "";
+
+      renderManajemen();
+    }
+  </script>
+</body>
+</html>
