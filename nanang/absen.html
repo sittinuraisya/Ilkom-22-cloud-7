@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Absen Sederhana</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f0fdf4;
+      display: flex;
+      justify-content: center;
+      padding-top: 50px;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      max-width: 400px;
+      width: 100%;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #22c55e;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #16a34a;
+    }
+    ul {
+      margin-top: 20px;
+      padding-left: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Form Absen</h2>
+    <input type="text" id="nameInput" placeholder="Masukkan nama">
+    <button onclick="submitAbsen()">Absen</button>
+    <ul id="absenList"></ul>
+  </div>
+
+  <script>
+    const absenList = document.getElementById("absenList");
+
+    function submitAbsen() {
+      const nameInput = document.getElementById("nameInput");
+      const name = nameInput.value.trim();
+      if (name === "") return alert("Nama tidak boleh kosong!");
+
+      const li = document.createElement("li");
+      li.textContent = name;
+      absenList.appendChild(li);
+      nameInput.value = "";
+    }
+  </script>
+</body>
+</html>
