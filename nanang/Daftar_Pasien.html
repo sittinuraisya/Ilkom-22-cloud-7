@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daftar Pasien</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f0fdfa;
+      padding: 30px;
+    }
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #0d9488;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #14b8a6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0f766e;
+    }
+    ul {
+      margin-top: 20px;
+      list-style: none;
+      padding-left: 0;
+    }
+    li {
+      padding: 10px;
+      border-bottom: 1px solid #e0f2f1;
+    }
+    .keluhan {
+      font-size: 0.9em;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Form Daftar Pasien</h2>
+    <input type="text" id="namaPasien" placeholder="Nama pasien">
+    <textarea id="keluhanPasien" rows="3" placeholder="Keluhan"></textarea>
+    <button onclick="tambahPasien()">Tambah Pasien</button>
+    <ul id="daftarPasien"></ul>
+  </div>
+
+  <script>
+    const daftarPasien = [];
+    const daftarPasienList = document.getElementById("daftarPasien");
+
+    function renderPasien() {
+      daftarPasienList.innerHTML = "";
+      daftarPasien.forEach((pasien, i) => {
+        const li = document.createElement("li");
+        li.innerHTML = `<strong>${pasien.nama}</strong><div class='keluhan'>${pasien.keluhan}</div>`;
+        daftarPasienList.appendChild(li);
+      });
+    }
+
+    function tambahPasien() {
+      const nama = document.getElementById("namaPasien").value.trim();
+      const keluhan = document.getElementById("keluhanPasien").value.trim();
+      if (nama === "" || keluhan === "") return alert("Nama dan keluhan harus diisi.");
+
+      daftarPasien.push({ nama, keluhan });
+      document.getElementById("namaPasien").value = "";
+      document.getElementById("keluhanPasien").value = "";
+      renderPasien();
+    }
+  </script>
+</body>
+</html>
