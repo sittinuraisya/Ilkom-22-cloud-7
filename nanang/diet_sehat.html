@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Catatan Diet Sehat</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f1f8e9;
+      padding: 30px;
+    }
+    .container {
+      max-width: 700px;
+      background: white;
+      margin: auto;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #558b2f;
+    }
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 15px;
+      width: 100%;
+      padding: 12px;
+      background-color: #558b2f;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #33691e;
+    }
+    .diet-list {
+      margin-top: 25px;
+    }
+    .diet-item {
+      background-color: #dcedc8;
+      border: 1px solid #c5e1a5;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Catatan Diet Sehat</h2>
+
+    <label for="makanan">Nama Makanan/Minuman:</label>
+    <input type="text" id="makanan" placeholder="Contoh: Oatmeal, Jus Jeruk">
+
+    <label for="kalori">Jumlah Kalori (kkal):</label>
+    <input type="number" id="kalori" placeholder="Contoh: 150">
+
+    <label for="catatan">Catatan Tambahan:</label>
+    <textarea id="catatan" rows="3" placeholder="Contoh: Sarapan jam 8 pagi, tanpa gula"></textarea>
+
+    <button onclick="tambahDiet()">Tambah Catatan</button>
+
+    <div class="diet-list" id="daftarDiet"></div>
+  </div>
+
+  <script>
+    const daftarDiet = [];
+    const daftarDiv = document.getElementById("daftarDiet");
+
+    function renderDiet() {
+      daftarDiv.innerHTML = "";
+      daftarDiet.forEach((item, index) => {
+        const div = document.createElement("div");
+        div.className = "diet-item";
+        div.innerHTML = `
+          <strong>${item.makanan}</strong> - ${item.kalori} kkal<br>
+          <em>Catatan:</em> ${item.catatan}
+        `;
+        daftarDiv.appendChild(div);
+      });
+    }
+
+    function tambahDiet() {
+      const makanan = document.getElementById("makanan").value.trim();
+      const kalori = document.getElementById("kalori").value.trim();
+      const catatan = document.getElementById("catatan").value.trim();
+
+      if (!makanan || !kalori || !catatan) {
+        alert("Harap isi semua kolom!");
+        return;
+      }
+
+      daftarDiet.push({ makanan, kalori, catatan });
+
+      document.getElementById("makanan").value = "";
+      document.getElementById("kalori").value = "";
+      document.getElementById("catatan").value = "";
+
+      renderDiet();
+    }
+  </script>
+</body>
+</html>

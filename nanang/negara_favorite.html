@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Negara Favorit</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #e0f7fa;
+      padding: 30px;
+    }
+    .container {
+      max-width: 600px;
+      background: white;
+      margin: auto;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #00796b;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px;
+      background-color: #00796b;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+    }
+    button:hover {
+      background-color: #004d40;
+    }
+    .negara-list {
+      margin-top: 20px;
+    }
+    .negara-item {
+      background: #b2dfdb;
+      border: 1px solid #80cbc4;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Negara Favorit</h2>
+
+    <label for="negara">Nama Negara:</label>
+    <input type="text" id="negara" placeholder="Contoh: Jepang">
+
+    <label for="alasan">Alasan:</label>
+    <textarea id="alasan" rows="3" placeholder="Mengapa kamu suka negara ini?"></textarea>
+
+    <button onclick="tambahNegara()">Tambah Negara</button>
+
+    <div class="negara-list" id="daftarNegara"></div>
+  </div>
+
+  <script>
+    const daftarNegara = [];
+    const daftarNegaraDiv = document.getElementById("daftarNegara");
+
+    function renderNegara() {
+      daftarNegaraDiv.innerHTML = "";
+      daftarNegara.forEach((item) => {
+        const div = document.createElement("div");
+        div.className = "negara-item";
+        div.innerHTML = `
+          <strong>${item.negara}</strong><br>
+          <em>Alasan:</em> ${item.alasan}
+        `;
+        daftarNegaraDiv.appendChild(div);
+      });
+    }
+
+    function tambahNegara() {
+      const negara = document.getElementById("negara").value.trim();
+      const alasan = document.getElementById("alasan").value.trim();
+
+      if (negara === "" || alasan === "") {
+        alert("Harap isi nama negara dan alasannya!");
+        return;
+      }
+
+      daftarNegara.push({ negara, alasan });
+
+      document.getElementById("negara").value = "";
+      document.getElementById("alasan").value = "";
+
+      renderNegara();
+    }
+  </script>
+</body>
+</html>

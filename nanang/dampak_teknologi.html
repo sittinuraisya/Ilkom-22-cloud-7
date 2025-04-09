@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dampak Teknologi</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f3e5f5;
+      padding: 30px;
+    }
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #6a1b9a;
+    }
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 15px;
+      width: 100%;
+      padding: 12px;
+      background-color: #6a1b9a;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #4a148c;
+    }
+    .list {
+      margin-top: 25px;
+    }
+    .item {
+      background-color: #ede7f6;
+      border: 1px solid #ce93d8;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+    .positif {
+      color: green;
+    }
+    .negatif {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Dampak Teknologi</h2>
+
+    <label for="teknologi">Nama Teknologi:</label>
+    <input type="text" id="teknologi" placeholder="Contoh: AI, Internet, Smartphone">
+
+    <label for="dampak">Jenis Dampak:</label>
+    <select id="dampak">
+      <option value="">-- Pilih --</option>
+      <option value="Positif">Positif</option>
+      <option value="Negatif">Negatif</option>
+    </select>
+
+    <label for="deskripsi">Deskripsi Dampak:</label>
+    <textarea id="deskripsi" rows="3" placeholder="Jelaskan dampaknya..."></textarea>
+
+    <button onclick="tambahDampak()">Tambah Dampak</button>
+
+    <div class="list" id="daftarDampak"></div>
+  </div>
+
+  <script>
+    const daftarDampak = [];
+    const daftarDiv = document.getElementById("daftarDampak");
+
+    function renderDampak() {
+      daftarDiv.innerHTML = "";
+      daftarDampak.forEach((item) => {
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `
+          <strong>${item.teknologi}</strong> - 
+          <span class="${item.dampak.toLowerCase()}">${item.dampak}</span><br>
+          ${item.deskripsi}
+        `;
+        daftarDiv.appendChild(div);
+      });
+    }
+
+    function tambahDampak() {
+      const teknologi = document.getElementById("teknologi").value.trim();
+      const dampak = document.getElementById("dampak").value;
+      const deskripsi = document.getElementById("deskripsi").value.trim();
+
+      if (!teknologi || !dampak || !deskripsi) {
+        alert("Harap lengkapi semua kolom!");
+        return;
+      }
+
+      daftarDampak.push({ teknologi, dampak, deskripsi });
+
+      document.getElementById("teknologi").value = "";
+      document.getElementById("dampak").value = "";
+      document.getElementById("deskripsi").value = "";
+
+      renderDampak();
+    }
+  </script>
+</body>
+</html>
