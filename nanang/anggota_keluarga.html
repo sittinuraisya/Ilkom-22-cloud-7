@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Anggota Keluarga</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #e3f2fd;
+      padding: 30px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #1976d2;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px;
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+    }
+    button:hover {
+      background-color: #0d47a1;
+    }
+    .anggota-list {
+      margin-top: 20px;
+    }
+    .anggota-item {
+      background: #bbdefb;
+      border: 1px solid #90caf9;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Data Anggota Keluarga</h2>
+    <label for="nama">Nama:</label>
+    <input type="text" id="nama" placeholder="Contoh: Budi">
+
+    <label for="usia">Usia:</label>
+    <input type="number" id="usia" placeholder="Contoh: 35">
+
+    <label for="hubungan">Hubungan:</label>
+    <select id="hubungan">
+      <option value="">--Pilih--</option>
+      <option value="Ayah">Ayah</option>
+      <option value="Ibu">Ibu</option>
+      <option value="Anak">Anak</option>
+      <option value="Saudara">Saudara</option>
+    </select>
+
+    <button onclick="tambahAnggota()">Tambah Anggota</button>
+
+    <div class="anggota-list" id="daftarAnggota"></div>
+  </div>
+
+  <script>
+    const daftarAnggota = [];
+    const daftarAnggotaDiv = document.getElementById("daftarAnggota");
+
+    function renderAnggota() {
+      daftarAnggotaDiv.innerHTML = "";
+      daftarAnggota.forEach((anggota) => {
+        const div = document.createElement("div");
+        div.className = "anggota-item";
+        div.innerHTML = `
+          <strong>${anggota.nama}</strong> (Usia: ${anggota.usia}) - ${anggota.hubungan}
+        `;
+        daftarAnggotaDiv.appendChild(div);
+      });
+    }
+
+    function tambahAnggota() {
+      const nama = document.getElementById("nama").value.trim();
+      const usia = document.getElementById("usia").value.trim();
+      const hubungan = document.getElementById("hubungan").value;
+
+      if (nama === "" || usia === "" || hubungan === "") {
+        alert("Harap lengkapi semua data!");
+        return;
+      }
+
+      daftarAnggota.push({ nama, usia, hubungan });
+
+      document.getElementById("nama").value = "";
+      document.getElementById("usia").value = "";
+      document.getElementById("hubungan").value = "";
+
+      renderAnggota();
+    }
+  </script>
+</body>
+</html>
