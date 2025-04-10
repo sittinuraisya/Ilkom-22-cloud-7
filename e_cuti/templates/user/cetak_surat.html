@@ -1,159 +1,197 @@
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Surat Cuti - {{ cuti.username }}</title>
-        <style>
-            body { 
-                font-family: Arial, sans-serif; 
-                margin: 2cm;
-                line-height: 1.6;
-            }
-            .kop-surat { 
-                text-align: center; 
-                margin-bottom: 20px; 
-            }
-            .header { 
-                margin-top: 30px;
-                margin-bottom: 15px;
-            }
-            .content { 
-                margin-top: 10px;
-                text-align: justify;
-            }
-            .ttd { 
-                margin-top: 50px; 
-                width: 100%; 
-            }
-            .data-diri {
-                margin-left: 50px;
-                margin-top: 15px;
-                margin-bottom: 15px;
-            }
-            @media print {
-                .no-print { display: none; }
-                body { margin: 1cm; }
-            }
-        </style>
-    </head>
-    <body>
-        <!-- Kop Surat (tidak diubah) -->
-        <div class="kop-surat" style="font-family: Arial, sans-serif; border-bottom: 3px solid #000; padding-bottom: 10px; margin-bottom: 20px;">
-            <div style="display: flex; align-items: center; margin-bottom: 5px;">
-                <img src="{{ url_for('static', filename='images/logo_sultra.png') }}" 
-                     style="height: 80px; margin-right: 20px;" 
-                     alt="Logo Pemprov Sultra">
-                <div style="text-align: center; width: 100%;">
-                    <p style="font-size: 14pt; font-weight: bold; margin: 0; line-height: 1.2;">
-                        PEMERINTAH PROVINSI SULAWESI TENGGARA
-                    </p>
-                    <p style="font-size: 16pt; font-weight: bold; margin: 0; line-height: 1.5;">
-                        SEKRETARIAT DAERAH
-                    </p>
-                    <p style="font-size: 8pt; margin: 0; line-height: 1.3;">
-                        Kompleks Bumi Praja Anduonohu Kec. Poasia, Kota Kendari, Sulawesi Tenggara 93231<br>
-                        Telp. (0401) 391609, Faksimile (0401) 391614 39232
-                    </p>
-                </div>
-            </div>
-            <div style="border-top: 3px solid #000; margin-top: 10px;"></div>
-            <div style="border-top: 1px solid #000; margin-top: 2px;"></div>
-        </div>
-    
-        <!-- Header Surat -->
-        <div class="header">
-            <div style="display: flex; justify-content: space-between;">
-                <div style="text-align: left;">
-                    <p style="margin: 0;">Nomor &nbsp;&nbsp;&nbsp;: {{ cuti.id }}/HRD/{{ cuti.tahun }}</p>
-                    <p style="margin: 0;">Lamp &nbsp;&nbsp;&nbsp;&nbsp;: -</p>
-                    <p style="margin: 0;">Perihal &nbsp;: <strong>Permohonan Izin Cuti</strong></p>
-                </div>
-                <div style="text-align: right;">
-                    <p style="margin: 0;">Kendari, {{ cuti.tanggal_format }}</p>
-                </div>
-            </div>
-        </div>
-        <div style="height: 15pt;"></div>
-    
-        <!-- Tujuan Surat -->
-        <p style="margin: 0; text-align: left;">
-            Kepada Yth.<br>
-            Kepala Biro Organisasi<br>
-            di<br>
-            <span style="margin-left: 50px;">Tempat</span>
-        </p>
-    
-        <div style="height: 10pt;"></div>
-    
-        <!-- Salam Pembuka -->
-        <p style="font-weight: bold; margin: 0; text-align: left;">Assalamu'alaikum Warahmatullahi Wabarakatuh</p>
-    
-        <div style="height: 10pt;"></div>
-    
-        <!-- Isi Surat -->
-        <div class="content">
-            <p style="margin: 0;">
-                Dengan hormat, semoga Bapak/Ibu selalu dalam lindungan Allah SWT serta diberikan kemudahan dalam menjalankan tugas sehari-hari.
-            </p>
-    
-            <div style="height: 10pt;"></div>
-    
-            <p style="margin: 0;">
-                Sehubungan dengan keperluan pribadi, saya yang bertanda tangan di bawah ini:
-            </p>
-    
-            <!-- Data Diri -->
-            <div class="data-diri">
-                <table>
-                    <tr><td><strong>Nama</strong></td><td>: <strong>{{ cuti.username }}</strong></td></tr>
-                    <tr><td><strong>NIP</strong></td><td>: <strong>{{ cuti.nip }}</strong></td></tr>
-                    <tr><td><strong>Jabatan</strong></td><td>: <strong>{{ cuti.jabatan }}</strong></td></tr>
-                </table>
-            </div>
-    
-            <p style="margin: 0;">
-                Dengan ini mengajukan permohonan cuti <strong>{{ cuti.jenis_cuti|lower }}</strong> selama 
-                <strong>{{ cuti.jumlah_hari }} hari kerja</strong>, terhitung mulai tanggal 
-                <strong>{{ cuti.tanggal_mulai }}</strong> sampai dengan 
-                <strong>{{ cuti.tanggal_selesai }}</strong>.
-            </p>
-    
-            <div style="height: 10pt;"></div>
-    
-            <p style="margin: 0;">
-                Demikian permohonan ini saya sampaikan. Atas perhatian dan kebijaksanaan Bapak/Ibu, saya ucapkan terima kasih.
-            </p>
-        </div>
-    
-        <div style="height: 10pt;"></div>
-    
-        <!-- Salam Penutup -->
-        <p style="font-weight: bold; margin: 0; text-align: left;">Wassalamu'alaikum Warahmatullahi Wabarakatuh</p>
-    
-        <!-- Tanda Tangan -->
-        <div class="ttd">
-            <div style="width: 300px; float: right; text-align: center;">
-                <p>Hormat saya,</p>
-                <br><br><br>
-                <p><strong>{{ cuti.username }}</strong></p>
-                <p>NIP. {{ cuti.nip }}</p>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Surat Cuti - {{ cuti.username }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 2cm;
+            line-height: 1.6;
+            background-color: #ffffff;
+            color: #000000;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .kop-surat {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header {
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        .content {
+            margin-top: 10px;
+            text-align: justify;
+        }
+
+        .ttd {
+            margin-top: 50px;
+            width: 100%;
+        }
+
+        .data-diri {
+            margin-left: 50px;
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+
+        @media print {
+            .no-print { display: none; }
+            body { margin: 1cm; }
+        }
+
+        /* Dark Mode Styles */
+        .dark-mode {
+            background-color: #121212;
+            color: #f1f1f1;
+        }
+
+        .dark-mode .kop-surat,
+        .dark-mode .header,
+        .dark-mode .content,
+        .dark-mode .ttd {
+            border-color: #f1f1f1;
+        }
+
+        button, a.no-print-button {
+            padding: 8px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            margin: 5px;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Toggle Dark Mode -->
+    <div class="no-print" style="text-align: right;">
+        <button class="btn-secondary" onclick="toggleDarkMode()">🌓 Toggle Dark Mode</button>
+    </div>
+
+    <!-- Kop Surat -->
+    <div class="kop-surat" style="border-bottom: 3px solid #000; padding-bottom: 10px; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; margin-bottom: 5px;">
+            <img src="{{ url_for('static', filename='images/logo_sultra.png') }}"
+                 style="height: 80px; margin-right: 20px;"
+                 alt="Logo Pemprov Sultra">
+            <div style="text-align: center; width: 100%;">
+                <p style="font-size: 14pt; font-weight: bold; margin: 0; line-height: 1.2;">
+                    PEMERINTAH PROVINSI SULAWESI TENGGARA
+                </p>
+                <p style="font-size: 16pt; font-weight: bold; margin: 0; line-height: 1.5;">
+                    SEKRETARIAT DAERAH
+                </p>
+                <p style="font-size: 8pt; margin: 0; line-height: 1.3;">
+                    Kompleks Bumi Praja Anduonohu Kec. Poasia, Kota Kendari, Sulawesi Tenggara 93231<br>
+                    Telp. (0401) 391609, Faksimile (0401) 391614 39232
+                </p>
             </div>
         </div>
-    
-        <!-- Tombol Aksi -->
-        <div class="no-print" style="margin-top: 50px; text-align: center;">
-            <button onclick="window.print()" style="padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                Cetak Surat
-            </button>
-            <a href="{{ url_for('status_cuti') }}" style="padding: 8px 15px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 4px; margin-left: 10px;">
-                Kembali
-            </a>
+        <div style="border-top: 3px solid #000; margin-top: 10px;"></div>
+        <div style="border-top: 1px solid #000; margin-top: 2px;"></div>
+    </div>
+
+    <!-- Header Surat -->
+    <div class="header">
+        <div style="display: flex; justify-content: space-between;">
+            <div style="text-align: left;">
+                <p style="margin: 0;">Nomor &nbsp;&nbsp;&nbsp;: {{ cuti.id }}/HRD/{{ cuti.tahun }}</p>
+                <p style="margin: 0;">Lamp &nbsp;&nbsp;&nbsp;&nbsp;: -</p>
+                <p style="margin: 0;">Perihal &nbsp;: <strong>Permohonan Izin Cuti</strong></p>
+            </div>
+            <div style="text-align: right;">
+                <p style="margin: 0;">Kendari, {{ cuti.tanggal_format }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tujuan Surat -->
+    <p style="margin: 0; text-align: left;">
+        Kepada Yth.<br>
+        Kepala Biro Organisasi<br>
+        di<br>
+        <span style="margin-left: 50px;">Tempat</span>
+    </p>
+
+    <!-- Salam Pembuka -->
+    <p style="font-weight: bold; margin-top: 15px;">Assalamu'alaikum Warahmatullahi Wabarakatuh</p>
+
+    <!-- Isi Surat -->
+    <div class="content">
+        <p>Dengan hormat, semoga Bapak/Ibu selalu dalam lindungan Allah SWT serta diberikan kemudahan dalam menjalankan tugas sehari-hari.</p>
+
+        <p>Sehubungan dengan keperluan pribadi, saya yang bertanda tangan di bawah ini:</p>
+
+        <div class="data-diri">
+            <table>
+                <tr><td><strong>Nama</strong></td><td>: <strong>{{ cuti.username }}</strong></td></tr>
+                <tr><td><strong>NIP</strong></td><td>: <strong>{{ cuti.nip }}</strong></td></tr>
+                <tr><td><strong>Jabatan</strong></td><td>: <strong>{{ cuti.jabatan }}</strong></td></tr>
+            </table>
         </div>
 
+        <p>
+            Dengan ini mengajukan permohonan cuti <strong>{{ cuti.jenis_cuti|lower }}</strong> selama 
+            <strong>{{ cuti.jumlah_hari }} hari kerja</strong>, terhitung mulai tanggal 
+            <strong>{{ cuti.tanggal_mulai }}</strong> sampai dengan 
+            <strong>{{ cuti.tanggal_selesai }}</strong>.
+        </p>
+
+        <p>Demikian permohonan ini saya sampaikan. Atas perhatian dan kebijaksanaan Bapak/Ibu, saya ucapkan terima kasih.</p>
+    </div>
+
+    <!-- Salam Penutup -->
+    <p style="font-weight: bold;">Wassalamu'alaikum Warahmatullahi Wabarakatuh</p>
+
+    <!-- Nama Pengirim Tanpa Tanda Tangan -->
+    <div class="ttd">
+        <div style="width: 300px; float: right; text-align: center;">
+            <p>Hormat saya,</p>
+            <br><br><br><br>
+            <p><strong>{{ cuti.username }}</strong></p>
+            <p>NIP. {{ cuti.nip }}</p>
+        </div>
+    </div>
+
+    <!-- Tombol Aksi -->
+    <div class="no-print" style="margin-top: 100px; text-align: center;">
+        <button onclick="window.print()" class="btn-primary">Cetak Surat</button>
+        <a href="{{ url_for('status_cuti') }}" class="no-print-button btn-secondary">Kembali</a>
+        <a href="{{ url_for('cetak_pdf', cuti_id=cuti.id) }}" class="no-print-button btn-success">Download PDF</a>
+    </div>
+
     <script>
-        // Auto print ketika halaman loaded (opsional)
-        window.addEventListener('DOMContentLoaded', (event) => {
-            // window.print(); // Uncomment jika ingin auto print
-        });
+        function toggleDarkMode() {
+            document.body.classList.toggle("dark-mode");
+        }
+
+        // Optional auto-toggle on system preference
+        // window.onload = () => {
+        //     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        //         toggleDarkMode();
+        //     }
+        // };
     </script>
 </body>
 </html>

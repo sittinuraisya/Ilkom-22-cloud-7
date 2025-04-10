@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block title %}Ajukan Cuti{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="mb-0">
+                    <i class="bi bi-file-earmark-plus"></i> Ajukan Cuti
+                </h1>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Kembali
+                </a>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <!-- Tambahkan class loading-form dan id form-ajukan-cuti -->
+                    <form method="POST" action="{{ url_for('ajukan_cuti') }}" class="loading-form" id="form-ajukan-cuti">
+                        <!-- Jenis Cuti -->
+                        <div class="mb-4">
+                            <label for="jenis_cuti" class="form-label fw-bold">
+                                <i class="bi bi-list-ul me-2"></i>Jenis Cuti
+                            </label>
+                            <select class="form-select form-select-lg" id="jenis_cuti" name="jenis_cuti" required>
+                                <option value="" selected disabled>Pilih Jenis Cuti</option>
+                                <option value="tahunan">Cuti Tahunan (Maks 12 hari)</option>
+                                <option value="sakit">Cuti Sakit (Maks 14 hari, wajib surat dokter)</option>
+                                <option value="melahirkan">Cuti Melahirkan (Maks 90 hari)</option>
+                            </select>
+                        </div>
+
+                        <!-- Tanggal Cuti -->
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label for="tanggal_mulai" class="form-label fw-bold">
+                                    <i class="bi bi-calendar me-2"></i>Tanggal Mulai
+                                </label>
+                                <input type="date" class="form-control form-control-lg" id="tanggal_mulai" name="tanggal_mulai" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="tanggal_selesai" class="form-label fw-bold">
+                                    <i class="bi bi-calendar me-2"></i>Tanggal Selesai
+                                </label>
+                                <input type="date" class="form-control form-control-lg" id="tanggal_selesai" name="tanggal_selesai" required>
+                            </div>
+                        </div>
+
+                        <!-- Perihal Cuti -->
+                        <div class="mb-4">
+                            <label for="perihal_cuti" class="form-label fw-bold">
+                                <i class="bi bi-file-text me-2"></i>Perihal Cuti
+                            </label>
+                            <textarea class="form-control" id="perihal_cuti" name="perihal_cuti" rows="5" 
+                                      placeholder="Jelaskan alasan cuti Anda secara detail..." required></textarea>
+                            <div class="form-text">Mohon jelaskan dengan jelas alasan pengajuan cuti Anda.</div>
+                        </div>
+
+                        <!-- Tombol Submit dengan spinner state -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg" id="submit-button">
+                                <span id="submit-text">
+                                    <i class="bi bi-send-fill me-2"></i>Ajukan Cuti
+                                </span>
+                                <span id="submit-spinner" class="spinner-border spinner-border-sm d-none" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="loading-overlay d-none">
+    <div class="loading-spinner">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="loading-text mt-3 fs-5">Mengirim pengajuan cuti...</p>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tanggalMulai = document.getElementById('tanggal_mulai');
+    const tanggalSelesai = document.getElementById('tanggal_selesai');
+    const form = document.getElementById('form-ajukan-cuti');
+    const submitButton = document.getElementById('submit-button');
+    const submitText = document.getElementById('submit-text');
+    const submitSpinner = document.getElementById('submit-spinner');
+    const loadingOverlay = document.getElementById('loading-overlay');
+    
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    tanggalMulai.min = today;
+    
+    tanggalMulai.addEventListener('change', function() {
+        if (this.value) {
+            tanggalSelesai.min = this.value;
+            if (tanggalSelesai.value && tanggalSelesai.value < this.value) {
+                tanggalSelesai.value = this.value;
+            }
+        }
+    });
+
+    // Handle form submission
+    form.addEventListener('submit', function(e) {
+        // Tampilkan loading state
+        submitText.innerHTML = 'Sedang mengirim...';
+        submitSpinner.classList.remove('d-none');
+        submitButton.disabled = true;
+        loadingOverlay.classList.remove('d-none');
+        
+        // Optional: Tambahkan timeout untuk simulasi loading
+        // setTimeout(() => {
+        //     form.submit();
+        // }, 2000);
+    });
+});
+
+// Sembunyikan loading jika halaman di-refresh
+window.addEventListener('pageshow', function() {
+    const loadingOverlay = document.getElementById('loading-overlay');
+    loadingOverlay.classList.add('d-none');
+});
+</script>
+
+<style>
+    .form-select-lg, .form-control-lg {
+        padding: 0.5rem 1rem;
+        font-size: 1.05rem;
+    }
+    textarea {
+        min-height: 150px;
+    }
+    
+    /* Loading Overlay Styles */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.85);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+    
+    .loading-spinner {
+        text-align: center;
+    }
+    
+    .loading-text {
+        font-weight: bold;
+        color: #0d6efd;
+        margin-top: 1rem;
+    }
+    
+    /* Disable form inputs during submission */
+    .loading-form.disabled {
+        opacity: 0.7;
+        pointer-events: none;
+    }
+</style>
+{% endblock %}

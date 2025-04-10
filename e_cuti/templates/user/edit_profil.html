@@ -1,104 +1,99 @@
 {% extends "base.html" %}
+
 {% block title %}Edit Profil{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-4">
-        <div class="card mb-4">
-            <div class="card-body text-center">
-                <img src="{{ url_for('static', filename='uploads/profile/' + user.foto_profil) if user.foto_profil else url_for('static', filename='images/profile-default.png') }}" 
-                     class="rounded-circle mb-3" width="200" height="200">
-                
-                <form method="POST" action="{{ url_for('upload_profile') }}" enctype="multipart/form-data">
-                    <div class="mb-3">
-                        <input type="file" class="form-control" name="foto_profil" accept="image/*">
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">Upload Foto</button>
-                </form>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <!-- Profil Foto -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body text-center">
+                    <img 
+                        src="{{ url_for('static', filename='uploads/profile/' + user.foto_profil) if user.foto_profil else url_for('static', filename='images/profile-default.png') }}" 
+                        alt="Foto Profil"
+                        class="rounded-circle img-fluid mb-3" style="width: 180px; height: 180px; object-fit: cover;">
+
+                    <form method="POST" action="{{ url_for('upload_profile') }}" enctype="multipart/form-data">
+                        <input type="file" class="form-control mb-3" name="foto_profil" accept="image/*">
+                        <button type="submit" class="btn btn-outline-primary w-100">Upload Foto Baru</button>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
-    
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">Edit Profil</h5>
-            </div>
-            <div class="card-body">
-                <form method="POST" action="{{ url_for('update_profile') }}">
-                    <div class="row mb-3">
-                        <label class="col-sm-3 col-form-label">NIP</label>
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" name="nip" value="{{ user.nip }}" required>
+
+        <!-- Form Edit -->
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Edit Profil Pengguna</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('update_profile') }}">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">NIP</label>
+                                <input type="text" class="form-control" name="nip" value="{{ user.nip }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Nama</label>
+                                <input type="text" class="form-control" name="username" value="{{ user.username }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" name="email" value="{{ user.email }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">No. HP</label>
+                                <input type="tel" class="form-control" name="phone" value="{{ user.phone }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Tempat Lahir</label>
+                                <input type="text" class="form-control" name="tempat_lahir" value="{{ user.tempat_lahir }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Tanggal Lahir</label>
+                                <input type="date" class="form-control" name="tanggal_lahir" value="{{ user.tanggal_lahir }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Jenis Kelamin</label>
+                                <select class="form-select" name="jenis_kelamin" required>
+                                    <option value="Laki-laki" {% if user.jenis_kelamin == 'Laki-laki' %}selected{% endif %}>Laki-laki</option>
+                                    <option value="Perempuan" {% if user.jenis_kelamin == 'Perempuan' %}selected{% endif %}>Perempuan</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Jabatan</label>
+                                <input type="text" class="form-control" name="jabatan" value="{{ user.jabatan }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Golongan</label>
+                                <input type="text" class="form-control" name="golongan" value="{{ user.golongan }}" required>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="row mb-3">
-                        <label class="col-sm-3 col-form-label">Nama</label>
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" name="username" value="{{ user.username }}" required>
+
+                        <!-- Tombol -->
+                        <div class="mt-4 d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary me-2">Simpan</button>
+                            <a href="{{ url_for('user_dashboard') }}" class="btn btn-outline-secondary">Batal</a>
                         </div>
-                    </div>
-                    
-                    <div class="row mb-3">
-                        <label class="col-sm-3 col-form-label">Email</label>
-                        <div class="col-sm-9">
-                            <input type="email" class="form-control" name="email" value="{{ user.email }}" required>
+
+                        <!-- Blok Jabatan & Golongan -->
+                        <div class="mt-4">
+                            <h6 class="fw-bold mb-3">Informasi Kepegawaian</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Jabatan</label>
+                                    <input type="text" class="form-control" name="jabatan" value="{{ user.jabatan }}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Golongan</label>
+                                    <input type="text" class="form-control" name="golongan" value="{{ user.golongan }}" required>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="row mb-3">
-                        <label class="col-sm-3 col-form-label">No. HP</label>
-                        <div class="col-sm-9">
-                            <input type="tel" class="form-control" name="phone" value="{{ user.phone }}" required>
-                        </div>
-                    </div>
-                    
-                    <div class="row mb-3">
-                        <label class="col-sm-3 col-form-label">Tempat Lahir</label>
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" name="tempat_lahir" value="{{ user.tempat_lahir }}" required>
-                        </div>
-                    </div>
-                    
-                    <div class="row mb-3">
-                        <label class="col-sm-3 col-form-label">Tanggal Lahir</label>
-                        <div class="col-sm-9">
-                            <input type="date" class="form-control" name="tanggal_lahir" value="{{ user.tanggal_lahir }}" required>
-                        </div>
-                    </div>
-                    
-                    <div class="row mb-3">
-                        <label class="col-sm-3 col-form-label">Jenis Kelamin</label>
-                        <div class="col-sm-9">
-                            <select class="form-select" name="jenis_kelamin" required>
-                                <option value="Laki-laki" {% if user.jenis_kelamin == 'Laki-laki' %}selected{% endif %}>Laki-laki</option>
-                                <option value="Perempuan" {% if user.jenis_kelamin == 'Perempuan' %}selected{% endif %}>Perempuan</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="row mb-3">
-                        <label class="col-sm-3 col-form-label">Jabatan</label>
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" name="jabatan" value="{{ user.jabatan }}" required>
-                        </div>
-                    </div>
-                    
-                    <div class="row mb-3">
-                        <label class="col-sm-3 col-form-label">Golongan</label>
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" name="golongan" value="{{ user.golongan }}" required>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-sm-9 offset-sm-3">
-                            <button type="submit" class="btn btn-primary me-2">Simpan Perubahan</button>
-                            <a href="{{ url_for('user_dashboard') }}" class="btn btn-secondary">Batal</a>
-                        </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

@@ -27,7 +27,6 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% if cuti_list %}
                         {% for c in cuti_list %}
                         <tr class="animate__animated animate__fadeIn">
                             <td>{{ loop.index + ((page - 1) * per_page) }}</td>
@@ -40,8 +39,10 @@
                             <td>{{ c.jumlah_hari }} hari</td>
                             <td>{{ c.perihal_cuti }}</td>
                             <td>
-                                {% if c.status == 'Dibatalkan' %}
-                                    <span class="badge rounded-pill bg-secondary">Dibatalkan</span>
+                                {% if c.is_cancelled %}
+                                    <span class="badge rounded-pill bg-secondary">
+                                        Dibatalkan
+                                    </span>
                                 {% else %}
                                     <span class="badge rounded-pill bg-{{ 'success' if c.status == 'Approved' else 'danger' if c.status == 'Rejected' else 'warning' }}">
                                         {{ c.status }}
@@ -49,8 +50,8 @@
                                 {% endif %}
                             </td>
                             <td>
-                                {% if c.status == 'Dibatalkan' %}
-                                    <small class="text-muted">{{ c.cancel_reason or '-' }}</small>
+                                {% if c.is_cancelled %}
+                                    <small class="text-muted">{{ c.cancel_reason }}</small>
                                 {% else %}
                                     {{ c.admin_notes if c.admin_notes else '-' }}
                                 {% endif %}
@@ -68,24 +69,49 @@
                                        target="_blank">
                                         <i class="bi bi-printer"></i>
                                     </a>
-                                    {% if c.status == 'Pending' and (session['user_id'] == c.user_id or session['role'] == 'admin') %}
+                                    {% if not c.is_cancelled and c.status == 'Pending' and (session['user_id'] == c.user_id or session['role'] == 'admin') %}
                                     <button class="btn btn-outline-warning" 
                                             title="Batalkan"
                                             data-bs-toggle="modal" 
                                             data-bs-target="#cancelModal-{{ c.id }}">
                                         <i class="bi bi-x-circle"></i>
                                     </button>
-                                    <form action="{{ url_for('hapus_cuti', cuti_id=c.id) }}" method="POST" style="display:inline;" 
-                                          onsubmit="return confirm('Yakin ingin menghapus pengajuan cuti ini?');">
-                                        <button type="submit" class="btn btn-outline-danger" title="Hapus Cuti">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
                                     {% endif %}
                                 </div>
                             </td>
                         </tr>
-                        {% endfor %}
+
+                        <!-- Modal Pembatalan -->
+                        <div class="modal fade" id="cancelModal-{{ c.id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-warning text-white">
+                                        <h5 class="modal-title">Batalkan Pengajuan Cuti</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <form method="POST" action="{{ url_for('batalkan_cuti', cuti_id=c.id) }}">
+                                        <div class="modal-body">
+                                            <div class="mb-3">
+                                                <label class="form-label">Alasan Pembatalan:</label>
+                                                <textarea class="form-control" 
+                                                          name="cancel_reason" 
+                                                          required 
+                                                          rows="3"
+                                                          placeholder="Masukkan alasan pembatalan..."></textarea>
+                                            </div>
+                                            <div class="alert alert-warning">
+                                                <i class="bi bi-exclamation-triangle"></i> 
+                                                Pembatalan cuti tidak dapat dibatalkan kembali
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                            <button type="submit" class="btn btn-warning">Konfirmasi Pembatalan</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                         {% else %}
                         <tr>
                             <td colspan="8" class="text-center py-4">
@@ -95,7 +121,7 @@
                                 </div>
                             </td>
                         </tr>
-                        {% endif %}
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
@@ -109,32 +135,44 @@
                 </div>
                 <nav aria-label="Page navigation">
                     <ul class="pagination pagination-sm">
+                        <!-- Previous Button -->
                         <li class="page-item {% if page <= 1 %}disabled{% endif %}">
-                            <a class="page-link" href="{{ url_for('status_cuti', page=page-1) }}" aria-label="Previous">
+                            <a class="page-link" 
+                               href="{{ url_for('status_cuti', page=page-1) if page > 1 else '#' }}" 
+                               aria-label="Previous">
                                 <span aria-hidden="true">&laquo;</span>
                             </a>
                         </li>
+
+                        <!-- Page Numbers -->
                         {% set start_page = [1, page-2]|max %}
                         {% set end_page = [total_pages, page+2]|min %}
+                        
                         {% if start_page > 1 %}
-                            <li class="page-item"><a class="page-link" href="{{ url_for('status_cuti', page=1) }}">1</a></li>
-                            {% if start_page > 2 %}
-                                <li class="page-item disabled"><span class="page-link">...</span></li>
-                            {% endif %}
+                        <li class="page-item"><a class="page-link" href="{{ url_for('status_cuti', page=1) }}">1</a></li>
+                        {% if start_page > 2 %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
                         {% endif %}
+                        {% endif %}
+                        
                         {% for p in range(start_page, end_page + 1) %}
                         <li class="page-item {% if p == page %}active{% endif %}">
                             <a class="page-link" href="{{ url_for('status_cuti', page=p) }}">{{ p }}</a>
                         </li>
                         {% endfor %}
+                        
                         {% if end_page < total_pages %}
-                            {% if end_page < total_pages - 1 %}
-                                <li class="page-item disabled"><span class="page-link">...</span></li>
-                            {% endif %}
-                            <li class="page-item"><a class="page-link" href="{{ url_for('status_cuti', page=total_pages) }}">{{ total_pages }}</a></li>
+                        {% if end_page < total_pages - 1 %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
                         {% endif %}
+                        <li class="page-item"><a class="page-link" href="{{ url_for('status_cuti', page=total_pages) }}">{{ total_pages }}</a></li>
+                        {% endif %}
+
+                        <!-- Next Button -->
                         <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
-                            <a class="page-link" href="{{ url_for('status_cuti', page=page+1) }}" aria-label="Next">
+                            <a class="page-link" 
+                               href="{{ url_for('status_cuti', page=page+1) if page < total_pages else '#' }}" 
+                               aria-label="Next">
                                 <span aria-hidden="true">&raquo;</span>
                             </a>
                         </li>
@@ -145,36 +183,4 @@
         </div>
     </div>
 </div>
-
-<!-- Modal Batalkan Cuti -->
-{% for c in cuti_list %}
-    {% if c.status == 'Pending' and (session['user_id'] == c.user_id or session['role'] == 'admin') %}
-    <div class="modal fade" id="cancelModal-{{ c.id }}" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-warning text-white">
-                    <h5 class="modal-title">Batalkan Pengajuan Cuti</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form method="POST" action="{{ url_for('batalkan_cuti', cuti_id=c.id) }}">
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Alasan Pembatalan:</label>
-                            <textarea class="form-control" name="cancel_reason" required rows="3" placeholder="Masukkan alasan pembatalan..."></textarea>
-                        </div>
-                        <div class="alert alert-warning">
-                            <i class="bi bi-exclamation-triangle"></i> 
-                            Pembatalan cuti tidak dapat dibatalkan kembali.
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                        <button type="submit" class="btn btn-warning">Konfirmasi Pembatalan</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-{% endfor %}
 {% endblock %}

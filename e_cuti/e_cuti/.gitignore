@@ -1,0 +1,6 @@
+echo "token.json" >> .gitignore
+echo "credentials.json" >> .gitignore
+
+.env
+config.py
+token.json  

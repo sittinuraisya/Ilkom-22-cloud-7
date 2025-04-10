@@ -19,9 +19,9 @@
         <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
             <i class="fas fa-arrow-left me-1"></i> Kembali
         </a>
-        <button class="btn btn-primary" onclick="syncAllToCalendar()">
-            <i class="fab fa-google me-1"></i> Sync All
-        </button>
+        <a href="{{ url_for('cetak_pdf', cuti_id=cuti.id) }}" class="btn btn-sm btn-danger">
+            <i class="fas fa-file-pdf"></i> Download PDF
+        </a>
     </div>
 </div>
 
@@ -62,14 +62,9 @@
 <div class="card shadow-sm">
     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
         <h5 class="mb-0"><i class="fas fa-list me-1"></i> Daftar Pengajuan Cuti</h5>
-        <div>
-            <span class="badge bg-light text-dark me-2">
-                Total: {{ cuti_list.total }} Data
-            </span>
-            <button class="btn btn-sm btn-light" onclick="exportToExcel()">
-                <i class="fas fa-file-excel"></i> Export
-            </button>
-        </div>
+        <span class="badge bg-light text-dark">
+            Total: {{ cuti_list.total }} Data
+        </span>
     </div>
     <div class="card-body p-0">
         {% if cuti_list.items %}
@@ -122,11 +117,6 @@
                                    title="Cetak Surat"
                                    target="_blank">
                                     <i class="fas fa-print"></i>
-                                   <button class="btn btn-sm btn-warning loading-action"
-                                   onclick="sendReminderEmail('{{ cuti.user.email }}')"
-                                   title="Kirim Reminder">
-                                    <i class="fas fa-envelope"></i>
-                                </button>
                                 </a>
                                 
                                 {% if cuti.status == 'Pending' %}
@@ -143,13 +133,6 @@
                                         onclick="showRejectModal('{{ cuti.id }}', '{{ cuti.username }}', '{{ cuti.nip }}')">
                                     <i class="fas fa-times"></i>
                                 </button>
-
-                                <button class="btn btn-sm btn-dark loading-action sync-single"
-                                        data-cuti-id="{{ cuti.id }}"
-                                        title="Sync to Calendar">
-                                    <i class="fab fa-google"></i>
-                                </button>
-
                                 {% endif %}
                             </div>
                         </td>
@@ -199,24 +182,6 @@
     </div>
 </div>
 
-<!-- Modal Baru untuk API Actions -->
-<div class="modal fade" id="apiActionModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="apiModalTitle">API Action</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="apiModalBody">
-                <!-- Konten dinamis akan diisi oleh JavaScript -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Action Modal -->
 <div class="modal fade" id="actionModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
@@ -247,65 +212,15 @@
     </div>
 </div>
 
-<!-- Script untuk Integrasi API -->
-<script src="{{ url_for('static', filename='js/api_integrations.js') }}"></script>
 <script>
-// Fungsi untuk sinkronisasi massal ke Google Calendar
-async function syncAllToCalendar() {
-    showLoading();
-    try {
-        const response = await fetch('/api/calendar/sync-all', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token() }}'
-            }
-        });
-        const result = await response.json();
-        
-        if (response.ok) {
-            showApiModal('Berhasil', `${result.synced} event berhasil disinkronisasi`);
-        } else {
-            throw new Error(result.error || 'Gagal sinkronisasi');
-        }
-    } catch (error) {
-        showApiModal('Error', error.message);
-    } finally {
-        hideLoading();
-    }
+// Fungsi untuk menampilkan loading
+function showLoading() {
+  document.getElementById('loading-overlay').style.display = 'flex';
 }
 
-// Fungsi untuk menampilkan modal API
-function showApiModal(title, message) {
-    const modal = new bootstrap.Modal(document.getElementById('apiActionModal'));
-    document.getElementById('apiModalTitle').textContent = title;
-    document.getElementById('apiModalBody').innerHTML = message;
-    modal.show();
-}
-
-// Event listener untuk tombol sync individual
-document.querySelectorAll('.sync-single').forEach(btn => {
-    btn.addEventListener('click', async function() {
-        const cutiId = this.dataset.cutiId;
-        showLoading();
-        try {
-            const response = await fetch(`/api/calendar/sync/${cutiId}`);
-            const result = await response.json();
-            
-            if (response.ok) {
-                this.innerHTML = '<i class="fas fa-check"></i>';
-                this.classList.remove('btn-dark');
-                this.classList.add('btn-success');
-            } else {
-                throw new Error(result.error);
-            }
-        } catch (error) {
-            showApiModal('Error', error.message);
-        } finally {
-            hideLoading();
-        }
-    });
-});
+// Fungsi untuk menyembunyikan loading
+function hideLoading() {
+  document.getElementById('loading-overlay').style.display = 'none';
 }
 
 // Fungsi approve modal
@@ -384,49 +299,9 @@ window.addEventListener('beforeunload', function() {
 document.getElementById('actionModal').addEventListener('shown.bs.modal', function() {
   document.getElementById('modalNotes').focus();
 });
-</scrip>
+</script>
 
 <style>
-    .loading-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(255,255,255,0.85);
-        display: none;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-        backdrop-filter: blur(2px);
-    }
-    
-    .loading-content {
-        text-align: center;
-        padding: 2rem;
-        border-radius: 10px;
-        background-color: rgba(255,255,255,0.9);
-        box-shadow: 0 0 20px rgba(0,0,0,0.1);
-    }
-    
-    .loading-text {
-        color: #0d6efd;
-        margin-top: 1rem;
-        font-size: 1.25rem;
-        font-weight: bold;
-    }
-    
-    /* Animasi untuk tombol sync */
-    @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-        100% { transform: scale(1); }
-    }
-    
-    .sync-single.syncing {
-        animation: pulse 1s infinite;
-    }
-
 /* Loading Spinner Animation */
 @keyframes spin {
   0% { transform: rotate(0deg); }

@@ -1,66 +1,25 @@
-# --- Built-in Python Modules ---
-import os
-import re
-import time
-import sqlite3
-import smtplib
-import traceback
-from datetime import datetime, timedelta, date
-
-# --- Flask Core ---
-from flask import (
-    Flask, render_template, request, redirect,
-    url_for, flash, session, make_response, jsonify, abort, current_app
-)
-from flask_login import (
-    LoginManager, current_user, login_user,
-    logout_user, login_required, UserMixin
-)
-
-# --- Config & Local Modules ---
-from config import Config
-from models import User
-from services.email_service import EmailService
-from services.calendar_service import GoogleCalendarService
-
-# --- Flask Utils ---
-from functools import wraps
-from itsdangerous import URLSafeTimedSerializer
-
-# --- Werkzeug ---
+from flask import Flask, render_template, request, redirect, url_for, flash, session, make_response, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import HTTPException
-
-# --- Third-party Libraries ---
-import pdfkit
-import numpy as np
-import requests
+from datetime import datetime, timedelta, date
+import traceback, sqlite3, re, os, smtplib, pdfkit
+from functools import wraps
+from itsdangerous import URLSafeTimedSerializer
 from email.mime.text import MIMEText
 from dotenv import load_dotenv
-
-# --- Google APIs ---
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
 from google_auth_oauthlib.flow import Flow
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
 
-# --- Load .env Credentials ---
-load_dotenv('credentials/.env')
+load_dotenv()
 
-# --- Initialize Flask App ---
 app = Flask(__name__)
-app.config.from_object(Config)
-app.secret_key = os.getenv('FLASK_SECRET_KEY')
-
-# --- App Configuration ---
-app.config['ENV'] = 'development'  # ganti ke 'production' saat deploy
+app.secret_key = 'supersecretkey'
+app.config['ENV'] = 'development'  # Ganti ke 'production' saat deploy
 app.config['SYSTEM_NAME'] = "E-Cuti: Sistem Digitalisasi Pengelolaan Cuti Pegawai"
 app.config['ORGANIZATION'] = "Biro Organisasi Setda Prov. Sultra"
 app.config['UPLOAD_FOLDER'] = 'static/uploads/profile'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg'}
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default-secret')
+app.config['SECRET_KEY'] = 'your-secret-key'
 app.config['SECURITY_PASSWORD_SALT'] = 'your-password-salt'
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
@@ -71,32 +30,10 @@ app.config['WKHTMLTOPDF_PATH'] = '/usr/local/bin/wkhtmltopdf'
 app.config['GOOGLE_CLIENT_ID'] = os.getenv('GOOGLE_CLIENT_ID')
 app.config['GOOGLE_CLIENT_SECRET'] = os.getenv('GOOGLE_CLIENT_SECRET')
 app.config['REDIRECT_URI'] = os.getenv('REDIRECT_URI')
-app.config['SLACK_WEBHOOK_URL'] = os.getenv('SLACK_WEBHOOK_URL')
-app.config['MAILGUN_API_KEY'] = os.getenv('MAILGUN_API_KEY')
-app.config['MAILGUN_DOMAIN'] = os.getenv('MAILGUN_DOMAIN')
-app.config['MAILGUN_SENDER'] = os.getenv('MAILGUN_SENDER')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
-# --- Print to Confirm Environment ---
-print(f"SECRET_KEY loaded: {app.config['SECRET_KEY']}")
-
-# --- Serializer for Token (e.g., email confirmation) ---
 serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
-# --- Initialize Login Manager ---
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'login'  # nama fungsi view login kamu
-
-# --- Initialize Custom Services ---
-email_service = EmailService()
-calendar_service = GoogleCalendarService()
-
-class Config:
-    # Google Calendar
-    GOOGLE_CALENDAR_CREDENTIALS = 'service-account.json'
-    GOOGLE_CALENDAR_ID = 'primary'
-
-# --- PDF Config (gunakan di mana perlu) ---
 PDF_CONFIG = {
     'page-size': 'A4',
     'margin-top': '15mm',
@@ -107,23 +44,10 @@ PDF_CONFIG = {
     'quiet': ''
 }
 
-# --- Optional Fallback Check ---
-if not app.config.get('GOOGLE_CLIENT_ID'):
-    print("Warning: GOOGLE_CLIENT_ID is not set. Check your .env file.")
+if not app.config['GOOGLE_CLIENT_ID']:
+    from config import Config
+    app.config.from_object(Config)
 
-class User(UserMixin):
-    def __init__(self, id, username, password, role, email_verified, email):  
-        self.id = id
-        self.username = username
-        self.password = password
-        self.role = role
-        self.email_verified = email_verified
-        self.email = email  
-
-    # Optional (Flask-Login compatible)
-    def get_id(self):
-        return str(self.id)
-    
 # --- Database Functions ---
 def get_db_connection():
     conn = sqlite3.connect('database.db')
@@ -132,13 +56,6 @@ def get_db_connection():
 
 def init_db():
     conn = get_db_connection()
-
-    try:
-        conn.execute("ALTER TABLE cuti ADD COLUMN lampiran TEXT")
-    except sqlite3.OperationalError as e:
-        if "duplicate column name" not in str(e):
-            raise 
-    # Tabel users
     conn.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -161,8 +78,6 @@ def init_db():
             created_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
     ''')
-
-    # Tabel cuti (dengan fitur cancel)
     conn.execute('''
         CREATE TABLE IF NOT EXISTS cuti (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -174,16 +89,11 @@ def init_db():
             perihal_cuti TEXT NOT NULL,
             status TEXT DEFAULT 'Pending',
             admin_notes TEXT,
-            is_cancelled BOOLEAN DEFAULT 0,
-            cancel_reason TEXT,
-            cancelled_at TEXT,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             updated_at TEXT,
             FOREIGN KEY (user_id) REFERENCES users (id)
         )
     ''')
-
-    # Tabel login_logs
     conn.execute('''
         CREATE TABLE IF NOT EXISTS login_logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -195,7 +105,16 @@ def init_db():
             FOREIGN KEY (user_id) REFERENCES users (id)
         )
     ''')
-
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS cuti (
+            ...
+            is_cancelled BOOLEAN DEFAULT 0,
+            cancel_reason TEXT,
+            cancelled_at TEXT,
+            ...
+        )
+    ''')
+    
     # Add default admin user if not exists
     admin_exists = conn.execute('SELECT id FROM users WHERE username = ?', ('admin',)).fetchone()
     if not admin_exists:
@@ -208,47 +127,8 @@ def init_db():
     conn.close()
 
 # --- Helper Functions ---
-@login_manager.user_loader
-def load_user(user_id):
-    conn = get_db_connection()
-    try:
-        user = conn.execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
-        if user:
-            return User(
-                id=user['id'],
-                username=user['username'],
-                password=user['password'],
-                role=user['role'],
-                email_verified=user['email_verified'],
-                email=user['email']  # ← pastikan kolom `email` ada di database
-            )
-        return None
-    finally:
-        conn.close()
-
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
-
-def send_email(to, subject, html):
-    api_key = current_app.config.get('MAILGUN_API_KEY')
-    domain = current_app.config.get('MAILGUN_DOMAIN')
-    sender = current_app.config.get('MAILGUN_SENDER')
-
-    if not all([api_key, domain, sender]):
-        current_app.logger.warning('Mailgun config not set properly.')
-        return None
-
-    return requests.post(
-        f"https://api.mailgun.net/v3/{domain}/messages",
-        auth=("api", api_key),
-        data={
-            "from": sender,
-            "to": [to],
-            "subject": subject,
-            "html": html
-        }
-    )
-
 
 def login_required(f):
     @wraps(f)
@@ -288,16 +168,6 @@ def calculate_working_days(start_date, end_date):
         if day.weekday() < 5:  # Monday to Friday
             working_days += 1
     return working_days
-
-def get_user_by_id(user_id):
-    conn = sqlite3.connect('your_database.db')
-    c = conn.cursor()
-    c.execute("SELECT id, username, password, role, email_verified FROM users WHERE id = ?", (user_id,))
-    row = c.fetchone()
-    conn.close()
-    if row:
-        return User(*row)
-    return None
 
 def send_verification_email(email, token):
     verification_url = url_for('verify_email', token=token, _external=True)
@@ -388,22 +258,6 @@ def format_date(value, format='%d-%m-%Y'):
         value = datetime.strptime(value, '%Y-%m-%d')
     return value.strftime(format)
 
-def get_cuti_by_id(cuti_id):
-    """Ambil data cuti dari database berdasarkan ID"""
-    conn = get_db_connection()
-    cuti = conn.execute('''
-        SELECT c.*, u.username 
-        FROM cuti c
-        JOIN users u ON c.user_id = u.id
-        WHERE c.id = ?
-    ''', (cuti_id,)).fetchone()
-    conn.close()
-    
-    if not cuti:
-        raise ValueError(f"Data cuti dengan ID {cuti_id} tidak ditemukan")
-    
-    return dict(cuti)  
-
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}
@@ -431,133 +285,109 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('dashboard'))
-
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        remember = True if request.form.get('remember') else False
+        remember = request.form.get('remember')
 
+        # Validasi input
         if not username or not password:
             flash('Username dan password harus diisi', 'error')
             return redirect(url_for('login'))
 
         conn = get_db_connection()
         try:
-            user_row = conn.execute(
-                'SELECT * FROM users WHERE username = ?', (username,)
-            ).fetchone()
-
-            if not user_row or not check_password_hash(user_row['password'], password):
+            user = conn.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
+            
+            # Cek user exists dan password match
+            if not user or not check_password_hash(user['password'], password):
                 flash('Username atau password salah', 'error')
                 return redirect(url_for('login'))
-
-            # Cek verifikasi email
-            if 'email_verified' in user_row and not user_row['email_verified']:
+            
+            # Cek kolom email_verified ada sebelum mengakses
+            if 'email_verified' in user and not user['email_verified']:
                 flash('Email belum diverifikasi. Silakan cek email Anda', 'warning')
                 return redirect(url_for('login'))
-
-            # Buat objek User (dari UserMixin)
-            user = User(
-                id=user_row['id'],
-                username=user_row['username'],
-                password=user_row['password'],
-                role=user_row['role'],
-                email_verified=user_row['email_verified']
-            )
-
-            # Login pakai Flask-Login
-            login_user(user, remember=remember, duration=timedelta(days=30))
-
+            
+            # Set session
+            session['user_id'] = user['id']
+            session['username'] = user['username']
+            session['role'] = user['role']
+            
+            # Prepare response
+            response = make_response(redirect(url_for('user_dashboard')))
+            
+            # Set remember me cookies
+            if remember:
+                expires = datetime.now() + timedelta(days=30)
+                response.set_cookie('remember_token', 
+                                  value=generate_password_hash(user['username']),  # Hash cookie value
+                                  expires=expires,
+                                  httponly=True,
+                                  samesite='Strict')
+                response.set_cookie('user_id',
+                                  value=str(user['id']),
+                                  expires=expires,
+                                  httponly=True,
+                                  samesite='Strict')
+            
             flash('Login berhasil', 'success')
-            return redirect(url_for('user_dashboard'))
-
+            return response
+            
         except Exception as e:
-            app.logger.error(f"Login error: {str(e)}")
             flash('Terjadi kesalahan saat login', 'error')
+            app.logger.error(f"Login error: {str(e)}")
             return redirect(url_for('login'))
-
+            
         finally:
             conn.close()
-
+    
+    # Auto-login via remember me cookies
+    if 'user_id' not in session and all(k in request.cookies for k in ['remember_token', 'user_id']):
+        try:
+            conn = get_db_connection()
+            user = conn.execute('SELECT * FROM users WHERE id = ?', 
+                              (request.cookies.get('user_id'),)).fetchone()
+            
+            if user and check_password_hash(request.cookies.get('remember_token'), user['username']):
+                session['user_id'] = user['id']
+                session['username'] = user['username']
+                session['role'] = user['role']
+                return redirect(url_for('user_dashboard'))
+                
+        except Exception as e:
+            app.logger.error(f"Auto-login error: {str(e)}")
+            # Clear invalid cookies
+            response = make_response(redirect(url_for('login')))
+            response.delete_cookie('remember_token')
+            response.delete_cookie('user_id')
+            return response
+            
+        finally:
+            conn.close()
+    
     return render_template('auth/login.html')
-
 @app.route('/verify-email/<token>')
 def verify_email(token):
     try:
-        email = serializer.loads(token, salt='email-verification', max_age=86400)  # 24 jam
+        email = serializer.loads(token, salt='email-verification', max_age=86400)  # 24 hours expiry
         conn = get_db_connection()
+        user = conn.execute('SELECT * FROM users WHERE email=?', (email,)).fetchone()
         
-        user = conn.execute(
-            'SELECT * FROM users WHERE email = ?', (email,)
-        ).fetchone()
-
         if user and user['verification_token'] == token:
-            conn.execute(
-                'UPDATE users SET email_verified = 1, verification_token = NULL WHERE email = ?',
-                (email,)
-            )
+            conn.execute('UPDATE users SET email_verified=1, verification_token=NULL WHERE email=?', (email,))
             conn.commit()
             flash('Email berhasil diverifikasi! Silakan login.', 'success')
         else:
-            flash('Link verifikasi tidak valid.', 'error')
-
+            flash('Link verifikasi tidak valid', 'error')
+            
     except Exception as e:
-        print(f"[Verifikasi Gagal] {str(e)}")
-        flash('Link verifikasi tidak valid atau kadaluarsa.', 'error')
-
+        print(f"Verification error: {str(e)}")
+        flash('Link verifikasi tidak valid atau kadaluarsa', 'error')
     finally:
-        if 'conn' in locals():
-            conn.close()
-
-    return redirect(url_for('login'))
-
-@app.route('/send-email', methods=['POST'])
-def send_email_api():
-    data = request.get_json()
-    success = email_service.send(
-        to=data['email'],
-        subject="Notifikasi Cuti",
-        template=render_template('emails/notification.html', type=data['type'])
-    )
-    return jsonify(success=success)
-
-@app.route('/callback')
-def callback():
-    from services.calendar_service import GoogleCalendarService
-    try:
-        calendar = GoogleCalendarService()
-        calendar.get_credentials()  # Ini akan menyimpan token
-        flash('Autentikasi Google Calendar berhasil!', 'success')
-    except Exception as e:
-        flash(f'Gagal autentikasi: {str(e)}', 'error')
-    return redirect(url_for('dashboard'))
-
-@app.route('/sync-calendar', methods=['POST'])
-def sync_calendar():
-    cuti_data = {
-        'jenis_cuti': request.form.get('jenis_cuti'),
-        'user_name': current_user.username,
-        'user_email': current_user.email,
-        'perihal_cuti': request.form.get('perihal_cuti'),
-        'tanggal_mulai': request.form.get('tanggal_mulai'),
-        'tanggal_selesai': request.form.get('tanggal_selesai')
-    }
+        conn.close()
     
-    result = calendar_service.create_cuti_event(cuti_data)
-    if result['success']:
-        return redirect(url_for('cuti.index'))
-    else:
-        flash('Gagal menyinkronkan dengan Google Calendar', 'error')
-        return redirect(url_for('cuti.create'))
-        return jsonify(error=str(e)), 500
-
-@app.route('/test-calendar')
-def test_calendar():
-    calendar = GoogleCalendarService()
-    creds = calendar.get_credentials()
-    return "Berhasil mendapatkan credentials!"
+    return redirect(url_for('login'))
 
 @app.route('/lupa-password', methods=['GET', 'POST'])
 def lupa_password():
@@ -611,11 +441,13 @@ def reset_password_token(token):
     return render_template('auth/reset_password.html', token=token)
 
 @app.route('/logout')
-@login_required
 def logout():
-    logout_user()
-    flash('Kamu berhasil logout.', 'info')
-    return redirect(url_for('login'))
+    session.clear()
+    response = make_response(redirect(url_for('login')))
+    response.delete_cookie('remember_token')
+    response.delete_cookie('user_id')
+    flash('Anda telah logout', 'success')
+    return response
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -636,7 +468,7 @@ def register():
             flash('Password dan konfirmasi password tidak cocok', 'error')
             return redirect(url_for('register'))
 
-        if not is_valid_email(email):  # kamu harus punya fungsi ini
+        if not is_valid_email(email):
             flash('Format email tidak valid', 'error')
             return redirect(url_for('register'))
 
@@ -652,23 +484,19 @@ def register():
             )
             conn.commit()
 
-            # Ambil kembali user untuk login
-            user_row = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
-            user = User(**user_row)
-            login_user(user)  # Login user langsung
-
             # Handle email verification based on environment
             if app.config['ENV'] == 'development':
                 flash('Registrasi berhasil! (Development mode - verifikasi email dilewati)', 'success')
             else:
                 try:
-                    send_verification_email(email)  # harus punya fungsi ini
+                    send_verification_email(email)
                     flash('Registrasi berhasil! Silakan cek email untuk verifikasi', 'success')
                 except Exception as e:
                     print(f"Error sending verification email: {e}")
+                    # In production, we should handle this more gracefully
                     flash('Registrasi berhasil tetapi gagal mengirim email verifikasi. Silakan hubungi admin.', 'warning')
 
-            return redirect(url_for('dashboard'))  # arahkan ke halaman utama login
+            return redirect(url_for('login'))
 
         except sqlite3.IntegrityError as e:
             if 'username' in str(e):
@@ -682,6 +510,7 @@ def register():
         finally:
             conn.close()
 
+    # GET request - show registration form
     return render_template('auth/register.html')
 
 @app.route('/resend-verification', methods=['POST'])
@@ -792,191 +621,100 @@ def format_date(value, format='%d-%m-%Y'):
 @login_required
 def ajukan_cuti():
     if request.method == 'POST':
+        # Data dari form
+        jenis_cuti = request.form.get('jenis_cuti')
+        tanggal_mulai = request.form.get('tanggal_mulai')
+        tanggal_selesai = request.form.get('tanggal_selesai')
+        perihal_cuti = request.form.get('perihal_cuti')
+        lampiran = request.files.get('lampiran')
+        
+        # Validasi input
+        if not all([jenis_cuti, tanggal_mulai, tanggal_selesai, perihal_cuti]):
+            flash('Semua field wajib diisi', 'error')
+            return redirect(url_for('ajukan_cuti'))
+
         try:
-            # Validasi data
-            required_fields = {
-                'jenis_cuti': request.form.get('jenis_cuti'),
-                'tanggal_mulai': request.form.get('tanggal_mulai'),
-                'tanggal_selesai': request.form.get('tanggal_selesai'),
-                'perihal_cuti': request.form.get('perihal_cuti')
-            }
-
-            if not all(required_fields.values()):
-                missing = [k for k, v in required_fields.items() if not v]
-                flash(f'Field wajib diisi: {", ".join(missing)}', 'error')
-                return redirect(url_for('ajukan_cuti'))
-
-            # Validasi tanggal
-            try:
-                start_date = datetime.strptime(required_fields['tanggal_mulai'], '%Y-%m-%d')
-                end_date = datetime.strptime(required_fields['tanggal_selesai'], '%Y-%m-%d')
-            except ValueError:
-                flash('Format tanggal tidak valid', 'error')
-                return redirect(url_for('ajukan_cuti'))
-
+            # Konversi dan validasi tanggal
+            start_date = datetime.strptime(tanggal_mulai, '%Y-%m-%d')
+            end_date = datetime.strptime(tanggal_selesai, '%Y-%m-%d')
+            
             if end_date < start_date:
-                flash('Tanggal selesai harus setelah tanggal mulai', 'error')
+                flash('Tanggal selesai tidak boleh sebelum tanggal mulai', 'error')
                 return redirect(url_for('ajukan_cuti'))
-
-            if start_date < datetime.now():
-                flash('Tanggal mulai tidak boleh di masa lalu', 'error')
-                return redirect(url_for('ajukan_cuti'))
-
-            # Penanganan lampiran
-            lampiran_path = None
-            lampiran = request.files.get('lampiran')
-            if lampiran and lampiran.filename:
-                if not allowed_file(lampiran.filename):
-                    flash('Format file tidak didukung. Gunakan PDF, JPG, atau PNG', 'error')
-                    return redirect(url_for('ajukan_cuti'))
-
-                filename = secure_filename(f"cuti_{current_user.id}_{int(time.time())}_{lampiran.filename}")
-                lampiran_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                
-                try:
-                    lampiran.save(lampiran_path)
-                except IOError as e:
-                    current_app.logger.error(f'File save error: {str(e)}')
-                    flash('Gagal menyimpan lampiran', 'error')
-                    return redirect(url_for('ajukan_cuti'))
-
-            # Hitung jumlah hari kerja (pastikan integer!)
-            business_days = int(np.busday_count(
+            
+            # Hitung hari kerja (exclude weekend)
+            jumlah_hari = np.busday_count(
                 start_date.date(),
-                (end_date + timedelta(days=1)).date()  # Include end_date
-            ))
-
-            if business_days <= 0:
-                flash('Durasi cuti harus minimal 1 hari kerja', 'error')
-                return redirect(url_for('ajukan_cuti'))
-
+                end_date.date() + timedelta(days=1)  # +1 untuk inklusif
+            
+            # Simpan lampiran jika ada
+            lampiran_path = None
+            if lampiran and allowed_file(lampiran.filename):
+                filename = secure_filename(f"{session['user_id']}_{int(time.time())}_{lampiran.filename}")
+                lampiran_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                lampiran.save(lampiran_path)
+            
             # Simpan ke database
             conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute('''
+                INSERT INTO cuti (
+                    user_id, jenis_cuti, tanggal_mulai, tanggal_selesai, 
+                    jumlah_hari, perihal_cuti, lampiran, status
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending')
+            ''', (
+                session['user_id'], jenis_cuti, tanggal_mulai, 
+                tanggal_selesai, jumlah_hari, perihal_cuti, lampiran_path
+            ))
+            cuti_id = cur.lastrowid
+            conn.commit()
+            
+            # Dapatkan data user untuk notifikasi
+            user = conn.execute('SELECT email, nama_lengkap FROM users WHERE id = ?', 
+                              (session['user_id'],)).fetchone()
+            conn.close()
+            
+            # Integrasi Google Calendar
             try:
-                cur = conn.execute('''
-                    INSERT INTO cuti (
-                        user_id, jenis_cuti, tanggal_mulai, tanggal_selesai, 
-                        jumlah_hari, perihal_cuti, lampiran, status
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                    RETURNING id
-                ''', (
-                    current_user.id,
-                    required_fields['jenis_cuti'],
-                    required_fields['tanggal_mulai'],
-                    required_fields['tanggal_selesai'],
-                    business_days,  # sudah dipastikan tipe int
-                    required_fields['perihal_cuti'],
-                    lampiran_path,
-                    'Pending'
-                ))
-                cuti_id = cur.fetchone()['id']
-                conn.commit()
-
-                # Integrasi Google Calendar
-                if current_app.config.get('GOOGLE_CALENDAR_ENABLED', False):
-                    try:
-                        calendar_service = GoogleCalendarService()
-                        event_result = calendar_service.create_cuti_event({
-                            'jenis_cuti': required_fields['jenis_cuti'],
-                            'tanggal_mulai': required_fields['tanggal_mulai'],
-                            'tanggal_selesai': required_fields['tanggal_selesai'],
-                            'perihal_cuti': required_fields['perihal_cuti'],
-                            'user_name': current_user.username,
-                            'user_email': current_user.email
-                        })
-
-                        if event_result['success']:
-                            conn.execute('''
-                                UPDATE cuti SET calendar_event = ? WHERE id = ?
-                            ''', (event_result['event_link'], cuti_id))
-                            conn.commit()
-                    except Exception as e:
-                        current_app.logger.error(f'Calendar error: {str(e)}')
-
-                # Kirim notifikasi ke Slack
-                if current_app.config.get('SLACK_WEBHOOK_URL'):
-                    try:
-                        slack_data = {
-                            "text": f"Pengajuan Cuti Baru - {current_user.username}",
-                            "blocks": [
-                                {
-                                    "type": "section",
-                                    "text": {
-                                        "type": "mrkdwn",
-                                        "text": f"*{current_user.username}* mengajukan cuti *{required_fields['jenis_cuti']}*"
-                                    }
-                                },
-                                {
-                                    "type": "section",
-                                    "fields": [
-                                        {
-                                            "type": "mrkdwn",
-                                            "text": f"*Periode:*\n{start_date.strftime('%d %b %Y')} - {end_date.strftime('%d %b %Y')}"
-                                        },
-                                        {
-                                            "type": "mrkdwn",
-                                            "text": f"*Durasi:*\n{business_days} hari kerja"
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                        requests.post(
-                            current_app.config['SLACK_WEBHOOK_URL'],
-                            json=slack_data,
-                            timeout=5
-                        )
-                    except Exception as e:
-                        current_app.logger.error(f'Slack error: {str(e)}')
-
-
-                    # Kirim notifikasi email via Mailgun
-                    try:
-                        html_email = render_template('email_cuti.html',
-                            nama=current_user.username,
-                            email=current_user.email,
-                            jenis_cuti=required_fields['jenis_cuti'],
-                            tanggal_mulai=start_date.strftime('%d %B %Y'),
-                            tanggal_selesai=end_date.strftime('%d %B %Y'),
-                            jumlah_hari=business_days,
-                            perihal=required_fields['perihal_cuti']
-                        )
-
-                        send_email(
-                            to=current_user.email,
-                            subject='Pengajuan Cuti Berhasil Dikirim',
-                            html=html_email
-                        )
-
-                        # Jika ingin cc ke HRD atau atasan:
-                        # send_email(to='hrd@ecuti-sultra.com', subject='Pengajuan Cuti Baru', html=html_email)
-
-                    except Exception as e:
-                        current_app.logger.error(f'Mailgun email error: {str(e)}')
-
-                flash('Pengajuan cuti berhasil dikirim!', 'success')
-                return redirect(url_for('status_cuti'))
-
-            except sqlite3.Error as e:
-                conn.rollback()
-                current_app.logger.error(f'Database error: {str(e)}')
-                flash('Terjadi kesalahan database', 'error')
-            finally:
-                conn.close()
-
+                calendar_service = GoogleCalendarService()
+                calendar_service.create_cuti_event({
+                    'cuti_id': cuti_id,
+                    'jenis_cuti': jenis_cuti,
+                    'tanggal_mulai': tanggal_mulai,
+                    'tanggal_selesai': tanggal_selesai,
+                    'perihal_cuti': perihal_cuti,
+                    'user_email': user['email'],
+                    'user_name': user['nama_lengkap']
+                })
+            except Exception as e:
+                app.logger.error(f'Google Calendar error: {str(e)}')
+                # Tidak diflash agar tidak mengganggu UX
+            
+            # Kirim notifikasi Slack
+            try:
+                slack_client = SlackWebhookClient(os.getenv('SLACK_WEBHOOK_URL'))
+                slack_client.send_notification(
+                    f"Pengajuan cuti baru dari {user['nama_lengkap']} ({user['email']})"
+                )
+            except Exception as e:
+                app.logger.error(f'Slack error: {str(e)}')
+            
+            flash('Pengajuan cuti berhasil dikirim!', 'success')
+            return redirect(url_for('dashboard'))
+            
+        except ValueError:
+            flash('Format tanggal tidak valid', 'error')
+        except sqlite3.Error as e:
+            flash('Terjadi kesalahan database', 'error')
+            app.logger.error(f'Database error: {str(e)}')
         except Exception as e:
-            current_app.logger.error(f'Unexpected error: {str(e)}')
             flash('Terjadi kesalahan sistem', 'error')
-
-    # GET method - tampilkan form
-    today = datetime.now().strftime('%Y-%m-%d')
-    max_date = (datetime.now() + timedelta(days=365)).strftime('%Y-%m-%d')
-
+            app.logger.error(f'Unexpected error: {str(e)}')
+    
+    # GET request: tampilkan form
     return render_template('user/ajukan_cuti.html',
-                           min_date=today,
-                           max_date=max_date,
-                           jenis_cuti_options=['Tahunan', 'Sakit', 'Melahirkan', 'Penting'],
-                           form_data=request.form if request.method == 'POST' else None)
+                         min_date=datetime.now().strftime('%Y-%m-%d'),
+                         max_date=(datetime.now() + timedelta(days=365)).strftime('%Y-%m-%d'))
 
 @app.route('/batalkan-cuti/<int:cuti_id>', methods=['POST'])
 @login_required
@@ -1042,34 +780,6 @@ def status_cuti():
                          page=page,
                          total_pages=total_pages,
                          per_page=per_page)
-
-@app.route('/hapus-cuti/<int:cuti_id>', methods=['POST'])
-@login_required
-def hapus_cuti(cuti_id):
-    conn = get_db_connection()
-    cuti = conn.execute('SELECT * FROM cuti WHERE id = ?', (cuti_id,)).fetchone()
-
-    if not cuti:
-        flash('Data cuti tidak ditemukan', 'error')
-        return redirect(url_for('status_cuti'))
-
-    if cuti['user_id'] != session['user_id'] and session.get('role') != 'admin':
-        flash('Anda tidak punya izin untuk menghapus cuti ini', 'error')
-        return redirect(url_for('status_cuti'))
-
-    if cuti['status'] not in ('Pending', 'Dibatalkan'):
-        flash('Cuti yang sudah diproses tidak bisa dihapus', 'error')
-        return redirect(url_for('status_cuti'))
-
-    # Hapus dari database
-    conn.execute('DELETE FROM cuti WHERE id = ?', (cuti_id,))
-    conn.commit()
-    conn.close()
-
-    flash('Pengajuan cuti berhasil dihapus', 'success')
-    return redirect(url_for('status_cuti'))
-
-
     
 @app.route('/cetak-surat/<int:cuti_id>')
 @login_required 
@@ -1271,7 +981,7 @@ def edit_profil():
             conn.close()
     
     conn.close()
-    return render_template("edit_profil.html", user=user)
+    return render_template('user/edit_profil.html', user=user)
 
 @app.route('/upload-foto-profil', methods=['POST'])
 @login_required
@@ -1397,49 +1107,6 @@ def get_cuti_events():
     return jsonify(events)
 
 # --- Admin Routes ---
-# API Routes
-@app.route('/api/calendar/sync-all', methods=['POST'])
-@admin_required
-def sync_all_calendar():
-    try:
-        conn = get_db_connection()
-        pending_cuti = conn.execute('''
-            SELECT c.*, u.* FROM cuti c
-            JOIN users u ON c.user_id = u.id
-            WHERE c.status = 'Approved'
-        ''').fetchall()
-        
-        synced = 0
-        for cuti in pending_cuti:
-            event = {
-                'summary': f'Cuti {cuti["jenis_cuti"]} - {cuti["username"]}',
-                'start': {'date': cuti['tanggal_mulai']},
-                'end': {'date': cuti['tanggal_selesai']},
-            }
-            calendar_service.create_event('primary', event)
-            synced += 1
-            
-        return jsonify({
-            'status': 'success',
-            'synced': synced
-        })
-    except Exception as e:
-        return jsonify({
-            'status': 'error',
-            'error': str(e)
-        }), 500
-
-@app.route('/api/email/reminder', methods=['POST'])
-@admin_required
-def send_reminder_email():
-    data = request.get_json()
-    email_service.send(
-        to=data['email'],
-        subject="Reminder Cuti",
-        template=render_template('emails/reminder.html')
-    )
-    return jsonify({'status': 'success'})
-    
 @app.route('/admin/dashboard')
 @admin_required
 def admin_dashboard():
