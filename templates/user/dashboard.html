@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Pegawai{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Selamat Datang, {{ session['username'] }}</h1>
+        <a href="{{ url_for('ajukan_cuti') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Ajukan Cuti
+        </a>
+    </div>
+
+    <!-- Statistik Cuti -->
+    <div class="row g-4 mb-4">
+        {% set stats = [
+            {'title': 'Cuti Tersisa', 'value': sisa_cuti, 'icon': 'calendar-check', 'color': 'primary'},
+            {'title': 'Disetujui', 'value': cuti_disetujui, 'icon': 'check-circle', 'color': 'success'},
+            {'title': 'Ditolak', 'value': cuti_ditolak, 'icon': 'x-circle', 'color': 'danger'}
+        ] %}
+        {% for item in stats %}
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100 border-start border-{{ item.color }} border-4">
+                <div class="card-body d-flex justify-content-between align-items-start">
+                    <div>
+                        <h5 class="card-title text-muted">{{ item.title }}</h5>
+                        <p class="display-5 fw-bold">{{ item.value }} Hari</p>
+                    </div>
+                    <div class="bg-{{ item.color }} bg-opacity-10 p-3 rounded">
+                        <i class="bi bi-{{ item.icon }} text-{{ item.color }} fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pengajuan Cuti Terakhir -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white border-bottom-0 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Pengajuan Cuti Terakhir</h5>
+            <a href="{{ url_for('status_cuti') }}" class="btn btn-sm btn-outline-primary">Lihat Semua</a>
+        </div>
+        <div class="card-body">
+            {% if cuti_terakhir %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Jenis Cuti</th>
+                            <th>Tanggal</th>
+                            <th>Lama</th>
+                            <th>Status</th>
+                            <th class="text-end">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cuti in cuti_terakhir %}
+                        <tr>
+                            <td>{{ cuti.jenis_cuti }}</td>
+                            <td>
+                                {{ cuti.tanggal_mulai_dt|format_date if cuti.tanggal_mulai_dt else '' }}<br>
+                                <small class="text-muted">
+                                    s/d {{ cuti.tanggal_selesai|format_date if cuti.tanggal_selesai else '' }}
+                                </small>
+                            </td>
+                            <td>{{ cuti.jumlah_hari }} Hari</td>
+                            <td>
+                                {% set status_color = 
+                                    'success' if cuti.status == 'Approved' else 
+                                    'warning' if cuti.status == 'Pending' else 'danger' %}
+                                <span class="badge rounded-pill bg-{{ status_color }}">
+                                    {{ cuti.status }}
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <a href="{{ url_for('cetak_surat', cuti_id=cuti.id) if cuti.id else '#' }}" 
+                                   class="btn btn-sm btn-outline-secondary" target="_blank">
+                                    <i class="bi bi-printer"></i> Cetak
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="bi bi-calendar-x fs-1 text-muted"></i>
+                <p class="mt-2">Belum ada pengajuan cuti</p>
+                <a href="{{ url_for('ajukan_cuti') }}" class="btn btn-primary mt-2">Ajukan Cuti Pertama Anda</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Kalender dan Ketentuan -->
+    <div class="row g-4">
+        <!-- Kalender -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white border-bottom-0 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Kalender Cuti</h5>
+                    <div class="btn-group">
+                        <button id="monthView" class="btn btn-sm btn-outline-primary active view-btn">Bulan</button>
+                        <button id="weekView" class="btn btn-sm btn-outline-primary view-btn">Minggu</button>
+                        <button id="listView" class="btn btn-sm btn-outline-primary view-btn">Daftar</button>
+                    </div>
+                </div>
+                <div class="card-body p-2">
+                    <div id="calendar"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ketentuan -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white border-bottom-0">
+                    <h5 class="mb-0">Syarat & Ketentuan Cuti</h5>
+                </div>
+                <div class="card-body">
+                    <div class="accordion accordion-flush" id="accordionCuti">
+                        {% if ketentuan_cuti %}
+                            {% for jenis, ket in ketentuan_cuti.items() %}
+                            <div class="accordion-item">
+                                <h3 class="accordion-header" id="heading{{ loop.index }}">
+                                    <button class="accordion-button collapsed py-3" type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#collapse{{ loop.index }}"
+                                            aria-expanded="false">
+                                        Cuti {{ jenis|title }}
+                                    </button>
+                                </h3>
+                                <div id="collapse{{ loop.index }}" class="accordion-collapse collapse"
+                                     aria-labelledby="heading{{ loop.index }}" data-bs-parent="#accordionCuti">
+                                    <div class="accordion-body small">
+                                        <p><strong>Maksimal:</strong> {{ ket.max_hari }} hari</p>
+                                        <p><strong>Syarat:</strong> {{ ket.persyaratan }}</p>
+                                        {% if ket.keterangan %}
+                                        <p><strong>Catatan:</strong> {{ ket.keterangan }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                        <div class="alert alert-warning">
+                            Informasi ketentuan cuti tidak tersedia.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal Detail Cuti -->
+<div class="modal fade" id="cutiModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detail Cuti</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Jenis Cuti:</strong> <span id="modalJenis"></span></p>
+                <p><strong>Tanggal:</strong> <span id="modalTanggal"></span></p>
+                <p><strong>Status:</strong> <span id="modalStatus"></span></p>
+                <p><strong>Keterangan:</strong> <span id="modalKeterangan"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales/id.global.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const calendarEl = document.getElementById('calendar');
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        locale: 'id',
+        initialView: 'dayGridMonth',
+        headerToolbar: false,
+        height: 500,
+        eventSources: [{
+            url: '/get_cuti_events',
+            method: 'GET',
+            extraParams: {
+                user_id: '{{ session.get("user_id") }}'
+            }
+        }],
+        eventClick: function (info) {
+            const event = info.event;
+            const startDate = new Date(event.start).toLocaleDateString('id-ID');
+            const endDate = new Date(event.end).toLocaleDateString('id-ID');
+
+            $('#modalJenis').text(event.title);
+            $('#modalTanggal').text(`${startDate} - ${endDate}`);
+            const badgeColor = event.backgroundColor === '#28a745' ? 'success' :
+                               event.backgroundColor === '#ffc107' ? 'warning' : 'danger';
+            $('#modalStatus').html(`<span class="badge bg-${badgeColor}">${event.extendedProps.status}</span>`);
+            $('#modalKeterangan').text(event.extendedProps.keterangan || '-');
+
+            new bootstrap.Modal(document.getElementById('cutiModal')).show();
+            info.jsEvent.preventDefault();
+        },
+        eventContent: function (arg) {
+            return {
+                html: `<div class="fc-event-main">
+                        <i class="bi bi-calendar-event me-1"></i>
+                        <strong>${arg.event.title}</strong>
+                       </div>`
+            };
+        },
+        dayHeaderClassNames: 'fw-bold',
+        dayCellClassNames: 'cursor-pointer'
+    });
+
+    calendar.render();
+
+    $('.view-btn').click(function () {
+        const view = this.id === 'weekView' ? 'timeGridWeek' :
+                     this.id === 'listView' ? 'listWeek' : 'dayGridMonth';
+        calendar.changeView(view);
+        $('.view-btn').removeClass('active');
+        $(this).addClass('active');
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Pengajuan Cuti</title>
+    <style>
+        body { font-family: Arial, sans-serif; color: #333; }
+        .container { max-width: 600px; margin: auto; padding: 20px; background: #f9f9f9; border: 1px solid #ddd; }
+        h2 { color: #007BFF; }
+        p { margin: 5px 0; }
+        .footer { margin-top: 30px; font-size: 12px; color: #888; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Pengajuan Cuti Diterima</h2>
+    <p>Halo <strong>{{ nama }}</strong>,</p>
+    <p>Pengajuan cuti kamu telah berhasil dikirim dengan rincian berikut:</p>
+    <ul>
+        <li><strong>Jenis Cuti:</strong> {{ jenis_cuti }}</li>
+        <li><strong>Periode:</strong> {{ tanggal_mulai }} - {{ tanggal_selesai }}</li>
+        <li><strong>Jumlah Hari Kerja:</strong> {{ jumlah_hari }}</li>
+        <li><strong>Perihal:</strong> {{ perihal }}</li>
+    </ul>
+    <p>Silakan menunggu proses verifikasi oleh atasan. Kami akan menginformasikan jika status cuti telah diperbarui.</p>
+
+    <div class="footer">
+        E-Cuti Sultra &copy; 2025 • Sistem Pengajuan Cuti Online
+    </div>
+</div>
+</body>
+</html>

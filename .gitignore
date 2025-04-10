@@ -1,0 +1,19 @@
+echo "token.json" >> .gitignore
+echo "credentials.json" >> .gitignore
+
+.env
+config.py
+token.json  
+
+GOOGLE_CLIENT_ID=147130135261-gf3ekgbn2k5jia9dmr36lmm7ab7g356c.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=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
+
+
+credentials/.env
+*.enc
+__pycache__/
+.env
+
+
+
+
