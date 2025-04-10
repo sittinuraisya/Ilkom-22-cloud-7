@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Keterampilan Hidup</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #e8f5e9;
+      padding: 30px;
+    }
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #2e7d32;
+    }
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 15px;
+      width: 100%;
+      padding: 12px;
+      background-color: #2e7d32;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #1b5e20;
+    }
+    .list {
+      margin-top: 25px;
+    }
+    .item {
+      background-color: #c8e6c9;
+      border: 1px solid #a5d6a7;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Keterampilan Hidup</h2>
+
+    <label for="nama">Nama Keterampilan:</label>
+    <input type="text" id="nama" placeholder="Contoh: Komunikasi Efektif">
+
+    <label for="kategori">Kategori:</label>
+    <select id="kategori">
+      <option value="">-- Pilih Kategori --</option>
+      <option value="Sosial">Sosial</option>
+      <option value="Pribadi">Pribadi</option>
+      <option value="Pekerjaan">Pekerjaan</option>
+      <option value="Lainnya">Lainnya</option>
+    </select>
+
+    <label for="deskripsi">Deskripsi:</label>
+    <textarea id="deskripsi" rows="3" placeholder="Penjelasan tentang keterampilan ini..."></textarea>
+
+    <button onclick="tambahKeterampilan()">Tambah Keterampilan</button>
+
+    <div class="list" id="daftarKeterampilan"></div>
+  </div>
+
+  <script>
+    const daftarKeterampilan = [];
+    const daftarDiv = document.getElementById("daftarKeterampilan");
+
+    function renderList() {
+      daftarDiv.innerHTML = "";
+      daftarKeterampilan.forEach((item) => {
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `
+          <strong>${item.nama}</strong> - <em>${item.kategori}</em><br>
+          ${item.deskripsi}
+        `;
+        daftarDiv.appendChild(div);
+      });
+    }
+
+    function tambahKeterampilan() {
+      const nama = document.getElementById("nama").value.trim();
+      const kategori = document.getElementById("kategori").value;
+      const deskripsi = document.getElementById("deskripsi").value.trim();
+
+      if (!nama || !kategori || !deskripsi) {
+        alert("Harap lengkapi semua kolom!");
+        return;
+      }
+
+      daftarKeterampilan.push({ nama, kategori, deskripsi });
+
+      document.getElementById("nama").value = "";
+      document.getElementById("kategori").value = "";
+      document.getElementById("deskripsi").value = "";
+
+      renderList();
+    }
+  </script>
+</body>
+</html>
