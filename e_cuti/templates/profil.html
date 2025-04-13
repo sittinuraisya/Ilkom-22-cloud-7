@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Profil Pengguna</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Halo, {{ current_user.username }}</h1>
+
+    <!-- Tampilkan foto profil -->
+    {% if current_user.foto_profil %}
+        <img src="{{ url_for('static', filename=current_user.foto_profil) }}" alt="Foto Profil" width="150">
+    {% else %}
+        <p>Belum ada foto profil</p>
+    {% endif %}
+
+    <!-- Form upload foto -->
+    <form action="{{ url_for('upload_foto_profil') }}" method="POST" enctype="multipart/form-data">
+        <label for="foto_profil">Upload Foto Profil:</label>
+        <input type="file" name="foto_profil" id="foto_profil" accept=".jpg, .jpeg, .png">
+        <button type="submit">Upload</button>
+    </form>
+
+    <a href="{{ url_for('logout') }}">Logout</a>
+</body>
+</html>

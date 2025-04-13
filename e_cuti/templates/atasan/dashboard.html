@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Atasan</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Selamat datang, {{ session['username'] }} (Atasan)</h1>
+
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('manage_cuti') }}">Kelola Cuti Pegawai</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </nav>
+
+    <section>
+        <h2>Statistik Cuti</h2>
+        <ul>
+            <li>Total Cuti Pending: {{ total_pending }}</li>
+            <li>Total Cuti Disetujui: {{ total_approved }}</li>
+            <li>Total Cuti Ditolak: {{ total_rejected }}</li>
+        </ul>
+    </section>
+</body>
+</html>

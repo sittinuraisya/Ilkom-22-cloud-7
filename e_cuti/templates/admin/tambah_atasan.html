@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Tambah Atasan Baru{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <!-- Form Tambah Atasan -->
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Tambah Atasan Baru</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Form Tambah Atasan -->
+                    <form method="POST" action="{{ url_for('tambah_atasan') }}">
+                        <!-- Nama Atasan -->
+                        <div class="form-group mb-3">
+                            <label for="name">Nama Atasan</label>
+                            <input type="text" class="form-control" id="name" name="name" required placeholder="Masukkan nama atasan">
+                        </div>
+
+                        <!-- Email Atasan -->
+                        <div class="form-group mb-3">
+                            <label for="email">Email Atasan</label>
+                            <input type="email" class="form-control" id="email" name="email" required placeholder="Masukkan email atasan">
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="form-group mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg w-100">Tambah Atasan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kembali ke Daftar Pengguna -->
+    <div class="row mt-4">
+        <div class="col-md-12 text-center">
+            <a href="{{ url_for('manage_users') }}" class="btn btn-secondary btn-lg">Kembali ke Daftar Pengguna</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

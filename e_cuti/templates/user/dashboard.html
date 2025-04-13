@@ -6,11 +6,65 @@
 <div class="container my-4">
 
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="mb-0">Selamat Datang, {{ session['username'] }}</h1>
-        <a href="{{ url_for('ajukan_cuti') }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Ajukan Cuti
-        </a>
+    <div class="container-fluid mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="mb-0 display-4 text-primary">Selamat Datang, {{ current_user.username }}</h1>
+            <a href="{{ url_for('ajukan_cuti') }}" class="btn btn-lg btn-primary">
+                <i class="bi bi-plus-circle me-2"></i> Ajukan Cuti
+            </a>
+        </div>
+    </div>
+
+    <!-- Akses Cepat -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <a href="{{ url_for('status_cuti') }}" class="text-decoration-none">
+                <div class="card h-100 shadow-sm border-start border-info border-4">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="bg-info bg-opacity-10 p-3 rounded me-3">
+                            <i class="bi bi-clock-history text-info fs-3"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">Status Pengajuan</h6>
+                            <h5 class="mb-0">Lihat Status Cuti</h5>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="{{ url_for('profil') }}" class="text-decoration-none">
+                <div class="card h-100 shadow-sm border-start border-warning border-4">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="bg-warning bg-opacity-10 p-3 rounded me-3">
+                            <i class="bi bi-person-lines-fill text-warning fs-3"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">Akun</h6>
+                            <h5 class="mb-0">Kelola Profil</h5>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Akses Kalender Cuti -->
+        <div class="col-md-4">
+            <a href="{{ url_for('kalender_cuti') }}" class="text-decoration-none">
+                <div class="card h-100 shadow-sm border-start border-primary border-4">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded me-3">
+                            <i class="fas fa-calendar-alt text-primary fs-3"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">Kalender Cuti</h6>
+                            <h5 class="mb-0">Lihat Kalender Cuti</h5>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
     </div>
 
     <!-- Statistik Cuti -->
@@ -158,83 +212,4 @@
     </div>
 
 </div>
-
-<!-- Modal Detail Cuti -->
-<div class="modal fade" id="cutiModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Detail Cuti</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
-            </div>
-            <div class="modal-body">
-                <p><strong>Jenis Cuti:</strong> <span id="modalJenis"></span></p>
-                <p><strong>Tanggal:</strong> <span id="modalTanggal"></span></p>
-                <p><strong>Status:</strong> <span id="modalStatus"></span></p>
-                <p><strong>Keterangan:</strong> <span id="modalKeterangan"></span></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-{% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales/id.global.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const calendarEl = document.getElementById('calendar');
-    const calendar = new FullCalendar.Calendar(calendarEl, {
-        locale: 'id',
-        initialView: 'dayGridMonth',
-        headerToolbar: false,
-        height: 500,
-        eventSources: [{
-            url: '/get_cuti_events',
-            method: 'GET',
-            extraParams: {
-                user_id: '{{ session.get("user_id") }}'
-            }
-        }],
-        eventClick: function (info) {
-            const event = info.event;
-            const startDate = new Date(event.start).toLocaleDateString('id-ID');
-            const endDate = new Date(event.end).toLocaleDateString('id-ID');
-
-            $('#modalJenis').text(event.title);
-            $('#modalTanggal').text(`${startDate} - ${endDate}`);
-            const badgeColor = event.backgroundColor === '#28a745' ? 'success' :
-                               event.backgroundColor === '#ffc107' ? 'warning' : 'danger';
-            $('#modalStatus').html(`<span class="badge bg-${badgeColor}">${event.extendedProps.status}</span>`);
-            $('#modalKeterangan').text(event.extendedProps.keterangan || '-');
-
-            new bootstrap.Modal(document.getElementById('cutiModal')).show();
-            info.jsEvent.preventDefault();
-        },
-        eventContent: function (arg) {
-            return {
-                html: `<div class="fc-event-main">
-                        <i class="bi bi-calendar-event me-1"></i>
-                        <strong>${arg.event.title}</strong>
-                       </div>`
-            };
-        },
-        dayHeaderClassNames: 'fw-bold',
-        dayCellClassNames: 'cursor-pointer'
-    });
-
-    calendar.render();
-
-    $('.view-btn').click(function () {
-        const view = this.id === 'weekView' ? 'timeGridWeek' :
-                     this.id === 'listView' ? 'listWeek' : 'dayGridMonth';
-        calendar.changeView(view);
-        $('.view-btn').removeClass('active');
-        $(this).addClass('active');
-    });
-});
-</script>
 {% endblock %}
