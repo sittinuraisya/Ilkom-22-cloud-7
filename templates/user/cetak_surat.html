@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
+    <meta charset="UTF-8">
     <title>Surat Cuti - {{ cuti.username }}</title>
     <style>
         body {
@@ -27,23 +28,28 @@
             text-align: justify;
         }
 
-        .ttd {
-            margin-top: 50px;
-            width: 100%;
-        }
-
         .data-diri {
             margin-left: 50px;
             margin-top: 15px;
             margin-bottom: 15px;
         }
 
-        @media print {
-            .no-print { display: none; }
-            body { margin: 1cm; }
+        .ttd {
+            margin-top: 50px;
+            width: 100%;
         }
 
-        /* Dark Mode Styles */
+        @media print {
+            .no-print {
+                display: none;
+            }
+
+            body {
+                margin: 1cm;
+            }
+        }
+
+        /* Dark Mode */
         .dark-mode {
             background-color: #121212;
             color: #f1f1f1;
@@ -56,7 +62,8 @@
             border-color: #f1f1f1;
         }
 
-        button, a.no-print-button {
+        button,
+        a.no-print-button {
             padding: 8px 15px;
             border-radius: 4px;
             text-decoration: none;
@@ -80,29 +87,23 @@
             background-color: #28a745;
             color: white;
         }
-
     </style>
 </head>
 <body>
-    <!-- Toggle Dark Mode -->
+
+    <!-- Tombol Dark Mode -->
     <div class="no-print" style="text-align: right;">
         <button class="btn-secondary" onclick="toggleDarkMode()">🌓 Toggle Dark Mode</button>
     </div>
 
     <!-- Kop Surat -->
-    <div class="kop-surat" style="border-bottom: 3px solid #000; padding-bottom: 10px; margin-bottom: 20px;">
+    <div class="kop-surat" style="border-bottom: 3px solid #000; padding-bottom: 10px;">
         <div style="display: flex; align-items: center; margin-bottom: 5px;">
-            <img src="{{ url_for('static', filename='images/logo_sultra.png') }}"
-                 style="height: 80px; margin-right: 20px;"
-                 alt="Logo Pemprov Sultra">
+            <img src="{{ url_for('static', filename='images/logo_sultra.png') }}" alt="Logo Pemprov Sultra" style="height: 80px; margin-right: 20px;">
             <div style="text-align: center; width: 100%;">
-                <p style="font-size: 14pt; font-weight: bold; margin: 0; line-height: 1.2;">
-                    PEMERINTAH PROVINSI SULAWESI TENGGARA
-                </p>
-                <p style="font-size: 16pt; font-weight: bold; margin: 0; line-height: 1.5;">
-                    SEKRETARIAT DAERAH
-                </p>
-                <p style="font-size: 8pt; margin: 0; line-height: 1.3;">
+                <p style="font-size: 14pt; font-weight: bold; margin: 0;">PEMERINTAH PROVINSI SULAWESI TENGGARA</p>
+                <p style="font-size: 16pt; font-weight: bold; margin: 0;">SEKRETARIAT DAERAH</p>
+                <p style="font-size: 8pt; margin: 0;">
                     Kompleks Bumi Praja Anduonohu Kec. Poasia, Kota Kendari, Sulawesi Tenggara 93231<br>
                     Telp. (0401) 391609, Faksimile (0401) 391614 39232
                 </p>
@@ -116,9 +117,9 @@
     <div class="header">
         <div style="display: flex; justify-content: space-between;">
             <div style="text-align: left;">
-                <p style="margin: 0;">Nomor &nbsp;&nbsp;&nbsp;: {{ cuti.id }}/HRD/{{ cuti.tahun }}</p>
-                <p style="margin: 0;">Lamp &nbsp;&nbsp;&nbsp;&nbsp;: -</p>
-                <p style="margin: 0;">Perihal &nbsp;: <strong>Permohonan Izin Cuti</strong></p>
+                <p style="margin: 0;">Nomor : {{ cuti.id }}/HRD/{{ cuti.tahun }}</p>
+                <p style="margin: 0;">Lamp : -</p>
+                <p style="margin: 0;">Perihal : <strong>Permohonan Izin Cuti</strong></p>
             </div>
             <div style="text-align: right;">
                 <p style="margin: 0;">Kendari, {{ cuti.tanggal_format }}</p>
@@ -126,16 +127,11 @@
         </div>
     </div>
 
-    <!-- Tujuan Surat -->
-    <p style="margin: 0; text-align: left;">
-        Kepada Yth.<br>
-        Kepala Biro Organisasi<br>
-        di<br>
-        <span style="margin-left: 50px;">Tempat</span>
-    </p>
+    <!-- Tujuan -->
+    <p style="margin: 0;">Kepada Yth.<br>Kepala Biro Organisasi<br>di<br><span style="margin-left: 50px;">Tempat</span></p>
 
     <!-- Salam Pembuka -->
-    <p style="font-weight: bold; margin-top: 15px;">Assalamu'alaikum Warahmatullahi Wabarakatuh</p>
+    <p style="font-weight: bold; margin-top: 15px;">Assalamu’alaikum Warahmatullahi Wabarakatuh</p>
 
     <!-- Isi Surat -->
     <div class="content">
@@ -145,26 +141,32 @@
 
         <div class="data-diri">
             <table>
-                <tr><td><strong>Nama</strong></td><td>: <strong>{{ cuti.username }}</strong></td></tr>
-                <tr><td><strong>NIP</strong></td><td>: <strong>{{ cuti.nip }}</strong></td></tr>
-                <tr><td><strong>Jabatan</strong></td><td>: <strong>{{ cuti.jabatan }}</strong></td></tr>
+                <tr>
+                    <td><strong>Nama</strong></td>
+                    <td>: <strong>{{ cuti.username }}</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>NIP</strong></td>
+                    <td>: <strong>{{ cuti.nip }}</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>Jabatan</strong></td>
+                    <td>: <strong>{{ cuti.jabatan }}</strong></td>
+                </tr>
             </table>
         </div>
 
         <p>
-            Dengan ini mengajukan permohonan cuti <strong>{{ cuti.jenis_cuti|lower }}</strong> selama 
-            <strong>{{ cuti.jumlah_hari }} hari kerja</strong>, terhitung mulai tanggal 
-            <strong>{{ cuti.tanggal_mulai }}</strong> sampai dengan 
-            <strong>{{ cuti.tanggal_selesai }}</strong>.
+            Dengan ini mengajukan permohonan cuti <strong>{{ cuti.jenis_cuti|lower }}</strong> selama <strong>{{ cuti.jumlah_hari }} hari kerja</strong>, terhitung mulai tanggal <strong>{{ cuti.tanggal_mulai }}</strong> sampai dengan <strong>{{ cuti.tanggal_selesai }}</strong>.
         </p>
 
         <p>Demikian permohonan ini saya sampaikan. Atas perhatian dan kebijaksanaan Bapak/Ibu, saya ucapkan terima kasih.</p>
     </div>
 
     <!-- Salam Penutup -->
-    <p style="font-weight: bold;">Wassalamu'alaikum Warahmatullahi Wabarakatuh</p>
+    <p style="font-weight: bold;">Wassalamu’alaikum Warahmatullahi Wabarakatuh</p>
 
-    <!-- Nama Pengirim Tanpa Tanda Tangan -->
+    <!-- Tanda Tangan -->
     <div class="ttd">
         <div style="width: 300px; float: right; text-align: center;">
             <p>Hormat saya,</p>
@@ -176,22 +178,24 @@
 
     <!-- Tombol Aksi -->
     <div class="no-print" style="margin-top: 100px; text-align: center;">
-        <button onclick="window.print()" class="btn-primary">Cetak Surat</button>
-        <a href="{{ url_for('status_cuti') }}" class="no-print-button btn-secondary">Kembali</a>
-        <a href="{{ url_for('cetak_pdf', cuti_id=cuti.id) }}" class="no-print-button btn-success">Download PDF</a>
+        <button onclick="window.print()" class="btn-primary">🖨️ Cetak Surat</button>
+        <a href="{{ url_for('status_cuti') }}" class="no-print-button btn-secondary">↩️ Kembali</a>
+        <a href="{{ url_for('cetak_pdf', cuti_id=cuti.id) }}" class="no-print-button btn-success">⬇️ Download PDF</a>
     </div>
 
+    <!-- Script -->
     <script>
         function toggleDarkMode() {
             document.body.classList.toggle("dark-mode");
         }
 
-        // Optional auto-toggle on system preference
+        // Auto-toggle berdasarkan preferensi sistem (opsional)
         // window.onload = () => {
         //     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
         //         toggleDarkMode();
         //     }
         // };
     </script>
+
 </body>
 </html>

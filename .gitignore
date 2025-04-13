@@ -24,6 +24,12 @@ node_modules/
 >>>>>>> 8f2b1b15cb398e96388f541f1b7604aa592cd3c2
 .env
 
+# Ignore semua folder yang tidak penting
+CheckIn/
+event_attendance/
+event_checkin/
+tes_webcheckin/
+nanang/
 
 
 
@@ -32,3 +38,4 @@ node_modules/
 
 
 >>>>>>> 8f2b1b15cb398e96388f541f1b7604aa592cd3c2
+

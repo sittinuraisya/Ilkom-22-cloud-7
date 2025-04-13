@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+
 {% block title %}Status Cuti{% endblock %}
 
 {% block content %}
@@ -23,59 +24,75 @@
                             <th>Perihal</th>
                             <th>Status</th>
                             <th>Keterangan</th>
+                            <th>Lampiran</th> 
                             <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% if cuti_list %}
-                        {% for c in cuti_list %}
+                        {% for item in cuti_list %}
                         <tr class="animate__animated animate__fadeIn">
                             <td>{{ loop.index + ((page - 1) * per_page) }}</td>
-                            <td>{{ c.jenis_cuti }}</td>
+                            <td>{{ item['cuti'].jenis_cuti }}</td>
                             <td>
-                                {{ c.tanggal_mulai|format_date }} <br>
+                                {{ item['cuti'].tanggal_mulai|format_date }} <br>
                                 <small>s/d</small> <br>
-                                {{ c.tanggal_selesai|format_date }}
+                                {{ item['cuti'].tanggal_selesai|format_date }}
                             </td>
-                            <td>{{ c.jumlah_hari }} hari</td>
-                            <td>{{ c.perihal_cuti }}</td>
+                            <td>{{ item['cuti'].jumlah_hari }} hari</td>
+                            <td>{{ item['cuti'].perihal_cuti }}</td>
                             <td>
-                                {% if c.status == 'Dibatalkan' %}
+                                {% if item['cuti'].status == 'Dibatalkan' %}
                                     <span class="badge rounded-pill bg-secondary">Dibatalkan</span>
                                 {% else %}
-                                    <span class="badge rounded-pill bg-{{ 'success' if c.status == 'Approved' else 'danger' if c.status == 'Rejected' else 'warning' }}">
-                                        {{ c.status }}
+                                    <span class="badge rounded-pill bg-{{ 'success' if item['cuti'].status == 'Approved' else 'danger' if item['cuti'].status == 'Rejected' else 'warning' }}">
+                                        {{ item['cuti'].status }}
                                     </span>
                                 {% endif %}
                             </td>
                             <td>
-                                {% if c.status == 'Dibatalkan' %}
-                                    <small class="text-muted">{{ c.cancel_reason or '-' }}</small>
+                                {% if item['cuti'].status == 'Dibatalkan' %}
+                                    <small class="text-muted">{{ item['cuti'].cancel_reason or '-' }}</small>
                                 {% else %}
-                                    {{ c.admin_notes if c.admin_notes else '-' }}
+                                    {{ item['cuti'].admin_notes if item['cuti'].admin_notes else '-' }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if item['cuti'].lampiran %}
+                                    {% if item['cuti'].lampiran.endswith(('.png', '.jpg', '.jpeg', '.gif')) %}
+                                        <a href="{{ url_for('static', filename='uploads/' ~ item['cuti'].lampiran) }}" target="_blank">
+                                            <img src="{{ url_for('static', filename='uploads/' ~ item['cuti'].lampiran) }}" alt="Lampiran" style="height: 50px; width: auto;">
+                                        </a>
+                                    {% else %}
+                                        <a href="{{ url_for('static', filename='uploads/' ~ item['cuti'].lampiran) }}" target="_blank">
+                                            <i class="bi bi-paperclip"></i> Lihat File
+                                        </a>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted">-</span>
                                 {% endif %}
                             </td>
                             <td>
                                 <div class="btn-group btn-group-sm">
-                                    <a href="{{ url_for('cetak_pdf', cuti_id=c.id) }}" 
+                                    <a href="{{ url_for('cetak_pdf', cuti_id=item['cuti'].id) }}" 
                                        class="btn btn-outline-danger" 
                                        title="Download PDF">
                                         <i class="bi bi-file-earmark-pdf"></i>
                                     </a>
-                                    <a href="{{ url_for('cetak_surat', cuti_id=c.id) }}" 
+                                    <a href="{{ url_for('cetak_surat', cuti_id=item['cuti'].id) }}" 
                                        class="btn btn-outline-primary" 
                                        title="Cetak Surat"
                                        target="_blank">
                                         <i class="bi bi-printer"></i>
                                     </a>
-                                    {% if c.status == 'Pending' and (session['user_id'] == c.user_id or session['role'] == 'admin') %}
+                                    {% if item['cuti'].status == 'Pending' and (session['user_id'] == item['cuti'].user_id or session['role'] == 'admin') %}
                                     <button class="btn btn-outline-warning" 
                                             title="Batalkan"
                                             data-bs-toggle="modal" 
-                                            data-bs-target="#cancelModal-{{ c.id }}">
+                                            data-bs-target="#cancelModal-{{ item['cuti'].id }}">
                                         <i class="bi bi-x-circle"></i>
                                     </button>
-                                    <form action="{{ url_for('hapus_cuti', cuti_id=c.id) }}" method="POST" style="display:inline;" 
+                                    <form action="{{ url_for('hapus_cuti', cuti_id=item['cuti'].id) }}" method="POST" style="display:inline;" 
                                           onsubmit="return confirm('Yakin ingin menghapus pengajuan cuti ini?');">
                                         <button type="submit" class="btn btn-outline-danger" title="Hapus Cuti">
                                             <i class="bi bi-trash"></i>
@@ -88,7 +105,7 @@
                         {% endfor %}
                         {% else %}
                         <tr>
-                            <td colspan="8" class="text-center py-4">
+                            <td colspan="9" class="text-center py-4">
                                 <div class="text-muted">
                                     <i class="bi bi-calendar-x" style="font-size: 2rem;"></i>
                                     <p class="mt-2">Belum ada pengajuan cuti</p>
@@ -100,11 +117,10 @@
                 </table>
             </div>
 
-            <!-- Pagination -->
             {% if total_pages > 1 %}
             <div class="d-flex justify-content-between mt-3">
                 <div class="text-muted">
-                    Menampilkan {{ cuti_list|length }} dari {{ total_cuti }} pengajuan
+                    Menampilkan {{ cuti_list|length }} dari {{ total }} pengajuan
                     (Halaman {{ page }} dari {{ total_pages }})
                 </div>
                 <nav aria-label="Page navigation">
@@ -146,35 +162,31 @@
     </div>
 </div>
 
-<!-- Modal Batalkan Cuti -->
-{% for c in cuti_list %}
-    {% if c.status == 'Pending' and (session['user_id'] == c.user_id or session['role'] == 'admin') %}
-    <div class="modal fade" id="cancelModal-{{ c.id }}" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-warning text-white">
-                    <h5 class="modal-title">Batalkan Pengajuan Cuti</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form method="POST" action="{{ url_for('batalkan_cuti', cuti_id=c.id) }}">
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Alasan Pembatalan:</label>
-                            <textarea class="form-control" name="cancel_reason" required rows="3" placeholder="Masukkan alasan pembatalan..."></textarea>
-                        </div>
-                        <div class="alert alert-warning">
-                            <i class="bi bi-exclamation-triangle"></i> 
-                            Pembatalan cuti tidak dapat dibatalkan kembali.
-                        </div>
+<!-- Modal untuk membatalkan pengajuan cuti -->
+{% for item in cuti_list %}
+<div class="modal fade" id="cancelModal-{{ item['cuti'].id }}" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cancelModalLabel">Batalkan Pengajuan Cuti</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin membatalkan pengajuan cuti ini?</p>
+                <form action="{{ url_for('batalkan_cuti', cuti_id=item['cuti'].id) }}" method="POST">
+                    <div class="mb-3">
+                        <label for="cancel_reason" class="form-label">Alasan Pembatalan</label>
+                        <textarea class="form-control" id="cancel_reason" name="cancel_reason" rows="3" required></textarea>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                        <button type="submit" class="btn btn-warning">Konfirmasi Pembatalan</button>
+                        <button type="submit" class="btn btn-danger">Batalkan Cuti</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-    {% endif %}
+</div>
 {% endfor %}
+
 {% endblock %}

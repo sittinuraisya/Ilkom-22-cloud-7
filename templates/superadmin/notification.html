@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifikasi</title>
+    <style>
+        /* Global Styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Notifications Section */
+        .notifications {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .notification-item {
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .notification-item:hover {
+            background-color: #e9ecef;
+        }
+
+        .notification-item.unread {
+            background-color: #e3f7ff;
+            border-color: #80c9f7;
+        }
+
+        .notification-item strong {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .notification-item small {
+            font-size: 0.8em;
+            color: #888;
+        }
+
+        .no-notifications {
+            padding: 10px;
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Notifikasi</h1>
+
+        <!-- Tampilkan notifikasi jika ada -->
+        {% if notifications %}
+        <div class="notifications">
+            <ul>
+                {% for notification in notifications %}
+                <li class="notification-item {{ 'unread' if not notification.read else '' }}">
+                    <strong>{{ notification.title }}</strong><br>
+                    <span>{{ notification.message }}</span><br>
+                    <small>{{ notification.timestamp }}</small>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% else %}
+        <div class="no-notifications">
+            Tidak ada notifikasi terbaru.
+        </div>
+        {% endif %}
+
+        <a class="back-link" href="{{ url_for('superadmin_dashboard') }}">Kembali ke Dashboard</a>
+    </div>
+</body>
+</html>
