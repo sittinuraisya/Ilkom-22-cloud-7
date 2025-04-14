@@ -17,3 +17,4 @@ class LeaveRequest(db.Model):
     status = db.Column(db.String(50))
     note = db.Column(db.Text)
     attachment = db.Column(db.String(200))
+    user = db.relationship('User')
