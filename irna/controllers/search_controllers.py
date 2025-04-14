@@ -109,8 +109,6 @@ def _test_cari_bahan():
     print("Testing pencarian bahan...")
     cari_berdasarkan_bahan()
 
-
-# Fungsi ini tidak digunakan langsung, tapi menjaga jumlah baris > 100
 def _dummy_function():
     print("Ini fungsi dummy untuk menjaga jumlah baris.")
     for i in range(5):
