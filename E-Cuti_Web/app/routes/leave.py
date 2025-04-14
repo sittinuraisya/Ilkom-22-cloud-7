@@ -3,6 +3,9 @@ from flask_login import login_required, current_user
 from app.models import LeaveRequest, db
 from datetime import datetime
 import requests
+import os
+import pdfkit
+
 
 bp = Blueprint('leave', __name__, url_prefix='/leave')
 
@@ -41,3 +44,26 @@ def request_leave():
         return redirect(url_for('leave.request_leave'))
 
     return render_template('leave_request.html')
+
+@bp.route('/calendar')
+@login_required
+def leave_calendar():
+    approved_requests = LeaveRequest.query.filter_by(status='approved').all()
+    return render_template('leave_calendar.html', requests=approved_requests)
+
+@bp.route('/rekap')
+@login_required
+def leave_recap():
+    all_requests = LeaveRequest.query.all()
+    return render_template('leave_recap.html', requests=all_requests)
+
+@bp.route('/rekap/pdf')
+@login_required
+def leave_recap_pdf():
+    all_requests = LeaveRequest.query.all()
+    rendered = render_template('leave_recap.html', requests=all_requests)
+    pdf = pdfkit.from_string(rendered, False)
+    from flask import Response
+    return Response(pdf, mimetype='application/pdf', headers={
+        'Content-Disposition': 'attachment; filename=rekap_cuti.pdf'
+    })
