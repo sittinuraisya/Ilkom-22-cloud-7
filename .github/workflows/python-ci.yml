@@ -56,7 +56,6 @@ jobs:
     - name: Lint with flake8
       run: |
         flake8 e_cuti/app.py --show-source --statistics
-        flake8 e_cuti/app.py --extend-ignore=E501,F401,E302,E305,W291,F811
     
     - name: Run tests
       run: |

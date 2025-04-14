@@ -1,24 +1,23 @@
-import os
 import subprocess
+import sys
 
-def clean_code():
-    """Run all code cleaning tools in sequence"""
-    file_path = "e_cuti/app.py"
+def clean_file(file_path):
+    tools = [
+        ("autoflake", ["--in-place", "--remove-unused-variables", "--remove-all-unused-imports", file_path]),
+        ("isort", [file_path]),
+        ("autopep8", ["--in-place", "--aggressive", file_path]),
+        ("black", [file_path, "--line-length", "120"])
+    ]
     
-    print("Running autoflake...")
-    subprocess.run(["autoflake", "--in-place", "--remove-unused-variables", 
-                   "--remove-all-unused-imports", file_path])
+    for tool, args in tools:
+        print(f"Running {tool}...")
+        try:
+            subprocess.run([tool] + args, check=True)
+        except subprocess.CalledProcessError as e:
+            print(f"Error running {tool}: {e}")
+            sys.exit(1)
     
-    print("Running isort...")
-    subprocess.run(["isort", file_path])
-    
-    print("Running autopep8...")
-    subprocess.run(["autopep8", "--in-place", "--aggressive", file_path])
-    
-    print("Running black...")
-    subprocess.run(["black", file_path, "--line-length", "79"])
-    
-    print("Cleaning completed!")
+    print("Cleaning completed successfully!")
 
 if __name__ == "__main__":
-    clean_code()
+    clean_file("e_cuti/app.py")
