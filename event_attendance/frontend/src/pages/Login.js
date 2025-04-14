@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import axios from '../axiosInstance';
+import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 
 function Login() {
@@ -8,8 +9,8 @@ function Login() {
     email: '',
     password: ''
   });
+  const { login } = useAuth();
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const { email, password } = formData;
 
@@ -27,9 +28,8 @@ function Login() {
         password
       });
 
-      localStorage.setItem('token', res.data.token);
+      login(res.data.token, res.data.user);
       toast.success('Logged in successfully');
-      navigate('/events');
     } catch (err) {
       toast.error(err.response?.data?.error || 'Login failed');
     } finally {

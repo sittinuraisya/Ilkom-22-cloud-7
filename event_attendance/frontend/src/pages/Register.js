@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import axios from '../axiosInstance';
+import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 
 function Register() {
@@ -10,8 +11,8 @@ function Register() {
     password: '',
     phone: ''
   });
+  const { login } = useAuth();
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const { name, email, password, phone } = formData;
 
@@ -24,15 +25,19 @@ function Register() {
     setLoading(true);
 
     try {
-      await axios.post('/api/v1/auth/register', {
+      const res = await axios.post('/api/v1/auth/register', {
         name,
         email,
         password,
         phone
       });
 
-      toast.success('Registration successful! Please check your email to verify your account');
-      navigate('/login');
+      if (res.data.token) {
+        login(res.data.token, res.data.user);
+        toast.success('Registration successful!');
+      } else {
+        toast.success('Registration successful! Please check your email to verify your account');
+      }
     } catch (err) {
       toast.error(err.response?.data?.error || 'Registration failed');
     } finally {
