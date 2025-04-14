@@ -1,0 +1,90 @@
+[
+    {
+        "id_resep": "31dc43bf-3f08-4c9b-acbb-ef4b30bebf7a",
+        "nama": "Nasi Goreng",
+        "kategori": "Masakan Utama",
+        "bahan": [
+            "Nasi",
+            "Bawang Putih",
+            "Kecap",
+            "Telur",
+            "Minyak"
+        ],
+        "langkah": [
+            "Panaskan minyak",
+            "Tumis bawang",
+            "Masukkan nasi",
+            "Tambahkan kecap",
+            "Masukkan telur"
+        ],
+        "dibuat": "2025-04-14T15:47:48.571171"
+    },
+    {
+        "id_resep": "7904bfcb-f260-4c1c-a61c-aa2db7bdbf2b",
+        "nama": "Jus Alpukat",
+        "kategori": "Minuman",
+        "bahan": [
+            "Alpukat",
+            "Susu Kental Manis",
+            "Es Batu"
+        ],
+        "langkah": [],
+        "dibuat": "2025-04-14T15:47:48.571171"
+    },
+    {
+        "id_resep": "713a70bb-2082-4680-be9a-c9a1509428a0",
+        "nama": "Ayam Goreng",
+        "kategori": "Masakan Utama",
+        "bahan": [
+            "Ayam",
+            "Bawang Putih",
+            "Ketumbar",
+            "Garam",
+            "Minyak"
+        ],
+        "langkah": [
+            "Lumuri ayam dengan bumbu",
+            "Diamkan 30 menit",
+            "Goreng hingga matang"
+        ],
+        "dibuat": "2025-04-14T15:47:48.571171"
+    },
+    {
+        "id_resep": "e97866f4-d8ea-489c-8043-96a334b7d82a",
+        "nama": "Mie Goreng",
+        "kategori": "Masakan Utama",
+        "bahan": [
+            "Mie",
+            "Sayuran",
+            "Telur",
+            "Kecap",
+            "Bawang Merah"
+        ],
+        "langkah": [
+            "Rebus mie",
+            "Tumis sayur",
+            "Masukkan mie dan telur",
+            "Tambahkan kecap"
+        ],
+        "dibuat": "2025-04-14T15:47:48.571171"
+    },
+    {
+        "id_resep": "765fcf86-b482-4846-b601-10edea32feb6",
+        "nama": "Sate Ayam",
+        "kategori": "Makanan",
+        "bahan": [
+            "Daging ayam",
+            "Tusuk sate",
+            "Bumbu kacang",
+            "Kecap",
+            "Bawang Merah"
+        ],
+        "langkah": [
+            "Potong ayam",
+            "Tusuk sate",
+            "Bakar sate",
+            "Sajikan dengan bumbu kacang"
+        ],
+        "dibuat": "2025-04-14T15:47:48.571171"
+    }
+]
