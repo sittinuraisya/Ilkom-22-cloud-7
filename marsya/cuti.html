@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pengajuan Cuti</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <h1>Form Pengajuan Cuti</h1>
+  <input type="text" id="nama" placeholder="Nama"><br>
+  <input type="date" id="tanggal"><br>
+  <input type="text" id="alasan" placeholder="Alasan"><br>
+  <button onclick="ajukanCuti()">Ajukan Cuti</button>
+
+  <h2>Daftar Pengajuan Cuti</h2>
+  <ul id="daftarCuti"></ul>
+
+  <script>
+    // GANTI DENGAN KONFIGURASI FIREBASE KAMU
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    async function ajukanCuti() {
+      const nama = document.getElementById('nama').value;
+      const tanggal = document.getElementById('tanggal').value;
+      const alasan = document.getElementById('alasan').value;
+
+      if (!nama || !tanggal || !alasan) {
+        alert("Semua field wajib diisi!");
+        return;
+      }
+
+      await db.collection("cuti").add({
+        nama,
+        tanggal,
+        alasan,
+        diajukan: new Date()
+      });
+
+      document.getElementById('nama').value = '';
+      document.getElementById('tanggal').value = '';
+      document.getElementById('alasan').value = '';
+
+      loadCuti();
+    }
+
+    async function loadCuti() {
+      const snapshot = await db.collection("cuti").orderBy("diajukan", "desc").get();
+      const list = document.getElementById('daftarCuti');
+      list.innerHTML = '';
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const li = document.createElement('li');
+        li.textContent = `${data.nama} | ${data.tanggal} | ${data.alasan}`;
+        list.appendChild(li);
+      });
+    }
+
+    loadCuti();
+  </script>
+</body>
+</html>
