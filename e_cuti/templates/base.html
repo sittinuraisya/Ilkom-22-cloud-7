@@ -6,16 +6,18 @@
     <title>{% block title %}Beranda{% endblock %} | {{ system_name }}</title>
 
     <!-- Favicon -->
-    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 
     <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 
-    <!-- CSS -->
+    <!-- CSS Libraries -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
     <style>
@@ -68,17 +70,21 @@
             top: 0; left: 0; right: 0; bottom: 0;
             background-color: rgba(255, 255, 255, 0.7);
             z-index: 9999;
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
             flex-direction: column;
+        }
+
+        .loading-overlay.active {
+            display: flex !important;
         }
     </style>
 </head>
 <body>
 
     <!-- Loading Overlay -->
-    <div id="loading-overlay" class="loading-overlay d-none">
+    <div id="loading-overlay" class="loading-overlay">
         <div class="loading-spinner">
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Memproses...</span>
@@ -94,25 +100,41 @@
                 {{ system_name }}<br>
                 <small class="navbar-subtitle">{{ organization }}</small>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    {% if 'user_id' in session %}
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a></li>
-                        {% if session['role'] == 'admin' %}
-                            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_dashboard') }}">Admin</a></li>
+                    {% if current_user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+                        </li>
+                        {% if current_user.role == 'admin' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('admin_dashboard') }}">Admin</a>
+                            </li>
+                        {% elif current_user.role == 'superadmin' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('superadmin_dashboard') }}">Superadmin</a>
+                            </li>
+                        {% elif current_user.role == 'atasan' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('atasan_dashboard') }}">Verifikasi Cuti</a>
+                            </li>
+                        {% elif current_user.role == 'user' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('dashboard') }}">Pegawai</a>
+                            </li>
                         {% endif %}
                     {% endif %}
                 </ul>
                 <ul class="navbar-nav ms-auto">
-                    {% if 'user_id' in session %}
+                    {% if current_user.is_authenticated %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user-circle me-1"></i> {{ session['username'] }}
+                                <i class="fas fa-user-circle me-1"></i> {{ current_user.username }}
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <ul class="dropdown-menu dropdown-menu-end">
                                 <li><a class="dropdown-item" href="{{ url_for('profil') }}"><i class="fas fa-user me-2"></i> Profil</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>

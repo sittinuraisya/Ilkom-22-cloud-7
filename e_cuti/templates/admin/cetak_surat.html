@@ -1,94 +1,201 @@
-{% extends "base.html" %}
-{% block title %}Cetak Surat Cuti{% endblock %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Surat Cuti - {{ cuti.username }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 2cm;
+            line-height: 1.6;
+            background-color: #ffffff;
+            color: #000000;
+            transition: background-color 0.3s, color 0.3s;
+        }
 
-{% block content %}
-<div class="print-container">
-    <div class="text-center mb-4">
-        <h3>SURAT PERMOHONAN CUTI</h3>
-        <hr style="border-top: 2px solid #000; margin: 10px 0;">
+        .kop-surat {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header {
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        .content {
+            margin-top: 10px;
+            text-align: justify;
+        }
+
+        .data-diri {
+            margin-left: 50px;
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+
+        .ttd {
+            margin-top: 50px;
+            width: 100%;
+        }
+
+        @media print {
+            .no-print {
+                display: none;
+            }
+
+            body {
+                margin: 1cm;
+            }
+        }
+
+        /* Dark Mode */
+        .dark-mode {
+            background-color: #121212;
+            color: #f1f1f1;
+        }
+
+        .dark-mode .kop-surat,
+        .dark-mode .header,
+        .dark-mode .content,
+        .dark-mode .ttd {
+            border-color: #f1f1f1;
+        }
+
+        button,
+        a.no-print-button {
+            padding: 8px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            margin: 5px;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Tombol Dark Mode -->
+    <div class="no-print" style="text-align: right;">
+        <button class="btn-secondary" onclick="toggleDarkMode()">🌓 Toggle Dark Mode</button>
     </div>
 
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <table class="table table-bordered">
+    <!-- Kop Surat -->
+    <div class="kop-surat" style="border-bottom: 3px solid #000; padding-bottom: 10px;">
+        <div style="display: flex; align-items: center; margin-bottom: 5px;">
+            <img src="{{ url_for('static', filename='images/logo_sultra.png') }}" alt="Logo Pemprov Sultra" style="height: 80px; margin-right: 20px;">
+            <div style="text-align: center; width: 100%;">
+                <p style="font-size: 14pt; font-weight: bold; margin: 0;">PEMERINTAH PROVINSI SULAWESI TENGGARA</p>
+                <p style="font-size: 16pt; font-weight: bold; margin: 0;">SEKRETARIAT DAERAH</p>
+                <p style="font-size: 8pt; margin: 0;">
+                    Kompleks Bumi Praja Anduonohu Kec. Poasia, Kota Kendari, Sulawesi Tenggara 93231<br>
+                    Telp. (0401) 391609, Faksimile (0401) 391614 39232
+                </p>
+            </div>
+        </div>
+        <div style="border-top: 3px solid #000; margin-top: 10px;"></div>
+        <div style="border-top: 1px solid #000; margin-top: 2px;"></div>
+    </div>
+
+    <!-- Header Surat -->
+    <div class="header">
+        <div style="display: flex; justify-content: space-between;">
+            <div style="text-align: left;">
+                <p style="margin: 0;">Nomor : {{ cuti.id }}/HRD/{{ cuti.tahun }}</p>
+                <p style="margin: 0;">Lamp : -</p>
+                <p style="margin: 0;">Perihal : <strong>Permohonan Izin Cuti</strong></p>
+            </div>
+            <div style="text-align: right;">
+                <p style="margin: 0;">Kendari, {{ cuti.tanggal_format }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tujuan -->
+    <p style="margin: 0;">Kepada Yth.<br>Kepala Biro Organisasi<br>di<br><span style="margin-left: 50px;">Tempat</span></p>
+
+    <!-- Salam Pembuka -->
+    <p style="font-weight: bold; margin-top: 15px;">Assalamu’alaikum Warahmatullahi Wabarakatuh</p>
+
+    <!-- Isi Surat -->
+    <div class="content">
+        <p>Dengan hormat, semoga Bapak/Ibu selalu dalam lindungan Allah SWT serta diberikan kemudahan dalam menjalankan tugas sehari-hari.</p>
+
+        <p>Sehubungan dengan keperluan pribadi, saya yang bertanda tangan di bawah ini:</p>
+
+        <div class="data-diri">
+            <table>
                 <tr>
-                    <th width="30%">Nama</th>
-                    <td>{{ cuti.username }}</td>
+                    <td><strong>Nama</strong></td>
+                    <td>: <strong>{{ cuti.username }}</strong></td>
                 </tr>
                 <tr>
-                    <th>NIP</th>
-                    <td>{{ cuti.nip }}</td>
+                    <td><strong>NIP</strong></td>
+                    <td>: <strong>{{ cuti.nip }}</strong></td>
                 </tr>
                 <tr>
-                    <th>Jabatan</th>
-                    <td>{{ cuti.jabatan }}</td>
-                </tr>
-                <tr>
-                    <th>Golongan</th>
-                    <td>{{ cuti.golongan }}</td>
+                    <td><strong>Jabatan</strong></td>
+                    <td>: <strong>{{ cuti.jabatan }}</strong></td>
                 </tr>
             </table>
         </div>
-        <div class="col-md-4">
-            <table class="table table-bordered">
-                <tr>
-                    <th>Jenis Cuti</th>
-                    <td>{{ cuti.jenis_cuti }}</td>
-                </tr>
-                <tr>
-                    <th>Tanggal</th>
-                    <td>{{ cuti.tanggal_mulai }} s/d {{ cuti.tanggal_selesai }}</td>
-                </tr>
-                <tr>
-                    <th>Lama</th>
-                    <td>{{ cuti.jumlah_hari }} hari</td>
-                </tr>
-            </table>
-        </div>
+
+        <p>
+            Dengan ini mengajukan permohonan cuti <strong>{{ cuti.jenis_cuti|lower }}</strong> selama <strong>{{ cuti.jumlah_hari }} hari kerja</strong>, terhitung mulai tanggal <strong>{{ cuti.tanggal_mulai }}</strong> sampai dengan <strong>{{ cuti.tanggal_selesai }}</strong>.
+        </p>
+
+        <p>Demikian permohonan ini saya sampaikan. Atas perhatian dan kebijaksanaan Bapak/Ibu, saya ucapkan terima kasih.</p>
     </div>
 
-    <div class="mb-4">
-        <h5>Alasan Cuti:</h5>
-        <p class="ps-4">{{ cuti.perihal_cuti }}</p>
-    </div>
+    <!-- Salam Penutup -->
+    <p style="font-weight: bold;">Wassalamu’alaikum Warahmatullahi Wabarakatuh</p>
 
-    <div class="row mt-5">
-        <div class="col-md-6 text-center">
-            <p>Pemohon,</p>
-            <br><br><br>
+    <!-- Tanda Tangan -->
+    <div class="ttd">
+        <div style="width: 300px; float: right; text-align: center;">
+            <p>Hormat saya,</p>
+            <br><br><br><br>
             <p><strong>{{ cuti.username }}</strong></p>
             <p>NIP. {{ cuti.nip }}</p>
         </div>
-        <div class="col-md-6 text-center">
-            <p>Mengetahui,</p>
-            <br><br><br>
-            <p><strong>Kepala Bagian</strong></p>
-            <p>NIP. ........................</p>
-        </div>
     </div>
 
-    <div class="text-end mt-4">
-        <button onclick="window.print()" class="btn btn-primary">Cetak Surat</button>
+    <!-- Tombol Aksi -->
+    <div class="no-print" style="margin-top: 100px; text-align: center;">
+        <button onclick="window.print()" class="btn-primary">🖨️ Cetak Surat</button>
+        <a href="{{ url_for('status_cuti') }}" class="no-print-button btn-secondary">↩️ Kembali</a>
+        <a href="{{ url_for('cetak_pdf', cuti_id=cuti.id) }}" class="no-print-button btn-success">⬇️ Download PDF</a>
     </div>
-</div>
 
-<style>
-    @media print {
-        body * {
-            visibility: hidden;
+    <!-- Script -->
+    <script>
+        function toggleDarkMode() {
+            document.body.classList.toggle("dark-mode");
         }
-        .print-container, .print-container * {
-            visibility: visible;
-        }
-        .print-container {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-        }
-        .no-print {
-            display: none !important;
-        }
-    }
-</style>
-{% endblock %}
+
+        // Auto-toggle berdasarkan preferensi sistem (opsional)
+        // window.onload = () => {
+        //     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        //         toggleDarkMode();
+        //     }
+        // };
+    </script>
+
+</body>
+</html>

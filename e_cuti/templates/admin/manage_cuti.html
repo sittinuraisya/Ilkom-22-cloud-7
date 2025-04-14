@@ -12,9 +12,9 @@
   </div>
 </div>
 
-<!-- Konten Utama -->
+<!-- Header -->
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="fas fa-calendar-alt me-2"></i>Manajemen Cuti Pegawai</h2>
+    <h2><i class="fas fa-calendar-alt me-2"></i>Manajemen Cuti Pegawai (Admin)</h2>
     <div>
         <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
             <i class="fas fa-arrow-left me-1"></i> Kembali
@@ -58,14 +58,12 @@
     </div>
 </div>
 
-<!-- Tabel Cuti -->
+<!-- Tabel Data Cuti -->
 <div class="card shadow-sm">
     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
         <h5 class="mb-0"><i class="fas fa-list me-1"></i> Daftar Pengajuan Cuti</h5>
         <div>
-            <span class="badge bg-light text-dark me-2">
-                Total: {{ cuti_list.total }} Data
-            </span>
+            <span class="badge bg-light text-dark me-2">Total: {{ cuti_list.total }} Data</span>
             <button class="btn btn-sm btn-light" onclick="exportToExcel()">
                 <i class="fas fa-file-excel"></i> Export
             </button>
@@ -77,14 +75,14 @@
             <table class="table table-hover mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th width="5%">No</th>
-                        <th width="10%">NIP</th>
-                        <th width="15%">Nama Pegawai</th>
-                        <th width="10%">Jenis Cuti</th>
-                        <th width="15%">Tanggal Cuti</th>
-                        <th width="8%">Hari</th>
-                        <th width="10%">Status</th>
-                        <th width="15%">Aksi</th>
+                        <th>No</th>
+                        <th>NIP</th>
+                        <th>Nama Pegawai</th>
+                        <th>Jenis Cuti</th>
+                        <th>Tanggal Cuti</th>
+                        <th>Hari</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -94,17 +92,13 @@
                         <td>{{ cuti.nip }}</td>
                         <td>{{ cuti.username }}</td>
                         <td>{{ cuti.jenis_cuti }}</td>
-                        <td>
-                            {{ cuti.tanggal_mulai|format_date }} - 
-                            {{ cuti.tanggal_selesai|format_date }}
-                        </td>
+                        <td>{{ cuti.tanggal_mulai|format_date }} - {{ cuti.tanggal_selesai|format_date }}</td>
                         <td class="text-center">{{ cuti.jumlah_hari }}</td>
                         <td class="text-center">
                             <span class="badge rounded-pill bg-{{ 
                                 'success' if cuti.status == 'Approved' 
                                 else 'warning' if cuti.status == 'Pending' 
-                                else 'danger' 
-                            }}">
+                                else 'danger' }}">
                                 {% if cuti.status == 'Approved' %}
                                     <i class="fas fa-check-circle me-1"></i>
                                 {% elif cuti.status == 'Pending' %}
@@ -122,35 +116,17 @@
                                    title="Cetak Surat"
                                    target="_blank">
                                     <i class="fas fa-print"></i>
-                                   <button class="btn btn-sm btn-warning loading-action"
-                                   onclick="sendReminderEmail('{{ cuti.user.email }}')"
-                                   title="Kirim Reminder">
+                                </a>
+                                <button class="btn btn-sm btn-warning loading-action"
+                                        onclick="sendReminderEmail('{{ cuti.user.email }}')"
+                                        title="Kirim Pengingat">
                                     <i class="fas fa-envelope"></i>
                                 </button>
-                                </a>
-                                
-                                {% if cuti.status == 'Pending' %}
-                                <button type="button" 
-                                        class="btn btn-sm btn-success loading-action" 
-                                        title="Setujui"
-                                        onclick="showApproveModal('{{ cuti.id }}', '{{ cuti.username }}', '{{ cuti.nip }}')">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                                
-                                <button type="button" 
-                                        class="btn btn-sm btn-danger loading-action" 
-                                        title="Tolak"
-                                        onclick="showRejectModal('{{ cuti.id }}', '{{ cuti.username }}', '{{ cuti.nip }}')">
-                                    <i class="fas fa-times"></i>
-                                </button>
-
                                 <button class="btn btn-sm btn-dark loading-action sync-single"
                                         data-cuti-id="{{ cuti.id }}"
-                                        title="Sync to Calendar">
+                                        title="Sync ke Calendar">
                                     <i class="fab fa-google"></i>
                                 </button>
-
-                                {% endif %}
                             </div>
                         </td>
                     </tr>
@@ -158,9 +134,9 @@
                 </tbody>
             </table>
         </div>
-        
+
         <!-- Pagination -->
-        <nav aria-label="Page navigation" class="mt-4 px-3">
+        <nav class="mt-4 px-3" aria-label="Page navigation">
             <ul class="pagination justify-content-center">
                 {% if cuti_list.has_prev %}
                 <li class="page-item">
@@ -169,19 +145,17 @@
                     </a>
                 </li>
                 {% endif %}
-                
+
                 {% for p in cuti_list.iter_pages() %}
                     {% if p %}
                         <li class="page-item {% if p == cuti_list.page %}active{% endif %}">
                             <a class="page-link loading-action" href="{{ url_for('manage_cuti', page=p, search=request.args.get('search'), status=request.args.get('status')) }}">{{ p }}</a>
                         </li>
                     {% else %}
-                        <li class="page-item disabled">
-                            <span class="page-link">...</span>
-                        </li>
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
                     {% endif %}
                 {% endfor %}
-                
+
                 {% if cuti_list.has_next %}
                 <li class="page-item">
                     <a class="page-link loading-action" href="{{ url_for('manage_cuti', page=cuti_list.next_num, search=request.args.get('search'), status=request.args.get('status')) }}">
@@ -193,64 +167,39 @@
         </nav>
         {% else %}
         <div class="alert alert-info text-center m-3">
-            <i class="fas fa-info-circle me-2"></i> Tidak ada data cuti yang ditemukan
+            <i class="fas fa-info-circle me-2"></i> Tidak ada data cuti yang ditemukan.
         </div>
         {% endif %}
     </div>
 </div>
 
-<!-- Modal Baru untuk API Actions -->
+<!-- Modal API -->
 <div class="modal fade" id="apiActionModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="apiModalTitle">API Action</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="apiModalBody">
-                <!-- Konten dinamis akan diisi oleh JavaScript -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-            </div>
-        </div>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="apiModalTitle">API Info</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div class="modal-body" id="apiModalBody">
+        <!-- Dinamis -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+      </div>
     </div>
+  </div>
 </div>
 
-<!-- Action Modal -->
-<div class="modal fade" id="actionModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalTitle">Konfirmasi</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form method="POST" action="{{ url_for('manage_cuti') }}" id="actionForm">
-                <div class="modal-body">
-                    <p id="modalMessage">Anda yakin ingin memproses pengajuan cuti ini?</p>
-                    <input type="hidden" name="cuti_id" id="modalCutiId">
-                    <input type="hidden" name="action" id="modalAction">
-                    <div class="mb-3">
-                        <label for="modalNotes" class="form-label" id="modalNotesLabel">Catatan:</label>
-                        <textarea class="form-control" id="modalNotes" name="admin_notes" rows="3"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn" id="modalSubmitBtn">
-                        <span class="submit-text">Proses</span>
-                        <span class="spinner-border spinner-border-sm d-none" role="status"></span>
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Script untuk Integrasi API -->
 <script src="{{ url_for('static', filename='js/api_integrations.js') }}"></script>
 <script>
-// Fungsi untuk sinkronisasi massal ke Google Calendar
+function showLoading() {
+    document.getElementById('loading-overlay').style.display = 'flex';
+}
+function hideLoading() {
+    document.getElementById('loading-overlay').style.display = 'none';
+}
+
 async function syncAllToCalendar() {
     showLoading();
     try {
@@ -262,20 +211,18 @@ async function syncAllToCalendar() {
             }
         });
         const result = await response.json();
-        
         if (response.ok) {
-            showApiModal('Berhasil', `${result.synced} event berhasil disinkronisasi`);
+            showApiModal('Berhasil', `${result.synced} data berhasil disinkronkan.`);
         } else {
-            throw new Error(result.error || 'Gagal sinkronisasi');
+            throw new Error(result.error || 'Gagal melakukan sinkronisasi.');
         }
-    } catch (error) {
-        showApiModal('Error', error.message);
+    } catch (err) {
+        showApiModal('Error', err.message);
     } finally {
         hideLoading();
     }
 }
 
-// Fungsi untuk menampilkan modal API
 function showApiModal(title, message) {
     const modal = new bootstrap.Modal(document.getElementById('apiActionModal'));
     document.getElementById('apiModalTitle').textContent = title;
@@ -283,7 +230,6 @@ function showApiModal(title, message) {
     modal.show();
 }
 
-// Event listener untuk tombol sync individual
 document.querySelectorAll('.sync-single').forEach(btn => {
     btn.addEventListener('click', async function() {
         const cutiId = this.dataset.cutiId;
@@ -291,7 +237,6 @@ document.querySelectorAll('.sync-single').forEach(btn => {
         try {
             const response = await fetch(`/api/calendar/sync/${cutiId}`);
             const result = await response.json();
-            
             if (response.ok) {
                 this.innerHTML = '<i class="fas fa-check"></i>';
                 this.classList.remove('btn-dark');
@@ -299,185 +244,12 @@ document.querySelectorAll('.sync-single').forEach(btn => {
             } else {
                 throw new Error(result.error);
             }
-        } catch (error) {
-            showApiModal('Error', error.message);
+        } catch (err) {
+            showApiModal('Error', err.message);
         } finally {
             hideLoading();
         }
     });
 });
-}
-
-// Fungsi approve modal
-function showApproveModal(cutiId, username, nip) {
-  const modal = new bootstrap.Modal(document.getElementById('actionModal'));
-  const modalEl = document.getElementById('actionModal');
-  
-  modalEl.querySelector('#modalTitle').textContent = 'Konfirmasi Persetujuan';
-  modalEl.querySelector('#modalMessage').innerHTML = 
-      `Anda yakin ingin menyetujui pengajuan cuti dari <strong>${username}</strong> (NIP: ${nip})?`;
-  modalEl.querySelector('#modalCutiId').value = cutiId;
-  modalEl.querySelector('#modalAction').value = 'approve';
-  modalEl.querySelector('#modalNotesLabel').textContent = 'Catatan (Opsional):';
-  modalEl.querySelector('#modalNotes').required = false;
-  
-  const submitBtn = modalEl.querySelector('#modalSubmitBtn');
-  submitBtn.className = 'btn btn-success';
-  submitBtn.querySelector('.submit-text').textContent = 'Setujui';
-  
-  modalEl.querySelector('.modal-header').className = 'modal-header bg-success text-white';
-  
-  modal.show();
-}
-
-// Fungsi reject modal
-function showRejectModal(cutiId, username, nip) {
-  const modal = new bootstrap.Modal(document.getElementById('actionModal'));
-  const modalEl = document.getElementById('actionModal');
-  
-  modalEl.querySelector('#modalTitle').textContent = 'Konfirmasi Penolakan';
-  modalEl.querySelector('#modalMessage').innerHTML = 
-      `Anda yakin ingin menolak pengajuan cuti dari <strong>${username}</strong> (NIP: ${nip})?`;
-  modalEl.querySelector('#modalCutiId').value = cutiId;
-  modalEl.querySelector('#modalAction').value = 'reject';
-  modalEl.querySelector('#modalNotesLabel').textContent = 'Alasan Penolakan:';
-  modalEl.querySelector('#modalNotes').required = true;
-  
-  const submitBtn = modalEl.querySelector('#modalSubmitBtn');
-  submitBtn.className = 'btn btn-danger';
-  submitBtn.querySelector('.submit-text').textContent = 'Tolak';
-  
-  modalEl.querySelector('.modal-header').className = 'modal-header bg-danger text-white';
-  
-  modal.show();
-}
-
-// Tangkap form submission
-document.getElementById('actionForm').addEventListener('submit', function(e) {
-  const submitBtn = this.querySelector('button[type="submit"]');
-  submitBtn.disabled = true;
-  submitBtn.querySelector('.submit-text').classList.add('d-none');
-  submitBtn.querySelector('.spinner-border').classList.remove('d-none');
-  showLoading();
-});
-
-// Tangkap semua elemen dengan class loading-action
-document.querySelectorAll('.loading-action').forEach(element => {
-  element.addEventListener('click', function() {
-    showLoading();
-    
-    // Untuk link cetak, sembunyikan loading setelah 3 detik jika popup diblokir
-    if (this.classList.contains('btn-info')) {
-      setTimeout(hideLoading, 3000);
-    }
-  });
-});
-
-// Tangkap event sebelum unload
-window.addEventListener('beforeunload', function() {
-  if (document.querySelector('#actionForm button[type="submit"]:disabled')) {
-    showLoading();
-  }
-});
-
-// Auto-focus textarea ketika modal shown
-document.getElementById('actionModal').addEventListener('shown.bs.modal', function() {
-  document.getElementById('modalNotes').focus();
-});
-</scrip>
-
-<style>
-    .loading-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(255,255,255,0.85);
-        display: none;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-        backdrop-filter: blur(2px);
-    }
-    
-    .loading-content {
-        text-align: center;
-        padding: 2rem;
-        border-radius: 10px;
-        background-color: rgba(255,255,255,0.9);
-        box-shadow: 0 0 20px rgba(0,0,0,0.1);
-    }
-    
-    .loading-text {
-        color: #0d6efd;
-        margin-top: 1rem;
-        font-size: 1.25rem;
-        font-weight: bold;
-    }
-    
-    /* Animasi untuk tombol sync */
-    @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-        100% { transform: scale(1); }
-    }
-    
-    .sync-single.syncing {
-        animation: pulse 1s infinite;
-    }
-
-/* Loading Spinner Animation */
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-.spinner-border {
-  animation: spin 0.75s linear infinite;
-  vertical-align: -0.125em;
-}
-
-/* Tombol Aksi */
-.btn-action {
-  min-width: 80px;
-  margin: 2px;
-  white-space: nowrap;
-}
-
-/* Efek hover tombol */
-.btn-success:hover { background-color: #218838; border-color: #1e7e34; }
-.btn-danger:hover { background-color: #c82333; border-color: #bd2130; }
-.btn-info:hover { background-color: #138496; border-color: #117a8b; }
-
-/* Responsive table */
-@media (max-width: 768px) {
-  .table-responsive {
-    border: 0;
-  }
-  .table thead {
-    display: none;
-  }
-  .table tr {
-    display: block;
-    margin-bottom: 1rem;
-    border: 1px solid #dee2e6;
-    border-radius: 0.25rem;
-  }
-  .table td {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem;
-    border-bottom: 1px solid #dee2e6;
-  }
-  .table td::before {
-    content: attr(data-label);
-    font-weight: bold;
-    padding-right: 1rem;
-  }
-  .table td:last-child {
-    border-bottom: 0;
-  }
-}
-</style>
+</script>
 {% endblock %}
