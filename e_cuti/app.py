@@ -1903,15 +1903,13 @@ def admin_dashboard():
 
     except SQLAlchemyError as e:
         current_app.logger.error(
-            f"Database error in admin_dashboard: {
-                str(e)}", exc_info=True)
+            f"Database error in admin_dashboard: {str(e)}", exc_info=True)
         return render_template(
             'error.html', error_message="Terjadi kesalahan database. Silakan coba lagi nanti."), 500
 
     except Exception as e:
         current_app.logger.error(
-            f"Unexpected error in admin_dashboard: {
-                str(e)}", exc_info=True)
+            f"Unexpected error in admin_dashboard: {str(e)}", exc_info=True)
         return render_template(
             'error.html', error_message="Terjadi kesalahan sistem. Tim kami telah diberitahu."), 500
 
@@ -1999,8 +1997,7 @@ def admin_edit_user(user_id):
         except Exception as e:
             db.session.rollback()
             flash(
-                f'Terjadi kesalahan saat memperbarui data: {
-                    str(e)}', 'error')
+                f'Terjadi kesalahan saat memperbarui data: {str(e)}', 'error')
             return redirect(url_for('admin_edit_user', user_id=user_id))
 
     return render_template(
@@ -2167,8 +2164,7 @@ def manage_cuti():
 
     except Exception as e:
         current_app.logger.error(
-            f"Error in manage_cuti: {
-                str(e)}", exc_info=True)
+            f"Error in manage_cuti: {str(e)}", exc_info=True)
         return render_template(
             'error.html', error_message="Terjadi kesalahan saat memuat data cuti"), 500
 # Route untuk menyetujui cuti
