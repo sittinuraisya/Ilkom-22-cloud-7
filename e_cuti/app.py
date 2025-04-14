@@ -16,7 +16,7 @@ import csv
 from datetime import datetime, timedelta
 
 # --- Flask Core & Extensions ---
-from flask import Flask, render_template, request, redirect, url_for, flash, session, make_response, jsonify, abort, current_app
+from flask import Flask, render_template, request, redirect, url_for, flash, session, make_response, jsonify, abort, current_app, Response
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
 from sqlalchemy import text
 from flask_migrate import Migrate
@@ -138,16 +138,6 @@ def role_required(role):
     return decorator
 
 
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated:
-            flash('Silakan login terlebih dahulu', 'error')
-            return redirect(url_for('login'))
-        return f(*args, **kwargs)
-    return decorated_function
-
-
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -222,7 +212,7 @@ def calculate_working_days(start_date, end_date):
 
 
 def get_user_by_id(user_id):
-    conn = sqlite3.connect('your_database.db')
+    conn = sqlite3.connect('database.db')
     c = conn.cursor()
     c.execute(
        "SELECT id, username, password, role, email_verified " \
@@ -635,7 +625,9 @@ def test_calendar():
     calendar_service.get_credentials()
     events = calendar_service.list_events()
     events_display = "<br>".join(events)
-    return f"Berhasil mendapatkan kredensial!<br><br>Acara Kalender:<br>{events_display}"
+    result = f"Berhasil mendapatkan kredensial!<br><br>Acara Kalender:<br>"
+    result += events_display
+    return result
 
 
 @app.route('/kalender-cuti')
@@ -833,8 +825,9 @@ def register():
                     send_verification_email(email)
                     flash(
                         """
-                        Registrasi berhasil! Silakan cek email untuk verifikasi
-                        """,  # Menggunakan tanda kutip tiga agar baris lebih pendek dan mudah dibaca
+                        Registrasi berhasil! Silakan cek email
+                        untuk verifikasi
+                        """ # Menggunakan tanda kutip tiga agar baris lebih pendek dan mudah dibaca
                         'success')
                 except Exception as e:
                     print(f"Error sending verification email: {e}")
@@ -1879,8 +1872,7 @@ def admin_dashboard():
             'error.html', error_message="Terjadi kesalahan database. Silakan coba lagi nanti."), 500
 
     except Exception:
-        current_app.logger.error(
-            "Unexpected error in admin_dashboard", exc_info=True)
+        current_app.logger.error("Unexpected error", exc_info=True)
         return render_template(
             'error.html', error_message="Terjadi kesalahan sistem. Tim kami telah diberitahu."), 500
 
