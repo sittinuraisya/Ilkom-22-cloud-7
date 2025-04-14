@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Atasan - e-Cuti</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --success-color: #1cc88a;
+            --danger-color: #e74a3b;
+            --warning-color: #f6c23e;
+            --light-bg: #f8f9fc;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+        }
+        
+        .stat-card {
+            border-left: 4px solid;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card.pending {
+            border-left-color: var(--warning-color);
+        }
+        
+        .stat-card.approved {
+            border-left-color: var(--success-color);
+        }
+        
+        .stat-card.rejected {
+            border-left-color: var(--danger-color);
+        }
+        
+        .welcome-card {
+            background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+            color: white;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-calendar-check me-2"></i>e-Cuti
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('atasan_dashboard') }}">
+                            <i class="bi bi-house-door me-1"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('manage_cuti') }}">
+                            <i class="bi bi-list-check me-1"></i> Kelola Cuti
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">
+                            <i class="bi bi-box-arrow-right me-1"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container py-4">
+        <!-- Welcome Card -->
+        <div class="card welcome-card mb-4 border-0 shadow">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h2 class="card-title mb-1">Selamat datang, {{ session['username'] }}</h2>
+                        <p class="card-text mb-0">Anda login sebagai <strong>Atasan</strong></p>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <i class="bi bi-person-badge" style="font-size: 3rem; opacity: 0.8;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="card stat-card pending h-100 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-uppercase text-muted mb-2">Cuti Pending</h6>
+                                <h2 class="mb-0">{{ total_pending }}</h2>
+                            </div>
+                            <i class="bi bi-hourglass text-warning" style="font-size: 2rem; opacity: 0.3;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card stat-card approved h-100 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-uppercase text-muted mb-2">Cuti Disetujui</h6>
+                                <h2 class="mb-0">{{ total_approved }}</h2>
+                            </div>
+                            <i class="bi bi-check-circle text-success" style="font-size: 2rem; opacity: 0.3;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card stat-card rejected h-100 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-uppercase text-muted mb-2">Cuti Ditolak</h6>
+                                <h2 class="mb-0">{{ total_rejected }}</h2>
+                            </div>
+                            <i class="bi bi-x-circle text-danger" style="font-size: 2rem; opacity: 0.3;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3">
+                    <i class="bi bi-lightning me-2"></i>Quick Actions
+                </h5>
+                <div class="d-grid gap-2 d-md-flex">
+                    <a href="{{ url_for('manage_cuti') }}" class="btn btn-primary me-md-2">
+                        <i class="bi bi-list-check me-1"></i> Kelola Pengajuan Cuti
+                    </a>
+                    <a href="{{ url_for('manage_cuti') }}?status=Pending" class="btn btn-warning">
+                        <i class="bi bi-hourglass me-1"></i> Lihat Pending
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
