@@ -81,12 +81,20 @@ function AdminUsers() {
                     </select>
                   </td>
                   <td>
-                    <button 
-                      className="btn btn-danger"
-                      onClick={() => handleDelete(user._id)}
-                    >
-                      Delete
-                    </button>
+                    <div className="user-actions">
+                      <button 
+                        className="btn btn-primary"
+                        onClick={() => impersonate(user._id)}
+                      >
+                        Impersonate
+                      </button>
+                      <button 
+                        className="btn btn-danger"
+                        onClick={() => handleDelete(user._id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
