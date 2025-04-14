@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import axios from '../../axiosInstance';
 import { toast } from 'react-toastify';
+import { useAuth } from '../../context/AuthContext';
 
 function AdminUsers() {
+  const { impersonate } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
