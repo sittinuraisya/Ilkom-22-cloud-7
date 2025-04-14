@@ -3,26 +3,31 @@ name: Python CI
 on: [push, pull_request]
 
 jobs:
-  test-and-lint:
+  lint-and-test:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
-
-      - name: Install dependencies
-        run: |
-          pip install flake8 pytest
-
-      - name: Lint with flake8
-        run: |
-          flake8 e_cuti/app.py  # Pastikan path benar!          flake8 e_cuti/app.py --extend-ignore=E501,F401,E302,E305,W291,F811
-
-      - name: Run Python script (Test)
-        run: |
-          cd e_cuti  # Masuk ke folder e_cuti
-          python -c "from app import app; print('App loaded successfully')"  # Cek import
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 autopep8 autoflake black isort
+        pip install -r requirements.txt  # jika ada
+    
+    - name: Run code cleaning
+      run: |
+        python cleanup.py
+    
+    - name: Lint with flake8
+      run: |
+        flake8 e_cuti/app.py --show-source --statistics
+        flake8 e_cuti/app.py --extend-ignore=E501,F401,E302,E305,W291,F811
+    
+    - name: Run tests
+      run: |
+        python -m pytest  # jika ada tes
