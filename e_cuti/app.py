@@ -1122,10 +1122,11 @@ def ajukan_cuti():
                     'perihal_cuti': perihal_cuti
                 }.items() if not v]
                 flash(
-                    f'Field wajib diisi: {
-                        ", ".join(missing_fields)}',
-                    'error')
+                    f'Field wajib diisi: {", ".join(missing_fields)}',
+                    'error'
+                )
                 return redirect(url_for('ajukan_cuti'))
+
 
             # Validasi tanggal
             try:
