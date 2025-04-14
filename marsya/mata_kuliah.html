@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Daftar Mata Kuliah</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <h1>Form Mata Kuliah</h1>
+  <input type="text" id="kode" placeholder="Kode Mata Kuliah"><br>
+  <input type="text" id="nama" placeholder="Nama Mata Kuliah"><br>
+  <textarea id="deskripsi" placeholder="Deskripsi Mata Kuliah"></textarea><br>
+  <input type="text" id="semester" placeholder="Semester"><br>
+  <button onclick="tambahMataKuliah()">Tambah Mata Kuliah</button>
+
+  <h2>Daftar Mata Kuliah</h2>
+  <ul id="daftarMataKuliah"></ul>
+
+  <script>
+    // GANTI DENGAN KONFIGURASI FIREBASE KAMU
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Fungsi untuk menambah mata kuliah
+    async function tambahMataKuliah() {
+      const kode = document.getElementById('kode').value;
+      const nama = document.getElementById('nama').value;
+      const deskripsi = document.getElementById('deskripsi').value;
+      const semester = document.getElementById('semester').value;
+
+      if (!kode || !nama || !deskripsi || !semester) {
+        alert("Semua field wajib diisi!");
+        return;
+      }
+
+      await db.collection("mataKuliah").add({
+        kode,
+        nama,
+        deskripsi,
+        semester
+      });
+
+      document.getElementById('kode').value = '';
+      document.getElementById('nama').value = '';
+      document.getElementById('deskripsi').value = '';
+      document.getElementById('semester').value = '';
+
+      loadMataKuliah();
+    }
+
+    // Fungsi untuk load mata kuliah
+    async function loadMataKuliah() {
+      const snapshot = await db.collection("mataKuliah").get();
+      const list = document.getElementById('daftarMataKuliah');
+      list.innerHTML = '';
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <strong>${data.kode}</strong> - ${data.nama} <br>
+          ${data.deskripsi} <br>
+          Semester: ${data.semester} <br>
+          <button onclick="editMataKuliah('${doc.id}')">Edit</button>
+          <button onclick="hapusMataKuliah('${doc.id}')">Hapus</button>
+          <hr>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    // Fungsi untuk menghapus mata kuliah
+    async function hapusMataKuliah(id) {
+      await db.collection("mataKuliah").doc(id).delete();
+      loadMataKuliah();
+    }
+
+    // Fungsi untuk mengedit mata kuliah
+    async function editMataKuliah(id) {
+      const doc = await db.collection("mataKuliah").doc(id).get();
+      const data = doc.data();
+      document.getElementById('kode').value = data.kode;
+      document.getElementById('nama').value = data.nama;
+      document.getElementById('deskripsi').value = data.deskripsi;
+      document.getElementById('semester').value = data.semester;
+      // Menghapus mata kuliah setelah edit
+      hapusMataKuliah(id);
+    }
+
+    // Load mata kuliah saat halaman dimuat
+    loadMataKuliah();
+  </script>
+</body>
+</html>
