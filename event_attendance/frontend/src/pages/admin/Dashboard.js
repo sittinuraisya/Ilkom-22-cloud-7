@@ -1,15 +1,13 @@
 import { useState, useEffect } from 'react';
 import axios from '../../axiosInstance';
 import { toast } from 'react-toastify';
-import { useAuth } from '../../context/AuthContext';
 
 function AdminDashboard() {
-  const { user } = useAuth();
   const [stats, setStats] = useState({
-    totalEvents: 0,
     totalUsers: 0,
-    totalAttendees: 0,
-    recentEvents: []
+    totalEvents: 0,
+    activeEvents: 0,
+    registrationsToday: 0
   });
   const [loading, setLoading] = useState(true);
 
@@ -19,7 +17,7 @@ function AdminDashboard() {
         const res = await axios.get('/api/v1/admin/stats');
         setStats(res.data);
       } catch (err) {
-        toast.error('Failed to load dashboard data');
+        toast.error('Failed to load dashboard statistics');
       } finally {
         setLoading(false);
       }
@@ -32,38 +30,29 @@ function AdminDashboard() {
   return (
     <div className="admin-container">
       <h1>Admin Dashboard</h1>
-      <p>Welcome back, {user?.name}</p>
       
       <div className="stats-grid">
-        <div className="stat-card">
-          <h3>Total Events</h3>
-          <p>{stats.totalEvents}</p>
-        </div>
         <div className="stat-card">
           <h3>Total Users</h3>
           <p>{stats.totalUsers}</p>
         </div>
         <div className="stat-card">
-          <h3>Total Attendees</h3>
-          <p>{stats.totalAttendees}</p>
+          <h3>Total Events</h3>
+          <p>{stats.totalEvents}</p>
+        </div>
+        <div className="stat-card">
+          <h3>Active Events</h3>
+          <p>{stats.activeEvents}</p>
+        </div>
+        <div className="stat-card">
+          <h3>Registrations Today</h3>
+          <p>{stats.registrationsToday}</p>
         </div>
       </div>
 
-      <div className="recent-events">
-        <h2>Recent Events</h2>
-        {stats.recentEvents.length > 0 ? (
-          <ul>
-            {stats.recentEvents.map(event => (
-              <li key={event._id}>
-                <h4>{event.name}</h4>
-                <p>Date: {new Date(event.date).toLocaleDateString()}</p>
-                <p>Attendees: {event.attendeeCount}</p>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No recent events</p>
-        )}
+      <div className="recent-activity">
+        <h2>Recent Activity</h2>
+        {/* Activity log will be implemented here */}
       </div>
     </div>
   );

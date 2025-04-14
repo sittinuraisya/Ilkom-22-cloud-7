@@ -1,0 +1,36 @@
+<button onclick="tandaiFavorit('mataKuliahID')">Tandai Favorit</button>
+
+<script>
+  // Fungsi untuk menandai mata kuliah favorit
+  async function tandaiFavorit(id) {
+    const mataKuliahRef = db.collection("mataKuliah").doc(id);
+    await mataKuliahRef.update({
+      favorit: true // Menambahkan atau mengupdate field favorit
+    });
+
+    alert("Mata kuliah ini sudah ditandai sebagai favorit!");
+    loadMataKuliah(); // Muat ulang daftar mata kuliah
+  }
+
+  // Fungsi untuk menampilkan mata kuliah favorit
+  async function loadFavorit() {
+    const snapshot = await db.collection("mataKuliah").where("favorit", "==", true).get();
+    const list = document.getElementById('daftarMataKuliah');
+    list.innerHTML = ''; // Clear the list
+
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <strong>${data.kode}</strong> - ${data.nama} <br>
+        ${data.deskripsi} <br>
+        Semester: ${data.semester} <br>
+        Jadwal: ${data.jadwal.hari}, ${data.jadwal.jamMulai} - ${data.jadwal.jamSelesai} <br>
+        <button onclick="editMataKuliah('${doc.id}')">Edit</button>
+        <button onclick="hapusMataKuliah('${doc.id}')">Hapus</button>
+        <hr>
+      `;
+      list.appendChild(li);
+    });
+  }
+</script>
