@@ -106,7 +106,7 @@
             <ul class="pagination justify-content-center">
                 {% if cuti_list.has_prev %}
                 <li class="page-item">
-                    <a class="page-link" href="{{ url_for('manage_cuti_atasan', page=cuti_list.prev_num, search=request.args.get('search'), status=request.args.get('status')) }}">
+                    <a class="page-link" href="{{ url_for('manage_cuti', page=cuti_list.prev_num, search=request.args.get('search'), status=request.args.get('status')) }}">
                         &laquo;
                     </a>
                 </li>
@@ -115,7 +115,7 @@
                 {% for p in cuti_list.iter_pages() %}
                 {% if p %}
                 <li class="page-item {% if p == cuti_list.page %}active{% endif %}">
-                    <a class="page-link" href="{{ url_for('manage_cuti_atasan', page=p, search=request.args.get('search'), status=request.args.get('status')) }}">{{ p }}</a>
+                    <a class="page-link" href="{{ url_for('manage_cuti', page=p, search=request.args.get('search'), status=request.args.get('status')) }}">{{ p }}</a>
                 </li>
                 {% else %}
                 <li class="page-item disabled"><span class="page-link">…</span></li>
@@ -124,7 +124,7 @@
 
                 {% if cuti_list.has_next %}
                 <li class="page-item">
-                    <a class="page-link" href="{{ url_for('manage_cuti_atasan', page=cuti_list.next_num, search=request.args.get('search'), status=request.args.get('status')) }}">
+                    <a class="page-link" href="{{ url_for('manage_cuti', page=cuti_list.next_num, search=request.args.get('search'), status=request.args.get('status')) }}">
                         &raquo;
                     </a>
                 </li>
@@ -143,7 +143,7 @@
 <div class="modal fade" id="actionModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="POST" action="{{ url_for('manage_cuti_atasan') }}">
+            <form method="POST" action="{{ url_for('manage_cuti') }}">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalTitle">Konfirmasi</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
