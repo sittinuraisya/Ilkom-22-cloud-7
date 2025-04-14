@@ -1,0 +1,40 @@
+<h2>Penilaian Mata Kuliah</h2>
+<select id="rating">
+  <option value="1">1</option>
+  <option value="2">2</option>
+  <option value="3">3</option>
+  <option value="4">4</option>
+  <option value="5">5</option>
+</select>
+<button onclick="beriRating('mataKuliahID')">Berikan Rating</button>
+
+<script>
+  // Fungsi untuk memberikan rating pada mata kuliah
+  async function beriRating(id) {
+    const rating = document.getElementById('rating').value;
+    const mataKuliahRef = db.collection("mataKuliah").doc(id);
+    const doc = await mataKuliahRef.get();
+    const data = doc.data();
+
+    // Mengupdate rating
+    const ratings = data.ratings || [];
+    ratings.push(Number(rating));
+
+    await mataKuliahRef.update({
+      ratings
+    });
+
+    alert("Terima kasih telah memberikan rating!");
+    loadMataKuliah(); // Muat ulang daftar mata kuliah
+  }
+
+  // Fungsi untuk menampilkan rating rata-rata
+  async function tampilkanRating(id) {
+    const doc = await db.collection("mataKuliah").doc(id).get();
+    const data = doc.data();
+    const ratings = data.ratings || [];
+    const rataRata = ratings.length > 0 ? ratings.reduce((a, b) => a + b) / ratings.length : 0;
+
+    alert(`Rating Rata-rata: ${rataRata}`);
+  }
+</script>
