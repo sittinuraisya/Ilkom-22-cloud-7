@@ -6,6 +6,7 @@ from datetime import datetime, timedelta, date
 from flask import Flask, render_template, request, redirect, url_for, flash, session, make_response, jsonify, abort, current_app, g
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required, UserMixin
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import cast, String, text
 from flask_migrate import Migrate
 from flask_mail import Message, Mail
 
@@ -428,40 +429,41 @@ class GoogleCalendarService:
         service = build('calendar', 'v3', credentials=self.credentials)
         return service
 
-    def create_event(self, event_data):
-        """
-        Membuat event baru di Google Calendar.
-        """
-        try:
-            start_datetime = datetime.strptime(event_data['start_date'], '%Y-%m-%d').isoformat() + 'T09:00:00'
-            end_datetime = datetime.strptime(event_data['end_date'], '%Y-%m-%d').isoformat() + 'T17:00:00'
+def create_event(self, event_data):
+    """
+    Membuat event baru di Google Calendar.
+    """
+    try:
+        # Parse the start and end date, and set the time to the appropriate hour (09:00 for start, 17:00 for end)
+        start_datetime = datetime.strptime(event_data['start_date'], '%Y-%m-%d').replace(hour=9, minute=0, second=0)
+        end_datetime = datetime.strptime(event_data['end_date'], '%Y-%m-%d').replace(hour=17, minute=0, second=0)
 
-            event = {
-                'summary': f"{event_data['event_type']} - {event_data['user_name']}",
-                'description': event_data['event_description'],
-                'start': {
-                    'dateTime': start_datetime,
-                    'timeZone': 'Asia/Jakarta',
-                },
-                'end': {
-                    'dateTime': end_datetime,
-                    'timeZone': 'Asia/Jakarta',
-                },
-                'attendees': [
-                    {'email': event_data['user_email']},
-                ],
-                'reminders': {
-                    'useDefault': True,
-                },
-            }
+        event = {
+            'summary': f"{event_data['event_type']} - {event_data['user_name']}",
+            'description': event_data['event_description'],
+            'start': {
+                'dateTime': start_datetime.isoformat(),  # Automatically converted to the correct ISO format
+                'timeZone': 'Asia/Jakarta',
+            },
+            'end': {
+                'dateTime': end_datetime.isoformat(),  # Automatically converted to the correct ISO format
+                'timeZone': 'Asia/Jakarta',
+            },
+            'attendees': [
+                {'email': event_data['user_email']},
+            ],
+            'reminders': {
+                'useDefault': True,
+            },
+        }
 
-            created_event = self.service.events().insert(
-                calendarId='primary', body=event).execute()
+        created_event = self.service.events().insert(
+            calendarId='primary', body=event).execute()
 
-            return {'success': True, 'event': created_event}
-        except Exception as e:
-            print(f"Error creating Google Calendar event: {e}")
-            return {'success': False, 'error': str(e)}
+        return {'success': True, 'event': created_event}
+    except Exception as e:
+        print(f"Error creating Google Calendar event: {e}")
+        return {'success': False, 'error': str(e)}
 
     def list_events(self):
         """
@@ -1418,11 +1420,15 @@ def get_cuti_events():
 
     events = []
     for c in cuti:
+        # Periksa apakah tanggal_mulai dan tanggal_selesai bukan None
+        start_date = c.tanggal_mulai.isoformat() if c.tanggal_mulai else None
+        end_date = c.tanggal_selesai.isoformat() if c.tanggal_selesai else None
+
         events.append({
             'id': c.id,
             'title': c.jenis_cuti,
-            'start': c.tanggal_mulai.isoformat(),  # Formatkan tanggal menjadi string ISO
-            'end': c.tanggal_selesai.isoformat(),
+            'start': start_date,  # Formatkan tanggal menjadi string ISO, jika tidak None
+            'end': end_date,
             'color': '#28a745' if c.status == 'Approved' else '#ffc107' if c.status == 'Pending' else '#dc3545',
             'extendedProps': {
                 'status': c.status,
@@ -1431,8 +1437,7 @@ def get_cuti_events():
         })
 
     return jsonify(events)
-
-                
+              
 
 # ------------------------    Route Profil     ---------------------------
 
@@ -1690,37 +1695,77 @@ def notifications():
 # ------- ADMIN ROUTES -------------
 
 # Rute untuk dashboard admin
+from datetime import datetime
+from sqlalchemy.exc import SQLAlchemyError
+
 @app.route('/admin/dashboard')
 @login_required
 @role_required('admin')
 def admin_dashboard():
-    stats = {
-        'total_cuti': Cuti.query.count(),
-        'pending_cuti': Cuti.query.filter_by(status='Pending').count(),
-        'total_users': User.query.count()
-    }
+    try:
+        # Get basic statistics
+        stats = {
+            'total_cuti': Cuti.query.count(),
+            'pending_cuti': Cuti.query.filter_by(status='Pending').count(),
+            'total_users': User.query.count()
+        }
 
-    # Menampilkan cuti terbaru
-    latest_cuti = Cuti.query.join(User).add_columns(
-        Cuti.id, Cuti.jenis_cuti, Cuti.tanggal_mulai, Cuti.tanggal_selesai, Cuti.perihal_cuti,
-        Cuti.status, User.nip, User.username, User.jabatan
-    ).order_by(Cuti.created_at.desc()).limit(5).all()
+        # Get latest leave requests with safe date handling
+        latest_cuti_query = db.session.query(
+            Cuti.id,
+            Cuti.jenis_cuti,
+            db.func.strftime('%Y-%m-%d', Cuti.tanggal_mulai).label('tanggal_mulai'),
+            db.func.strftime('%Y-%m-%d', Cuti.tanggal_selesai).label('tanggal_selesai'),
+            Cuti.perihal_cuti,
+            Cuti.status,
+            User.nip,
+            User.username,
+            User.jabatan
+        ).join(User).order_by(Cuti.created_at.desc()).limit(5)
 
-    # Rekap cuti berdasarkan status
-    rekap_per_status = db.session.query(Cuti.status, db.func.count().label('jumlah')).group_by(Cuti.status).all()
+        # Execute query and format results
+        latest_cuti = []
+        for cuti in latest_cuti_query:
+            latest_cuti.append({
+                'id': cuti.id,
+                'jenis_cuti': cuti.jenis_cuti,
+                'tanggal_mulai': cuti.tanggal_mulai,
+                'tanggal_selesai': cuti.tanggal_selesai,
+                'perihal_cuti': cuti.perihal_cuti,
+                'status': cuti.status,
+                'nip': cuti.nip,
+                'username': cuti.username,
+                'jabatan': cuti.jabatan
+            })
 
-    # Rekap cuti per bulan
-    rekap_per_bulan = db.session.query(
-        db.func.strftime('%Y-%m', Cuti.created_at).label('bulan'),
-        db.func.count().label('jumlah')
-    ).group_by('bulan').order_by(text('bulan desc')).limit(6).all()
+        # Get leave statistics by status
+        rekap_per_status = db.session.query(
+            Cuti.status,
+            db.func.count().label('jumlah')
+        ).group_by(Cuti.status).all()
 
-    return render_template('admin/dashboard.html',
-                           stats=stats,
-                           latest_cuti=latest_cuti,
-                           rekap_per_status=rekap_per_status,
-                           rekap_per_bulan=rekap_per_bulan)
+        # Get monthly leave statistics with proper date formatting
+        rekap_per_bulan = db.session.query(
+            db.func.strftime('%Y-%m', Cuti.created_at).label('bulan'),
+            db.func.count().label('jumlah')
+        ).group_by('bulan').order_by(text('bulan desc')).limit(6).all()
 
+        return render_template('admin/dashboard.html',
+                            stats=stats,
+                            latest_cuti=latest_cuti,
+                            rekap_per_status=rekap_per_status,
+                            rekap_per_bulan=rekap_per_bulan)
+
+    except SQLAlchemyError as e:
+        current_app.logger.error(f"Database error in admin_dashboard: {str(e)}", exc_info=True)
+        return render_template('error.html', 
+                            error_message="Terjadi kesalahan database. Silakan coba lagi nanti."), 500
+
+    except Exception as e:
+        current_app.logger.error(f"Unexpected error in admin_dashboard: {str(e)}", exc_info=True)
+        return render_template('error.html',
+                            error_message="Terjadi kesalahan sistem. Tim kami telah diberitahu."), 500
+    
 # Rute untuk mengelola pengguna
 @app.route('/admin/manage-users')
 @login_required
@@ -1737,24 +1782,25 @@ def manage_users():
     total = query.count()
     total_pages = (total + per_page - 1) // per_page
 
-    users = query.order_by(User.username.asc()).paginate(page, per_page, False).items
+    users = query.order_by(User.username.asc()).paginate(
+        page=page,
+        per_page=per_page,
+        error_out=False
+    ).items
 
     return render_template('admin/manage_users.html', 
-                         users=users,
-                         search=search,
-                         page=page,
-                         total_pages=total_pages)
+                           users=users,
+                           search=search,
+                           page=page,
+                           total_pages=total_pages)
 
 # Rute untuk mengedit data pengguna
 @app.route('/admin/edit-user/<int:user_id>', methods=['GET', 'POST'])
 @login_required
-@role_required('admin')
+@role_required('admin')  # pastikan decorator role_required berfungsi
 def admin_edit_user(user_id):
-    user = User.query.get(user_id)
-
-    if not user:
-        flash('User tidak ditemukan', 'error')
-        return redirect(url_for('manage_users'))
+    user = User.query.get_or_404(user_id)
+    atasan_list = User.query.filter_by(role='atasan').all()
 
     if request.method == 'POST':
         nip = request.form.get('nip')
@@ -1766,6 +1812,16 @@ def admin_edit_user(user_id):
         golongan = request.form.get('golongan')
         atasan_id = request.form.get('atasan')
 
+        # Validasi unik email
+        if User.query.filter(User.email == email, User.id != user_id).first():
+            flash('Email sudah digunakan oleh pengguna lain.', 'error')
+            return redirect(url_for('admin_edit_user', user_id=user_id))
+
+        # Validasi unik username (opsional)
+        if User.query.filter(User.username == username, User.id != user_id).first():
+            flash('Username sudah digunakan oleh pengguna lain.', 'error')
+            return redirect(url_for('admin_edit_user', user_id=user_id))
+
         try:
             user.nip = nip
             user.username = username
@@ -1774,19 +1830,16 @@ def admin_edit_user(user_id):
             user.role = role
             user.jabatan = jabatan
             user.golongan = golongan
-            user.atasan_id = atasan_id
+            user.atasan_id = int(atasan_id) if atasan_id else None
 
             db.session.commit()
-            flash('Data user berhasil diperbarui', 'success')
+            flash('Data user berhasil diperbarui.', 'success')
+            return redirect(url_for('manage_users'))
+
         except Exception as e:
-            flash(f'Error: {str(e)}', 'error')
             db.session.rollback()
+            flash(f'Terjadi kesalahan saat memperbarui data: {str(e)}', 'error')
             return redirect(url_for('admin_edit_user', user_id=user_id))
-
-        return redirect(url_for('manage_users'))
-
-    # Get list of atasan
-    atasan_list = User.query.filter_by(role='atasan').all()
 
     return render_template('admin/edit_user.html', user=user, atasan_list=atasan_list)
 
@@ -1820,7 +1873,6 @@ def manual_verification():
     unverified_users = User.query.filter_by(email_verified=False).all()
     return render_template('admin/verifikasi.html', unverified_users=unverified_users)
 
-# Rute untuk menambah atasan
 @app.route('/admin/tambah-atasan', methods=['GET', 'POST'])
 @login_required
 @role_required('admin')
@@ -1828,35 +1880,34 @@ def tambah_atasan():
     if request.method == 'POST':
         name = request.form['name']
         email = request.form['email']
-        password = generate_password()  # Fungsi generate_password() harus dibuat untuk menghasilkan password acak
-        hashed = hash_password(password)  # Fungsi hash_password() untuk mengenkripsi password
+        password = request.form['password']
+        confirm_password = request.form['confirm_password']
+
+        if password != confirm_password:
+            flash("Password dan konfirmasi password tidak cocok.", "danger")
+            return redirect(url_for('tambah_atasan'))
+
+        hashed = hash_password(password)
         role = 'atasan'
         must_change_password = True
-        email_verified = True  # Pastikan email langsung aktif dan terverifikasi
+        email_verified = True
 
-        # Menambahkan user baru dengan role 'atasan'
         new_user = User(
             username=name,
             email=email,
             password=hashed,
             role=role,
             must_change_password=must_change_password,
-            email_verified=email_verified  # Menandai email sebagai terverifikasi
+            email_verified=email_verified
         )
         db.session.add(new_user)
         db.session.commit()
 
-        # Kirim email dengan password awal
-        send_email(
-            email, 
-            'Akun Anda telah dibuat',
-            f'Halo {name},\n\nAkun Anda sebagai Kepala Biro telah dibuat.\nEmail: {email}\nPassword: {password}\n\nSilakan login dan segera ubah password Anda.'
-        )
-
-        flash("Atasan berhasil ditambahkan dan diberi akses login.", "success")
-        return redirect(url_for('manage_users'))  # Arahkan ke halaman pengelolaan pengguna
+        flash("Atasan berhasil ditambahkan.", "success")
+        return redirect(url_for('manage_users'))
 
     return render_template('admin/tambah_atasan.html')
+
 
 #  ----------- ATASAN ROUTE -----------------
 
@@ -1891,45 +1942,59 @@ def atasan_dashboard():
 
 # Route untuk manajemen cuti
 @app.route('/atasan/manage-cuti', methods=['GET', 'POST'])
-@login_required  # Pastikan pengguna sudah login
-@role_required('atasan')  # Pastikan pengguna adalah atasan
+@login_required
+@role_required('atasan')
 def manage_cuti():
-    page = request.args.get('page', 1, type=int)
-    per_page = 10  # Items per page
-    search = request.args.get('search', '')
-    status_filter = request.args.get('status', 'all')
+    try:
+        page = request.args.get('page', 1, type=int)
+        per_page = 10
+        search = request.args.get('search', '')
+        status_filter = request.args.get('status', 'all')
 
-    current_user_id = current_user.id  # Ganti dengan current_user.id
-
-    # Base query
-    query = Cuti.query.join(User).filter(User.atasan_id == current_user_id)
-
-    # Filter status
-    if status_filter != 'all':
-        query = query.filter(Cuti.status == status_filter)
-
-    # Filter pencarian berdasarkan NIP atau username
-    if search:
-        query = query.filter(
-            (User.nip.like(f"%{search}%")) | 
-            (User.username.like(f"%{search}%"))
+        # Base query - explicitly join with User model using the correct foreign key
+        query = db.session.query(Cuti).join(
+            User, Cuti.user_id == User.id  # Explicit join condition
+        ).filter(
+            Cuti.atasan_id == current_user.id  # Only show cuti where current user is the atasan
+        ).options(
+            db.joinedload(Cuti.user),  # Eager load user relationship
+            db.joinedload(Cuti.atasan)  # Eager load atasan relationship
         )
 
-    # Hitung total data
-    total = query.count()
-    total_pages = (total + per_page - 1) // per_page
+        # Filter status
+        if status_filter != 'all':
+            query = query.filter(Cuti.status == status_filter)
 
-    # Terapkan pagination dan urutkan
-    cuti_list = query.order_by(Cuti.created_at.desc()).limit(per_page).offset((page - 1) * per_page).all()
+        # Search filter
+        if search:
+            query = query.filter(
+                (User.nip.ilike(f"%{search}%")) |  # Case-insensitive search
+                (User.username.ilike(f"%{search}%"))
+            )
 
-    return render_template('atasan/manage_cuti.html',
-                           cuti_list=cuti_list,
-                           search=search,
-                           status_filter=status_filter,
-                           page=page,
-                           total_pages=total_pages,
-                           total=total)
+        # Count total records
+        total = query.count()
+        total_pages = (total + per_page - 1) // per_page
 
+        # Apply pagination
+        cuti_list = query.order_by(
+            Cuti.created_at.desc()
+        ).limit(per_page).offset(
+            (page - 1) * per_page
+        ).all()
+
+        return render_template('atasan/manage_cuti.html',
+                            cuti_list=cuti_list,
+                            search=search,
+                            status_filter=status_filter,
+                            page=page,
+                            total_pages=total_pages,
+                            total=total)
+
+    except Exception as e:
+        current_app.logger.error(f"Error in manage_cuti: {str(e)}", exc_info=True)
+        return render_template('error.html',
+                            error_message="Terjadi kesalahan saat memuat data cuti"), 500
 # Route untuk menyetujui cuti
 @app.route('/atasan/approve-cuti/<int:cuti_id>')
 @login_required  # Pastikan pengguna sudah login
