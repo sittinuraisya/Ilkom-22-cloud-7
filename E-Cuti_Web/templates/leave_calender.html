@@ -1,0 +1,25 @@
+"""
+<h2>Kalender Cuti Pegawai</h2>
+<div id="calendar"></div>
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css' rel='stylesheet' />
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js'></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        events: [
+        {% for req in requests %}
+        {
+            title: '{{ req.user.username }}',
+            start: '{{ req.start_date }}',
+            end: '{{ req.end_date }}T23:59:59',
+            color: 'green'
+        }
+        {% endfor %}
+        ]
+    });
+    calendar.render();
+});
+</script>
+"""
