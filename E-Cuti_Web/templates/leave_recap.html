@@ -1,0 +1,22 @@
+"""
+<h2>Rekap Data Cuti</h2>
+<table border="1">
+    <tr>
+        <th>Nama</th>
+        <th>Tanggal Mulai</th>
+        <th>Tanggal Selesai</th>
+        <th>Status</th>
+        <th>Catatan</th>
+    </tr>
+    {% for req in requests %}
+    <tr>
+        <td>{{ req.user.username }}</td>
+        <td>{{ req.start_date }}</td>
+        <td>{{ req.end_date }}</td>
+        <td>{{ req.status }}</td>
+        <td>{{ req.note }}</td>
+    </tr>
+    {% endfor %}
+</table>
+<a href="{{ url_for('leave.leave_recap_pdf') }}">Download PDF</a>
+"""
