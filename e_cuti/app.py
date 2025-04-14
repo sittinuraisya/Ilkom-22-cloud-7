@@ -1,12 +1,24 @@
 # --- Built-in Modules ---
-import os, re, time, sqlite3, smtplib, traceback, secrets, string, csv
-from datetime import datetime, timedelta, date
+from sqlalchemy.exc import SQLAlchemyError
+from datetime import datetime
+from googleapiclient.discovery import build
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
+import os
+import re
+import time
+import sqlite3
+import smtplib
+import secrets
+import string
+import csv
+from datetime import datetime, timedelta
 
 # --- Flask Core & Extensions ---
-from flask import Flask, render_template, request, redirect, url_for, flash, session, make_response, jsonify, abort, current_app, g
-from flask_login import LoginManager, current_user, login_user, logout_user, login_required, UserMixin
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import cast, String, text
+from flask import Flask, render_template, request, redirect, url_for, flash, session, make_response, jsonify, abort, current_app
+from flask_login import LoginManager, current_user, login_user, logout_user, login_required
+from sqlalchemy import text
 from flask_migrate import Migrate
 from flask_mail import Message, Mail
 
@@ -20,7 +32,6 @@ from services.calendar_service import GoogleCalendarService
 from functools import wraps
 from itsdangerous import URLSafeTimedSerializer as Serializer
 from itsdangerous import URLSafeTimedSerializer
-from itsdangerous import BadSignature, SignatureExpired
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import HTTPException
@@ -32,10 +43,9 @@ import numpy as np
 import requests
 from dotenv import load_dotenv
 from email.mime.text import MIMEText
-from sqlalchemy import text 
+from sqlalchemy import text
 
 # --- Google APIs  ---
-from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
 
@@ -88,10 +98,12 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 email_service = EmailService()
 
+
 class Config:
     # Google Calendar
     GOOGLE_CALENDAR_CREDENTIALS = 'service-account.json'
     GOOGLE_CALENDAR_ID = 'primary'
+
 
 # --- PDF Config (gunakan di mana perlu) ---
 PDF_CONFIG = {
@@ -108,54 +120,13 @@ PDF_CONFIG = {
 if not app.config.get('GOOGLE_CLIENT_ID'):
     print("Warning: GOOGLE_CLIENT_ID is not set. Check your .env file.")
 
-# class User(UserMixin, db.Model):
-#     __tablename__ = 'users'
-#     __table_args__ = {'extend_existing': True}  # Add this line
-
-#     id = db.Column(db.Integer, primary_key=True)
-#     username = db.Column(db.String(100), nullable=False)
-#     password = db.Column(db.String(255), nullable=False)
-#     role = db.Column(db.String(50), nullable=False)
-#     email_verified = db.Column(db.Boolean, default=False)
-#     _is_active = db.Column(db.Boolean, default=True)
-
-#     @property
-#     def is_active(self):
-#         return self._is_active
-
-#     @is_active.setter
-#     def is_active(self, value):
-#         self._is_active = value
-
-#     @property
-#     def is_authenticated(self):
-#         return self.email_verified
-
-#     @property
-#     def is_anonymous(self):
-#         return False
-
-#     def get_id(self):
-#         return str(self.id)
-
-#     def verify_email(self):
-#         self.email_verified = True
-
-#     def deactivate(self):
-#         self.is_active = False
-
-#     def activate(self):
-#         self.is_active = True
-
-#     def __repr__(self):
-#         return f"<User {self.username}>"
-
 
 # --- Middleware dan Dekorator ---
 
 @login_manager.user_loader
 def load_user(user_id):
     return db.session.get(User, int(user_id))
+
 
 def role_required(role):
     def decorator(f):
@@ -170,6 +141,7 @@ def role_required(role):
         return decorated_function
     return decorator
 
+
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -178,6 +150,7 @@ def login_required(f):
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
+
 
 def admin_required(f):
     @wraps(f)
@@ -188,6 +161,7 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+
 def atasan_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -197,16 +171,20 @@ def atasan_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+
 def verified_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         # Gunakan SQLAlchemy untuk mendapatkan status email_verified
         user = User.query.get(current_user.id)
         if not user or not user.email_verified:
-            flash('Email Anda belum diverifikasi. Silakan cek email Anda.', 'warning')
+            flash(
+                'Email Anda belum diverifikasi. Silakan cek email Anda.',
+                'warning')
             return redirect(url_for('user_dashboard'))
         return f(*args, **kwargs)
     return decorated_function
+
 
 def redirect_to_dashboard(role, must_change_password=False):
     if role == 'superadmin':
@@ -223,26 +201,41 @@ def redirect_to_dashboard(role, must_change_password=False):
         flash('Peran tidak dikenali', 'error')
         return redirect(url_for('login'))
 
+
 def generate_password(length=10):
     alphabet = string.ascii_letters + string.digits
     return ''.join(secrets.choice(alphabet) for _ in range(length))
+
 
 def hash_password(password):
     return generate_password_hash(password)
 
 # --- Fungsi Utility ---
+
+
 def calculate_working_days(start_date, end_date):
     delta = end_date - start_date
-    working_days = sum(1 for i in range(delta.days + 1) if (start_date + timedelta(days=i)).weekday() < 5)
+    working_days = sum(
+        1 for i in range(
+            delta.days +
+            1) if (
+            start_date +
+            timedelta(
+                days=i)).weekday() < 5)
     return working_days
+
 
 def get_user_by_id(user_id):
     conn = sqlite3.connect('your_database.db')
     c = conn.cursor()
-    c.execute("SELECT id, username, password, role, email_verified FROM users WHERE id = ?", (user_id,))
+    c.execute(
+        "SELECT id, username, password, role, email_verified FROM users WHERE id = ?",
+        (user_id,
+         ))
     row = c.fetchone()
     conn.close()
     return User(*row) if row else None
+
 
 def send_verification_email(email, token):
     verification_url = url_for('verify_email', token=token, _external=True)
@@ -260,20 +253,24 @@ def send_verification_email(email, token):
     try:
         with smtplib.SMTP(app.config['MAIL_SERVER'], app.config['MAIL_PORT']) as server:
             server.starttls()
-            server.login(app.config['MAIL_USERNAME'], app.config['MAIL_PASSWORD'])
+            server.login(
+                app.config['MAIL_USERNAME'],
+                app.config['MAIL_PASSWORD'])
             server.send_message(msg)
         return True
     except Exception as e:
         print(f"Error sending email: {str(e)}")
         return False
 
+
 def send_password_reset_email(user_email):
-    token = serializer.dumps(user_email, salt=app.config['SECURITY_PASSWORD_SALT'])
+    token = serializer.dumps(user_email,
+                             salt=app.config['SECURITY_PASSWORD_SALT'])
     reset_url = url_for('reset_password_token', token=token, _external=True)
     msg = MIMEText(f"""
     Untuk reset password, klik link berikut:
     {reset_url}
-    
+
     Link ini berlaku selama 1 jam.
     Jika Anda tidak meminta reset password, abaikan email ini.
     """)
@@ -284,12 +281,15 @@ def send_password_reset_email(user_email):
     try:
         with smtplib.SMTP(app.config['MAIL_SERVER'], app.config['MAIL_PORT']) as server:
             server.starttls()
-            server.login(app.config['MAIL_USERNAME'], app.config['MAIL_PASSWORD'])
+            server.login(
+                app.config['MAIL_USERNAME'],
+                app.config['MAIL_PASSWORD'])
             server.send_message(msg)
         return True
     except Exception as e:
         app.logger.error(f"Error sending email: {str(e)}")
         return False
+
 
 def log_login_attempt(user_id, username, success):
     # Buat objek LoginLog baru
@@ -304,6 +304,7 @@ def log_login_attempt(user_id, username, success):
     db.session.add(login_log)
     db.session.commit()
 
+
 def validate_password(password):
     if len(password) < 8:
         return False
@@ -315,9 +316,11 @@ def validate_password(password):
         return False
     return True
 
+
 def is_valid_email(email):
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return re.match(pattern, email) is not None
+
 
 def format_date(value, format='%d-%m-%Y'):
     if value is None:
@@ -326,12 +329,13 @@ def format_date(value, format='%d-%m-%Y'):
         value = datetime.strptime(value, '%Y-%m-%d')
     return value.strftime(format)
 
+
 def get_cuti_by_id(cuti_id):
     cuti = Cuti.query.join(User).filter(Cuti.id == cuti_id).first()
 
     if not cuti:
         raise ValueError(f"Data cuti dengan ID {cuti_id} tidak ditemukan")
-    
+
     # Mengembalikan data cuti dalam bentuk dictionary
     return {
         'id': cuti.id,
@@ -350,6 +354,7 @@ def get_cuti_by_id(cuti_id):
         'updated_at': cuti.updated_at,
         'username': cuti.user.username  # Menambahkan username dari tabel users
     }
+
 
 def send_email(to, subject, html):
     api_key = current_app.config.get('MAILGUN_API_KEY')
@@ -371,23 +376,22 @@ def send_email(to, subject, html):
         }
     )
 
+
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {
+        'png', 'jpg', 'jpeg', 'gif'}
+
 
 # --- Pastikan Folder Upload Ada ---
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
 
-# --------------------------------      GOOGLE CALENDAR API      ---------------------------------
+# --------------------------------      GOOGLE CALENDAR API      ---------
 
-from google.auth.transport.requests import Request
-from google_auth_oauthlib.flow import Flow, InstalledAppFlow
-from google.oauth2.credentials import Credentials
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
 
 # --- SCOPES global untuk Google API ---
 SCOPES = ['https://www.googleapis.com/auth/calendar']
+
 
 class GoogleCalendarService:
     def __init__(self):
@@ -429,24 +433,30 @@ class GoogleCalendarService:
         service = build('calendar', 'v3', credentials=self.credentials)
         return service
 
+
 def create_event(self, event_data):
     """
     Membuat event baru di Google Calendar.
     """
     try:
-        # Parse the start and end date, and set the time to the appropriate hour (09:00 for start, 17:00 for end)
-        start_datetime = datetime.strptime(event_data['start_date'], '%Y-%m-%d').replace(hour=9, minute=0, second=0)
-        end_datetime = datetime.strptime(event_data['end_date'], '%Y-%m-%d').replace(hour=17, minute=0, second=0)
+        # Parse the start and end date, and set the time to the appropriate
+        # hour (09:00 for start, 17:00 for end)
+        start_datetime = datetime.strptime(
+            event_data['start_date'], '%Y-%m-%d').replace(hour=9, minute=0, second=0)
+        end_datetime = datetime.strptime(
+            event_data['end_date'], '%Y-%m-%d').replace(hour=17, minute=0, second=0)
 
         event = {
             'summary': f"{event_data['event_type']} - {event_data['user_name']}",
             'description': event_data['event_description'],
             'start': {
-                'dateTime': start_datetime.isoformat(),  # Automatically converted to the correct ISO format
+                # Automatically converted to the correct ISO format
+                'dateTime': start_datetime.isoformat(),
                 'timeZone': 'Asia/Jakarta',
             },
             'end': {
-                'dateTime': end_datetime.isoformat(),  # Automatically converted to the correct ISO format
+                # Automatically converted to the correct ISO format
+                'dateTime': end_datetime.isoformat(),
                 'timeZone': 'Asia/Jakarta',
             },
             'attendees': [
@@ -483,16 +493,20 @@ def create_event(self, event_data):
             return {'success': False, 'error': str(e)}
 
 # Endpoint untuk callback autentikasi
+
+
 @app.route('/google_callback')
 def google_callback():
     try:
-        calendar_service = GoogleCalendarService()
+        GoogleCalendarService()
         flash('Autentikasi Google Calendar berhasil!', 'success')
     except Exception as e:
         flash(f'Gagal autentikasi: {str(e)}', 'error')
     return redirect(url_for('dashboard'))
 
 # Endpoint untuk menyinkronkan event ke Google Calendar
+
+
 @app.route('/sync-calendar', methods=['POST'])
 def sync_calendar_event():
     # Ambil data dari form
@@ -518,23 +532,32 @@ def sync_calendar_event():
         else:
             flash('Gagal menyinkronkan dengan Google Calendar', 'error')
             return redirect(url_for('cuti.create'))
-    
+
     except Exception as e:
         flash(f'Gagal menyinkronkan dengan Google Calendar: {str(e)}', 'error')
         return redirect(url_for('cuti.create'))
 
 # Endpoint untuk menampilkan kalender
+
+
 @app.route('/kalender-cuti', endpoint='kalender_cuti_view')
 @login_required
 def kalender_cuti():
     # Ambil data cuti berdasarkan role pengguna
     if current_user.role == 'admin':
         cuti_data = Cuti.query.join(User).add_columns(
-            User.username, User.nip, User.jabatan, Cuti.jenis_cuti, Cuti.tanggal_mulai, 
-            Cuti.tanggal_selesai, Cuti.status
-        ).order_by(Cuti.tanggal_mulai).all()
+            User.username,
+            User.nip,
+            User.jabatan,
+            Cuti.jenis_cuti,
+            Cuti.tanggal_mulai,
+            Cuti.tanggal_selesai,
+            Cuti.status).order_by(
+            Cuti.tanggal_mulai).all()
     else:
-        cuti_data = Cuti.query.filter(Cuti.user_id == current_user.id).order_by(Cuti.tanggal_mulai).all()
+        cuti_data = Cuti.query.filter(
+            Cuti.user_id == current_user.id).order_by(
+            Cuti.tanggal_mulai).all()
 
     # Ambil event dari Google Calendar
     calendar_service = GoogleCalendarService()
@@ -575,7 +598,7 @@ def kalender_cuti():
 @app.route('/callback')
 def callback():
     try:
-        calendar = GoogleCalendarService()
+        GoogleCalendarService()
         flash('Autentikasi Google Calendar berhasil!', 'success')
     except Exception as e:
         flash(f'Gagal autentikasi: {str(e)}', 'error')
@@ -612,7 +635,7 @@ def sync_calendar():
 @app.route('/test-calendar')
 def test_calendar():
     calendar_service = GoogleCalendarService()
-    creds = calendar_service.get_credentials()
+    calendar_service.get_credentials()
     events = calendar_service.list_events()
     events_display = "<br>".join(events)
     return f"Berhasil mendapatkan kredensial!<br><br>Acara Kalender:<br>{events_display}"
@@ -632,8 +655,10 @@ def kalender_cuti():
 
     service = GoogleCalendarService().service
     google_events = service.events().list(
-        calendarId='primary', maxResults=10, singleEvents=True, orderBy='startTime'
-    ).execute()
+        calendarId='primary',
+        maxResults=10,
+        singleEvents=True,
+        orderBy='startTime').execute()
     google_event_list = google_events.get('items', [])
 
     events = []
@@ -667,6 +692,8 @@ def kalender_cuti():
     return render_template('kalender_cuti.html', events=events)
 
 # --- Routes ---
+
+
 @app.route('/')
 def index():
     if 'user_id' in session:
@@ -675,6 +702,7 @@ def index():
         return redirect(url_for('dashboard'))
     return redirect(url_for('login'))
     return render_template('index.html')
+
 
 @app.context_processor
 def inject_system_info():
@@ -685,6 +713,7 @@ def inject_system_info():
     }
 
 #  ---------------------   AUTENTIKASI   --------------------------------
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -715,7 +744,7 @@ def login():
                 return redirect(url_for('login'))
 
             # Cek apakah email sudah diverifikasi
-            if user.email_verified == False:
+            if not user.email_verified:
                 flash('Email belum diverifikasi.', 'warning')
                 return redirect(url_for('login'))
 
@@ -746,6 +775,8 @@ def login():
     return render_template('auth/login.html')
 
 # Untuk logout
+
+
 @app.route('/logout')
 @login_required
 def logout():
@@ -754,6 +785,8 @@ def logout():
     return redirect(url_for('login'))
 
 # Rute untuk registrasi pengguna
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -795,14 +828,20 @@ def register():
 
             # Verifikasi email berdasarkan environment
             if app.config['ENV'] == 'development':
-                flash('Registrasi berhasil! (Development mode - verifikasi email dilewati)', 'success')
+                flash(
+                    'Registrasi berhasil! (Development mode - verifikasi email dilewati)',
+                    'success')
             else:
                 try:
                     send_verification_email(email)
-                    flash('Registrasi berhasil! Silakan cek email untuk verifikasi', 'success')
+                    flash(
+                        'Registrasi berhasil! Silakan cek email untuk verifikasi',
+                        'success')
                 except Exception as e:
                     print(f"Error sending verification email: {e}")
-                    flash('Registrasi berhasil tetapi gagal mengirim email verifikasi. Silakan hubungi admin.', 'warning')
+                    flash(
+                        'Registrasi berhasil tetapi gagal mengirim email verifikasi. Silakan hubungi admin.',
+                        'warning')
 
             # Login user setelah registrasi berhasil
             login_user(new_user)
@@ -816,11 +855,15 @@ def register():
 
     return render_template('auth/register.html')
 
+
 @app.route('/verify-email/<token>')
 def verify_email(token):
     try:
         # Mendekodekan token untuk mendapatkan email
-        email = serializer.loads(token, salt='email-verification', max_age=86400)  # 24 jam
+        email = serializer.loads(
+            token,
+            salt='email-verification',
+            max_age=86400)  # 24 jam
 
         # Mencari user berdasarkan email
         user = User.query.filter_by(email=email).first()
@@ -834,7 +877,8 @@ def verify_email(token):
             # Mengirimkan pesan sukses
             flash('Email berhasil diverifikasi! Silakan login.', 'success')
 
-            # Jika login otomatis diinginkan setelah verifikasi, aktifkan berikut:
+            # Jika login otomatis diinginkan setelah verifikasi, aktifkan
+            # berikut:
             login_user(user)
         else:
             flash('Link verifikasi tidak valid.', 'error')
@@ -845,6 +889,7 @@ def verify_email(token):
 
     return redirect(url_for('login'))
 
+
 @app.route('/send-email', methods=['POST'])
 def send_email_api():
     data = request.get_json()
@@ -854,6 +899,7 @@ def send_email_api():
         template=render_template('emails/notification.html', type=data['type'])
     )
     return jsonify(success=success)
+
 
 @app.route('/lupa-password', methods=['GET', 'POST'])
 def lupa_password():
@@ -869,7 +915,9 @@ def lupa_password():
 
             # Kirim email reset password
             if send_password_reset_email(user.email, token):
-                flash('Link reset password telah dikirim ke email Anda', 'success')
+                flash(
+                    'Link reset password telah dikirim ke email Anda',
+                    'success')
             else:
                 flash('Gagal mengirim email reset password', 'error')
         else:
@@ -879,9 +927,11 @@ def lupa_password():
 
     return render_template('auth/lupa_password.html')
 
+
 def generate_reset_token(email):
     serializer = Serializer(app.config['SECRET_KEY'])
     return serializer.dumps(email, salt='reset-password')
+
 
 def send_password_reset_email(email, token):
     # Ganti dengan logika pengiriman email, misalnya menggunakan Flask-Mail
@@ -897,6 +947,7 @@ def send_password_reset_email(email, token):
         print(f'Error sending email: {e}')
         return False
 
+
 @app.route('/reset-password/<token>', methods=['GET', 'POST'])
 def reset_password_token(token):
     try:
@@ -906,7 +957,7 @@ def reset_password_token(token):
             salt=app.config['SECURITY_PASSWORD_SALT'],
             max_age=3600  # Token expired after 1 hour
         )
-    except:
+    except BaseException:
         flash('Link reset password tidak valid atau sudah kadaluarsa', 'error')
         return redirect(url_for('login'))
 
@@ -922,14 +973,16 @@ def reset_password_token(token):
 
         # Meng-hash password dan update di database menggunakan SQLAlchemy
         hashed_password = generate_password_hash(password)
-        
+
         # Menemukan pengguna berdasarkan email
         user = User.query.filter_by(email=email).first()
-        
+
         if user:
             user.password = hashed_password
             db.session.commit()  # Menyimpan perubahan ke database
-            flash('Password berhasil direset. Silakan login dengan password baru.', 'success')
+            flash(
+                'Password berhasil direset. Silakan login dengan password baru.',
+                'success')
             return redirect(url_for('login'))
         else:
             flash('Pengguna tidak ditemukan.', 'error')
@@ -937,13 +990,14 @@ def reset_password_token(token):
 
     return render_template('auth/reset_password.html', token=token)
 
+
 @app.route('/resend-verification', methods=['POST'])
 def resend_verification():
     email = request.form.get('email')
-    
+
     # Menggunakan SQLAlchemy untuk mengambil user berdasarkan email
     user = User.query.filter_by(email=email).first()
-    
+
     if not user:
         flash('Email tidak terdaftar', 'error')
     elif user.email_verified:
@@ -951,14 +1005,17 @@ def resend_verification():
     else:
         try:
             # Gunakan token yang sudah ada atau buat token baru jika tidak ada
-            token = user.verification_token or serializer.dumps(email, salt='email-verification')
+            token = user.verification_token or serializer.dumps(
+                email, salt='email-verification')
             send_verification_email(email, token)
             flash('Email verifikasi telah dikirim ulang', 'success')
         except Exception as e:
             print(f"Gagal mengirim ulang: {str(e)}")
             flash('Gagal mengirim email. Hubungi admin.', 'error')
-    
+
 # --- User Routes ---
+
+
 @app.route('/dashboard')
 @login_required
 def dashboard():
@@ -968,20 +1025,35 @@ def dashboard():
     # Pastikan user ditemukan dan total_cuti ada (default 12 jika None)
     total_cuti = user.total_cuti if user.total_cuti is not None else 12
 
-    # Mengambil jumlah cuti yang disetujui di tahun berjalan menggunakan SQLAlchemy
-    cuti_disetujui = db.session.query(db.func.sum(Cuti.jumlah_hari)) \
-        .filter(Cuti.user_id == current_user.id, Cuti.status == 'Approved') \
-        .filter(db.func.strftime('%Y', Cuti.tanggal_mulai) == db.func.strftime('%Y', db.func.current_timestamp())) \
-        .scalar() or 0  # Jika None, set ke 0
+    # Mengambil jumlah cuti yang disetujui di tahun berjalan menggunakan
+    # SQLAlchemy
+    cuti_disetujui = db.session.query(
+        db.func.sum(
+            Cuti.jumlah_hari)) .filter(
+        Cuti.user_id == current_user.id,
+        Cuti.status == 'Approved') .filter(
+                db.func.strftime(
+                    '%Y',
+                    Cuti.tanggal_mulai) == db.func.strftime(
+                        '%Y',
+                    db.func.current_timestamp())) .scalar() or 0  # Jika None, set ke 0
 
-    # Mengambil jumlah cuti yang ditolak di tahun berjalan menggunakan SQLAlchemy
-    cuti_ditolak = db.session.query(db.func.sum(Cuti.jumlah_hari)) \
-        .filter(Cuti.user_id == current_user.id, Cuti.status == 'Rejected') \
-        .filter(db.func.strftime('%Y', Cuti.tanggal_mulai) == db.func.strftime('%Y', db.func.current_timestamp())) \
-        .scalar() or 0  # Jika None, set ke 0
+    # Mengambil jumlah cuti yang ditolak di tahun berjalan menggunakan
+    # SQLAlchemy
+    cuti_ditolak = db.session.query(
+        db.func.sum(
+            Cuti.jumlah_hari)) .filter(
+        Cuti.user_id == current_user.id,
+        Cuti.status == 'Rejected') .filter(
+                db.func.strftime(
+                    '%Y',
+                    Cuti.tanggal_mulai) == db.func.strftime(
+                        '%Y',
+                    db.func.current_timestamp())) .scalar() or 0  # Jika None, set ke 0
 
     # Menghitung sisa cuti
-    sisa_cuti = total_cuti - cuti_disetujui  # Menghindari masalah jika cuti_disetujui None
+    # Menghindari masalah jika cuti_disetujui None
+    sisa_cuti = total_cuti - cuti_disetujui
 
     # Mengambil 5 cuti terakhir
     cuti_terakhir = Cuti.query.filter(Cuti.user_id == current_user.id) \
@@ -994,24 +1066,19 @@ def dashboard():
         'tahunan': {
             'max_hari': 12,
             'persyaratan': 'Minimal bekerja 1 tahun',
-            'keterangan': f"Kuota tahunan: {total_cuti} hari (Tersisa: {sisa_cuti} hari)"
-        },
+            'keterangan': f"Kuota tahunan: {total_cuti} hari (Tersisa: {sisa_cuti} hari)"},
         'sakit': {
             'max_hari': 14,
             'persyaratan': 'Wajib lampirkan surat dokter',
-            'keterangan': 'Lebih dari 3 hari butuh persetujuan atasan'
-        },
+            'keterangan': 'Lebih dari 3 hari butuh persetujuan atasan'},
         'melahirkan': {
             'max_hari': 90,
             'persyaratan': 'Untuk karyawan wanita',
-            'keterangan': 'Wajib surat dokter kandungan'
-        },
+            'keterangan': 'Wajib surat dokter kandungan'},
         'penting': {
             'max_hari': 30,
             'persyaratan': 'Untuk keperluan mendesak',
-            'keterangan': 'Maksimal 5 hari berturut-turut'
-        }
-    }
+            'keterangan': 'Maksimal 5 hari berturut-turut'}}
 
     return render_template('user/dashboard.html',
                            user=user,
@@ -1021,16 +1088,18 @@ def dashboard():
                            cuti_ditolak=cuti_ditolak,
                            cuti_terakhir=cuti_terakhir)
 
+
 @app.template_filter('format_date')
 def format_date(value, format='%d-%m-%Y'):
     try:
         if isinstance(value, str):
             value = datetime.strptime(value, '%Y-%m-%d')
         return value.strftime(format)
-    except:
-        return value  
+    except BaseException:
+        return value
 
 #  --------------------  PERCUTIAN  ----------------------
+
 
 @app.route('/ajukan-cuti', methods=['GET', 'POST'])
 @login_required
@@ -1044,14 +1113,18 @@ def ajukan_cuti():
             perihal_cuti = request.form.get('perihal_cuti')
 
             # Validasi field wajib
-            if not all([jenis_cuti, tanggal_mulai, tanggal_selesai, perihal_cuti]):
+            if not all([jenis_cuti, tanggal_mulai,
+                       tanggal_selesai, perihal_cuti]):
                 missing_fields = [k for k, v in {
                     'jenis_cuti': jenis_cuti,
                     'tanggal_mulai': tanggal_mulai,
                     'tanggal_selesai': tanggal_selesai,
                     'perihal_cuti': perihal_cuti
                 }.items() if not v]
-                flash(f'Field wajib diisi: {", ".join(missing_fields)}', 'error')
+                flash(
+                    f'Field wajib diisi: {
+                        ", ".join(missing_fields)}',
+                    'error')
                 return redirect(url_for('ajukan_cuti'))
 
             # Validasi tanggal
@@ -1073,10 +1146,17 @@ def ajukan_cuti():
             # Hitung hari kerja
             try:
                 # Pastikan menggunakan format date
-                jumlah_hari = int(np.busday_count(start_date.date(), (end_date + timedelta(days=1)).date()))
+                jumlah_hari = int(
+                    np.busday_count(
+                        start_date.date(),
+                        (end_date +
+                         timedelta(
+                             days=1)).date()))
             except Exception as e:
                 flash('Gagal menghitung hari kerja', 'error')
-                current_app.logger.error(f'Business day calculation error: {str(e)}')
+                current_app.logger.error(
+                    f'Business day calculation error: {
+                        str(e)}')
                 return redirect(url_for('ajukan_cuti'))
 
             if jumlah_hari <= 0:
@@ -1088,11 +1168,15 @@ def ajukan_cuti():
             lampiran = request.files.get('lampiran')
             if lampiran and lampiran.filename:
                 if not allowed_file(lampiran.filename):
-                    flash('Format file tidak didukung. Gunakan PDF, JPG, atau PNG', 'error')
+                    flash(
+                        'Format file tidak didukung. Gunakan PDF, JPG, atau PNG',
+                        'error')
                     return redirect(url_for('ajukan_cuti'))
 
-                filename = secure_filename(f"cuti_{current_user.id}_{int(time.time())}_{lampiran.filename}")
-                lampiran_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                filename = secure_filename(
+                    f"cuti_{current_user.id}_{int(time.time())}_{lampiran.filename}")
+                lampiran_path = os.path.join(
+                    app.config['UPLOAD_FOLDER'], filename)
 
                 try:
                     lampiran.save(lampiran_path)
@@ -1131,10 +1215,12 @@ def ajukan_cuti():
                         })
 
                         if event_result.get('success'):
-                            new_cuti.calendar_event = event_result.get('event_link')
+                            new_cuti.calendar_event = event_result.get(
+                                'event_link')
                             db.session.commit()
                     except Exception as e:
-                        current_app.logger.error(f'Google Calendar error: {str(e)}')
+                        current_app.logger.error(
+                            f'Google Calendar error: {str(e)}')
 
                 # Kirim notifikasi ke Slack
                 slack_webhook = current_app.config.get('SLACK_WEBHOOK_URL')
@@ -1144,28 +1230,29 @@ def ajukan_cuti():
                             "text": f"Pengajuan Cuti Baru - {current_user.username}",
                             "blocks": [
                                 {"type": "section", "text": {"type": "mrkdwn",
-                                    "text": f"*{current_user.username}* mengajukan cuti *{jenis_cuti}*"}},
+                                                             "text": f"*{current_user.username}* mengajukan cuti *{jenis_cuti}*"}},
                                 {"type": "section", "fields": [
                                     {"type": "mrkdwn", "text": f"*Periode:*\n{start_date.strftime('%d %b %Y')} - {end_date.strftime('%d %b %Y')}"},
                                     {"type": "mrkdwn", "text": f"*Durasi:*\n{jumlah_hari} hari kerja"}
                                 ]}
                             ]
                         }
-                        requests.post(slack_webhook, json=slack_data, timeout=5)
+                        requests.post(
+                            slack_webhook, json=slack_data, timeout=5)
                     except Exception as e:
                         current_app.logger.error(f'Slack error: {str(e)}')
 
                 # Kirim notifikasi email via Mailgun
                 try:
-                    html_content = render_template('email_cuti.html',
+                    html_content = render_template(
+                        'email_cuti.html',
                         nama=current_user.username,
                         email=current_user.email,
                         jenis_cuti=jenis_cuti,
                         tanggal_mulai=start_date.strftime('%d %B %Y'),
                         tanggal_selesai=end_date.strftime('%d %B %Y'),
                         jumlah_hari=jumlah_hari,
-                        perihal=perihal_cuti
-                    )
+                        perihal=perihal_cuti)
 
                     send_email(
                         to=current_user.email,
@@ -1192,12 +1279,17 @@ def ajukan_cuti():
     today = datetime.now().strftime('%Y-%m-%d')
     max_date = (datetime.now() + timedelta(days=365)).strftime('%Y-%m-%d')
 
-    return render_template('user/ajukan_cuti.html',
+    return render_template(
+        'user/ajukan_cuti.html',
         min_date=today,
         max_date=max_date,
-        jenis_cuti_options=['Tahunan', 'Sakit', 'Melahirkan', 'Penting'],
-        form_data=request.form if request.method == 'POST' else None
-    )
+        jenis_cuti_options=[
+            'Tahunan',
+            'Sakit',
+            'Melahirkan',
+            'Penting'],
+        form_data=request.form if request.method == 'POST' else None)
+
 
 @app.route('/batalkan-cuti/<int:cuti_id>', methods=['POST'])
 @login_required
@@ -1220,6 +1312,7 @@ def batalkan_cuti(cuti_id):
     flash('Cuti berhasil dibatalkan', 'success')
     return redirect(url_for('status_cuti'))
 
+
 @app.route('/status_cuti')
 @login_required
 def status_cuti():
@@ -1229,21 +1322,29 @@ def status_cuti():
 
     if current_user.role == 'admin':
         # Query cuti semua user, gabung dengan user info
-        query = db.session.query(Cuti, User).join(User, Cuti.user_id == User.id)
-        total = query.count()
-        results = query.order_by(Cuti.created_at.desc()).paginate(page=page, per_page=per_page)
-        
+        query = db.session.query(
+            Cuti, User).join(
+            User, Cuti.user_id == User.id)
+        query.count()
+        results = query.order_by(
+            Cuti.created_at.desc()).paginate(
+            page=page,
+            per_page=per_page)
+
         cuti_list = [{
             'cuti': cuti,
             'username': user.username,
             'nip': user.nip
         } for cuti, user in results.items]
-    
+
     else:
         # Query cuti milik user login
         query = Cuti.query.filter_by(user_id=current_user.id)
-        total = query.count()
-        results = query.order_by(Cuti.created_at.desc()).paginate(page=page, per_page=per_page)
+        query.count()
+        results = query.order_by(
+            Cuti.created_at.desc()).paginate(
+            page=page,
+            per_page=per_page)
 
         cuti_list = [{
             'cuti': cuti,
@@ -1260,6 +1361,7 @@ def status_cuti():
         total_pages=total_pages,
         per_page=per_page
     )
+
 
 @app.route('/hapus-cuti/<int:cuti_id>', methods=['POST'])
 @login_required
@@ -1285,12 +1387,14 @@ def hapus_cuti(cuti_id):
     flash('Pengajuan cuti berhasil dihapus', 'success')
     return redirect(url_for('status_cuti'))
 
+
 @app.route('/cetak-surat/<int:cuti_id>')
 @login_required
 def cetak_surat(cuti_id):
     # Ambil data cuti berdasarkan role
     if current_user.role == 'admin':
-        cuti = db.session.query(Cuti).join(User).filter(Cuti.id == cuti_id).first()
+        cuti = db.session.query(Cuti).join(
+            User).filter(Cuti.id == cuti_id).first()
     else:
         cuti = db.session.query(Cuti).join(User).filter(
             Cuti.id == cuti_id,
@@ -1310,7 +1414,7 @@ def cetak_surat(cuti_id):
 
     try:
         tgl = datetime.strptime(cuti.tanggal_mulai, '%Y-%m-%d').date()
-    except:
+    except BaseException:
         tgl = datetime.today().date()
 
     tanggal_format = f"{tgl.day} {bulan[tgl.month]} {tgl.year}"
@@ -1318,10 +1422,16 @@ def cetak_surat(cuti_id):
 
     # Pilih template berdasarkan role
     template = 'admin/cetak_surat.html' if current_user.role == 'admin' else 'user/cetak_surat.html'
-    
-    return render_template(template, cuti=cuti, tanggal_format=tanggal_format, tahun=tahun)
+
+    return render_template(
+        template,
+        cuti=cuti,
+        tanggal_format=tanggal_format,
+        tahun=tahun)
 
 # Rute untuk cetak surat cuti dalam format PDF
+
+
 @app.route('/cetak-surat/<int:cuti_id>/pdf')
 @login_required
 def cetak_pdf(cuti_id):
@@ -1387,7 +1497,9 @@ def cetak_pdf(cuti_id):
             )
         except OSError as e:
             app.logger.error(f'Gagal membuat PDF: {e}')
-            flash('Aplikasi wkhtmltopdf tidak ditemukan atau gagal digunakan.', 'error')
+            flash(
+                'Aplikasi wkhtmltopdf tidak ditemukan atau gagal digunakan.',
+                'error')
             return redirect(url_for('status_cuti'))
 
         # Kirim PDF ke browser
@@ -1402,12 +1514,13 @@ def cetak_pdf(cuti_id):
         app.logger.error(f'Unexpected error: {e}', exc_info=True)
         flash('Terjadi kesalahan sistem yang tidak terduga.', 'error')
         return redirect(url_for('status_cuti'))
-        
+
+
 @app.route('/get_cuti_events')
 @login_required
 def get_cuti_events():
     user_id = request.args.get('user_id')
-    
+
     # Cek apakah pengguna adalah admin
     if current_user.role == 'admin':
         cuti = Cuti.query.all()  # Ambil semua data cuti jika role = admin
@@ -1437,7 +1550,7 @@ def get_cuti_events():
         })
 
     return jsonify(events)
-              
+
 
 # ------------------------    Route Profil     ---------------------------
 
@@ -1445,19 +1558,21 @@ def get_cuti_events():
 @login_required
 def profil():
     user = User.query.get(current_user.id)
-    
+
     if not user:
         flash('Data pengguna tidak ditemukan', 'error')
         return redirect(url_for('dashboard'))
-    
+
     # Format tanggal_lahir dan jenis_kelamin dalam template
-    tanggal_lahir_formatted = user.tanggal_lahir.strftime('%d/%m/%Y') if user.tanggal_lahir else ''
+    tanggal_lahir_formatted = user.tanggal_lahir.strftime(
+        '%d/%m/%Y') if user.tanggal_lahir else ''
     jenis_kelamin_label = 'Laki-laki' if user.jenis_kelamin == 'L' else 'Perempuan'
 
-    return render_template('user/profil.html', user=user, 
+    return render_template('user/profil.html', user=user,
                            tanggal_lahir_formatted=tanggal_lahir_formatted,
                            jenis_kelamin_label=jenis_kelamin_label)
-    
+
+
 @app.route('/edit-profil', methods=['GET', 'POST'])
 @login_required
 def edit_profil():
@@ -1471,7 +1586,7 @@ def edit_profil():
         jenis_kelamin = request.form.get('jenis_kelamin')
         golongan = request.form.get('golongan')
         jabatan = request.form.get('jabatan')
-        
+
         try:
             # Update user data using SQLAlchemy
             user.email = email
@@ -1481,16 +1596,17 @@ def edit_profil():
             user.jenis_kelamin = jenis_kelamin
             user.golongan = golongan
             user.jabatan = jabatan
-            
+
             db.session.commit()  # Save changes to the database
-            
+
             flash('Profil berhasil diperbarui', 'success')
             return redirect(url_for('profil'))  # Redirect to the profil page
         except Exception as e:
             flash('Terjadi kesalahan saat memperbarui profil', 'error')
             db.session.rollback()
-    
+
     return render_template("user/edit_profil.html", user=user)
+
 
 @app.route('/upload-foto-profil', methods=['POST'])
 @login_required
@@ -1500,7 +1616,7 @@ def upload_foto_profil():
         return redirect(url_for('profil'))
 
     file = request.files['foto_profil']
-    
+
     if file.filename == '':
         flash('Tidak ada file yang dipilih', 'error')
         return redirect(url_for('profil'))
@@ -1508,11 +1624,12 @@ def upload_foto_profil():
     if file and allowed_file(file.filename):
         # Membuat nama file yang aman
         filename = secure_filename(f"user_{current_user.id}_{file.filename}")
-        
+
         # Tentukan path folder untuk menyimpan foto profil
         folder_path = os.path.join(app.config['UPLOAD_FOLDER'], 'profile')
-        os.makedirs(folder_path, exist_ok=True)  # Membuat folder jika belum ada
-        
+        # Membuat folder jika belum ada
+        os.makedirs(folder_path, exist_ok=True)
+
         # Simpan file ke folder 'static/uploads/profile/'
         filepath = os.path.join(folder_path, filename)
         file.save(filepath)
@@ -1532,14 +1649,17 @@ def upload_foto_profil():
 
 # --- Admin Routes ---
 # API Routes
+
+
 @app.route('/api/calendar/sync-all', methods=['POST'])
 @login_required
 @admin_required
 def sync_all_calendar():
     try:
         # Mengambil semua cuti yang sudah disetujui
-        pending_cuti = Cuti.query.join(User).filter(Cuti.status == 'Approved').all()
-        
+        pending_cuti = Cuti.query.join(User).filter(
+            Cuti.status == 'Approved').all()
+
         synced = 0
         for cuti in pending_cuti:
             event = {
@@ -1561,6 +1681,7 @@ def sync_all_calendar():
             'error': str(e)
         }), 500
 
+
 @app.route('/api/email/reminder', methods=['POST'])
 @admin_required
 def send_reminder_email():
@@ -1568,23 +1689,25 @@ def send_reminder_email():
         data = request.get_json()
         to_email = data['email']
         subject = "Reminder Cuti"
-        
+
         # Menggunakan template HTML untuk email reminder
         body = render_template('emails/reminder.html', user_email=to_email)
 
         # Pastikan email_service sudah terintegrasi dengan benar
         email_service.send(to=to_email, subject=subject, body=body)
-        
+
         return jsonify({'status': 'success'})
     except Exception as e:
         return jsonify({
             'status': 'error',
             'error': str(e)
-        }), 500        
-        
+        }), 500
+
 # -------- SUPERADMIN ROUTES ---------------
 
 # Rute untuk dashboard superadmin
+
+
 @app.route('/superadmin/dashboard')
 @role_required('superadmin')
 @login_required
@@ -1593,11 +1716,12 @@ def superadmin_dashboard():
     total_atasan = User.query.filter_by(role='atasan').count()
     total_pegawai = User.query.filter_by(role='pegawai').count()
     users = User.query.all()
-    return render_template('superadmin/dashboard.html', 
-                           total_admin=total_admin, 
-                           total_atasan=total_atasan, 
-                           total_pegawai=total_pegawai, 
+    return render_template('superadmin/dashboard.html',
+                           total_admin=total_admin,
+                           total_atasan=total_atasan,
+                           total_pegawai=total_pegawai,
                            users=users)
+
 
 @app.route('/superadmin/tambah-admin', methods=['GET', 'POST'])
 @role_required('superadmin')  # Pastikan hanya superadmin yang dapat mengakses
@@ -1611,14 +1735,20 @@ def tambah_admin():
         role = 'admin'  # Role sebagai admin
 
         # Menambahkan admin baru ke database
-        new_user = User(username=username, email=email, password=password, role=role, email_verified=True)
+        new_user = User(
+            username=username,
+            email=email,
+            password=password,
+            role=role,
+            email_verified=True)
         db.session.add(new_user)
         db.session.commit()
-        
+
         flash('Admin berhasil ditambahkan', 'success')
         return redirect(url_for('superadmin_dashboard'))
-    
+
     return render_template('superadmin/tambah_admin.html')
+
 
 @app.route('/superadmin/edit-user/<int:user_id>', methods=['GET', 'POST'])
 @role_required('superadmin')
@@ -1629,12 +1759,13 @@ def superadmin_edit_user(user_id):
         user.username = request.form['username']
         user.email = request.form['email']
         user.role = request.form['role']
-        
+
         db.session.commit()
         flash('Pengguna berhasil diupdate', 'success')
         return redirect(url_for('superadmin_dashboard'))
-    
+
     return render_template('superadmin/edit_user.html', user=user)
+
 
 @app.route('/superadmin/delete-user/<int:user_id>', methods=['POST', 'GET'])
 @role_required('superadmin')
@@ -1647,6 +1778,8 @@ def superadmin_delete_user(user_id):
     return redirect(url_for('superadmin_dashboard'))
 
 # Rute untuk melihat log audit
+
+
 @app.route('/superadmin/audit-log')
 @role_required('superadmin')
 @login_required
@@ -1655,6 +1788,8 @@ def audit_log():
     return render_template('superadmin/audit_log.html', logs=logs)
 
 # Rute untuk mengubah role pengguna
+
+
 @app.route('/superadmin/change-role/<int:user_id>', methods=['POST'])
 @role_required('superadmin')
 @login_required
@@ -1667,36 +1802,42 @@ def change_role(user_id):
     return redirect(url_for('superadmin_dashboard'))
 
 # Rute untuk mengekspor data pengguna
+
+
 @app.route('/superadmin/export-users')
 @role_required('superadmin')
 @login_required
 def export_users():
     users = User.query.all()
-    
+
     output = StringIO()
     writer = csv.writer(output)
     writer.writerow(['ID', 'Username', 'Email', 'Role'])
     for user in users:
         writer.writerow([user.id, user.username, user.email, user.role])
-    
+
     output.seek(0)
     return Response(output, mimetype='text/csv', headers={
         'Content-Disposition': 'attachment;filename=users.csv'
     })
 
 # Rute untuk melihat notifikasi
+
+
 @app.route('/superadmin/notifications')
 @role_required('superadmin')
 @login_required
 def notifications():
     notifications = Notification.query.filter_by(seen=0).all()
-    return render_template('superadmin/notifications.html', notifications=notifications)
+    return render_template(
+        'superadmin/notifications.html',
+        notifications=notifications)
 
 # ------- ADMIN ROUTES -------------
 
+
 # Rute untuk dashboard admin
-from datetime import datetime
-from sqlalchemy.exc import SQLAlchemyError
+
 
 @app.route('/admin/dashboard')
 @login_required
@@ -1714,14 +1855,18 @@ def admin_dashboard():
         latest_cuti_query = db.session.query(
             Cuti.id,
             Cuti.jenis_cuti,
-            db.func.strftime('%Y-%m-%d', Cuti.tanggal_mulai).label('tanggal_mulai'),
-            db.func.strftime('%Y-%m-%d', Cuti.tanggal_selesai).label('tanggal_selesai'),
+            db.func.strftime(
+                '%Y-%m-%d',
+                Cuti.tanggal_mulai).label('tanggal_mulai'),
+            db.func.strftime(
+                '%Y-%m-%d',
+                Cuti.tanggal_selesai).label('tanggal_selesai'),
             Cuti.perihal_cuti,
             Cuti.status,
             User.nip,
             User.username,
-            User.jabatan
-        ).join(User).order_by(Cuti.created_at.desc()).limit(5)
+            User.jabatan).join(User).order_by(
+                Cuti.created_at.desc()).limit(5)
 
         # Execute query and format results
         latest_cuti = []
@@ -1751,22 +1896,28 @@ def admin_dashboard():
         ).group_by('bulan').order_by(text('bulan desc')).limit(6).all()
 
         return render_template('admin/dashboard.html',
-                            stats=stats,
-                            latest_cuti=latest_cuti,
-                            rekap_per_status=rekap_per_status,
-                            rekap_per_bulan=rekap_per_bulan)
+                               stats=stats,
+                               latest_cuti=latest_cuti,
+                               rekap_per_status=rekap_per_status,
+                               rekap_per_bulan=rekap_per_bulan)
 
     except SQLAlchemyError as e:
-        current_app.logger.error(f"Database error in admin_dashboard: {str(e)}", exc_info=True)
-        return render_template('error.html', 
-                            error_message="Terjadi kesalahan database. Silakan coba lagi nanti."), 500
+        current_app.logger.error(
+            f"Database error in admin_dashboard: {
+                str(e)}", exc_info=True)
+        return render_template(
+            'error.html', error_message="Terjadi kesalahan database. Silakan coba lagi nanti."), 500
 
     except Exception as e:
-        current_app.logger.error(f"Unexpected error in admin_dashboard: {str(e)}", exc_info=True)
-        return render_template('error.html',
-                            error_message="Terjadi kesalahan sistem. Tim kami telah diberitahu."), 500
-    
+        current_app.logger.error(
+            f"Unexpected error in admin_dashboard: {
+                str(e)}", exc_info=True)
+        return render_template(
+            'error.html', error_message="Terjadi kesalahan sistem. Tim kami telah diberitahu."), 500
+
 # Rute untuk mengelola pengguna
+
+
 @app.route('/admin/manage-users')
 @login_required
 @role_required('admin')
@@ -1777,7 +1928,12 @@ def manage_users():
 
     query = User.query
     if search:
-        query = query.filter(db.or_(User.username.like(f'%{search}%'), User.nip.like(f'%{search}%')))
+        query = query.filter(
+            db.or_(
+                User.username.like(
+                    f'%{search}%'),
+                User.nip.like(
+                    f'%{search}%')))
 
     total = query.count()
     total_pages = (total + per_page - 1) // per_page
@@ -1788,13 +1944,15 @@ def manage_users():
         error_out=False
     ).items
 
-    return render_template('admin/manage_users.html', 
+    return render_template('admin/manage_users.html',
                            users=users,
                            search=search,
                            page=page,
                            total_pages=total_pages)
 
 # Rute untuk mengedit data pengguna
+
+
 @app.route('/admin/edit-user/<int:user_id>', methods=['GET', 'POST'])
 @login_required
 @role_required('admin')  # pastikan decorator role_required berfungsi
@@ -1818,7 +1976,9 @@ def admin_edit_user(user_id):
             return redirect(url_for('admin_edit_user', user_id=user_id))
 
         # Validasi unik username (opsional)
-        if User.query.filter(User.username == username, User.id != user_id).first():
+        if User.query.filter(
+                User.username == username,
+                User.id != user_id).first():
             flash('Username sudah digunakan oleh pengguna lain.', 'error')
             return redirect(url_for('admin_edit_user', user_id=user_id))
 
@@ -1838,12 +1998,19 @@ def admin_edit_user(user_id):
 
         except Exception as e:
             db.session.rollback()
-            flash(f'Terjadi kesalahan saat memperbarui data: {str(e)}', 'error')
+            flash(
+                f'Terjadi kesalahan saat memperbarui data: {
+                    str(e)}', 'error')
             return redirect(url_for('admin_edit_user', user_id=user_id))
 
-    return render_template('admin/edit_user.html', user=user, atasan_list=atasan_list)
+    return render_template(
+        'admin/edit_user.html',
+        user=user,
+        atasan_list=atasan_list)
 
 # Rute untuk menghapus pengguna
+
+
 @app.route('/admin/delete-user/<int:user_id>')
 @login_required
 @role_required('admin')
@@ -1855,23 +2022,28 @@ def delete_user(user_id):
 
     # Mengecek apakah user memiliki riwayat cuti
     cuti_count = Cuti.query.filter_by(user_id=user_id).count()
-    
+
     if cuti_count > 0:
         flash('User tidak dapat dihapus karena memiliki riwayat cuti', 'error')
     else:
         db.session.delete(user)  # Menghapus user
         db.session.commit()
         flash('User berhasil dihapus', 'success')
-    
+
     return redirect(url_for('manage_users'))
 
 # Rute untuk verifikasi email secara manual
+
+
 @app.route('/admin/verifikasi', methods=['GET'])
 @login_required
 @role_required('admin')
 def manual_verification():
     unverified_users = User.query.filter_by(email_verified=False).all()
-    return render_template('admin/verifikasi.html', unverified_users=unverified_users)
+    return render_template(
+        'admin/verifikasi.html',
+        unverified_users=unverified_users)
+
 
 @app.route('/admin/tambah-atasan', methods=['GET', 'POST'])
 @login_required
@@ -1917,7 +2089,7 @@ def tambah_atasan():
 @role_required('atasan')  # Pastikan pengguna adalah atasan
 def atasan_dashboard():
     current_user_id = current_user.id  # Ambil ID user yang sedang login
-    
+
     # Menggunakan SQLAlchemy untuk menghitung status cuti
     total_pending = Cuti.query.join(User).filter(
         User.atasan_id == current_user_id,
@@ -1951,11 +2123,13 @@ def manage_cuti():
         search = request.args.get('search', '')
         status_filter = request.args.get('status', 'all')
 
-        # Base query - explicitly join with User model using the correct foreign key
+        # Base query - explicitly join with User model using the correct
+        # foreign key
         query = db.session.query(Cuti).join(
             User, Cuti.user_id == User.id  # Explicit join condition
         ).filter(
-            Cuti.atasan_id == current_user.id  # Only show cuti where current user is the atasan
+            # Only show cuti where current user is the atasan
+            Cuti.atasan_id == current_user.id
         ).options(
             db.joinedload(Cuti.user),  # Eager load user relationship
             db.joinedload(Cuti.atasan)  # Eager load atasan relationship
@@ -1984,18 +2158,22 @@ def manage_cuti():
         ).all()
 
         return render_template('atasan/manage_cuti.html',
-                            cuti_list=cuti_list,
-                            search=search,
-                            status_filter=status_filter,
-                            page=page,
-                            total_pages=total_pages,
-                            total=total)
+                               cuti_list=cuti_list,
+                               search=search,
+                               status_filter=status_filter,
+                               page=page,
+                               total_pages=total_pages,
+                               total=total)
 
     except Exception as e:
-        current_app.logger.error(f"Error in manage_cuti: {str(e)}", exc_info=True)
-        return render_template('error.html',
-                            error_message="Terjadi kesalahan saat memuat data cuti"), 500
+        current_app.logger.error(
+            f"Error in manage_cuti: {
+                str(e)}", exc_info=True)
+        return render_template(
+            'error.html', error_message="Terjadi kesalahan saat memuat data cuti"), 500
 # Route untuk menyetujui cuti
+
+
 @app.route('/atasan/approve-cuti/<int:cuti_id>')
 @login_required  # Pastikan pengguna sudah login
 @role_required('atasan')  # Pastikan pengguna adalah atasan
@@ -2006,7 +2184,8 @@ def approve_cuti(cuti_id):
     if cuti and cuti.user.atasan_id == current_user.id:  # Memastikan hanya atasan yang dapat approve
         # Update status cuti menjadi 'Approved'
         cuti.status = 'Approved'
-        cuti.updated_at = db.func.current_timestamp()  # Menggunakan fungsi timestamp dari SQLAlchemy
+        # Menggunakan fungsi timestamp dari SQLAlchemy
+        cuti.updated_at = db.func.current_timestamp()
 
         db.session.commit()  # Commit perubahan ke database
         flash('Cuti berhasil disetujui', 'success')
@@ -2030,7 +2209,8 @@ def reject_cuti(cuti_id):
         # Update status cuti menjadi 'Rejected' dan menambahkan catatan admin
         cuti.status = 'Rejected'
         cuti.admin_notes = admin_notes
-        cuti.updated_at = db.func.current_timestamp()  # Menggunakan fungsi timestamp dari SQLAlchemy
+        # Menggunakan fungsi timestamp dari SQLAlchemy
+        cuti.updated_at = db.func.current_timestamp()
 
         db.session.commit()  # Commit perubahan ke database
         flash('Cuti berhasil ditolak', 'success')
@@ -2045,12 +2225,13 @@ def reject_cuti(cuti_id):
 
 # ----  ERROR HANDLERS --------
 
+
 @app.route('/unauthorized')
 @login_required
 def unauthorized():
     return render_template('unauthorized.html')
 
-   
+
 @app.errorhandler(400)
 @app.errorhandler(401)
 @app.errorhandler(403)
@@ -2075,6 +2256,8 @@ def handle_error(e):
     ), code
 
 # Tangani semua exception lainnya
+
+
 @app.errorhandler(Exception)
 def handle_unexpected_error(e):
     app.logger.error(f"Unexpected error: {str(e)}")
@@ -2085,14 +2268,15 @@ def handle_unexpected_error(e):
         organization=app.config['ORGANIZATION']
     ), 500
 
+
 @app.route('/test/errors')
 def test_errors():
     """Route untuk testing error pages (hapus di production)"""
     from werkzeug.exceptions import (
-        BadRequest, Unauthorized, 
+        BadRequest, Unauthorized,
         Forbidden, NotFound, InternalServerError
     )
-    
+
     errors = {
         '400': BadRequest(),
         '401': Unauthorized(),
@@ -2100,13 +2284,15 @@ def test_errors():
         '404': NotFound(),
         '500': InternalServerError()
     }
-    
+
     return render_template('errors/test_errors.html', errors=errors)
+
 
 @app.route('/force-error')
 def force_error():
     """Route untuk memicu error 500 (testing)"""
     raise Exception("Ini adalah error testing yang disengaja")
+
 
 if __name__ == '__main__':
     app.run(debug=True)
