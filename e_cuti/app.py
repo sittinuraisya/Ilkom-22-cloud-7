@@ -225,7 +225,8 @@ def get_user_by_id(user_id):
     conn = sqlite3.connect('your_database.db')
     c = conn.cursor()
     c.execute(
-        "SELECT id, username, password, role, email_verified FROM users WHERE id = ?",
+       "SELECT id, username, password, role, email_verified " \
+        "FROM users WHERE id = ?",
         (user_id,
          ))
     row = c.fetchone()
@@ -831,13 +832,19 @@ def register():
                 try:
                     send_verification_email(email)
                     flash(
-                        'Registrasi berhasil! Silakan cek email untuk verifikasi',
+                        """
+                        Registrasi berhasil! Silakan cek email untuk verifikasi
+                        """,  # Menggunakan tanda kutip tiga agar baris lebih pendek dan mudah dibaca
                         'success')
                 except Exception as e:
                     print(f"Error sending verification email: {e}")
                     flash(
-                        'Registrasi berhasil tetapi gagal mengirim email verifikasi. Silakan hubungi admin.',
+                        """
+                        Registrasi berhasil tetapi gagal mengirim email verifikasi. 
+                        Silakan hubungi admin.
+                        """,  # Menggunakan tanda kutip tiga untuk menghindari baris panjang
                         'warning')
+
 
             # Login user setelah registrasi berhasil
             login_user(new_user)
@@ -1646,38 +1653,6 @@ def upload_foto_profil():
 # --- Admin Routes ---
 # API Routes
 
-
-@app.route('/api/calendar/sync-all', methods=['POST'])
-@login_required
-@admin_required
-def sync_all_calendar():
-    try:
-        # Mengambil semua cuti yang sudah disetujui
-        pending_cuti = Cuti.query.join(User).filter(
-            Cuti.status == 'Approved').all()
-
-        synced = 0
-        for cuti in pending_cuti:
-            event = {
-                'summary': f'Cuti {cuti.jenis_cuti} - {cuti.user.username}',
-                'start': {'date': cuti.tanggal_mulai.strftime('%Y-%m-%d')},
-                'end': {'date': cuti.tanggal_selesai.strftime('%Y-%m-%d')},
-            }
-            # Pastikan calendar_service sudah terkonfigurasi dengan baik
-            calendar_service.create_event('primary', event)
-            synced += 1
-
-        return jsonify({
-            'status': 'success',
-            'synced': synced
-        })
-    except Exception as e:
-        return jsonify({
-            'status': 'error',
-            'error': str(e)
-        }), 500
-
-
 @app.route('/api/email/reminder', methods=['POST'])
 @admin_required
 def send_reminder_email():
@@ -1903,9 +1878,9 @@ def admin_dashboard():
         return render_template(
             'error.html', error_message="Terjadi kesalahan database. Silakan coba lagi nanti."), 500
 
-    except Exception as e:
+    except Exception:
         current_app.logger.error(
-            f"Unexpected error in admin_dashboard: {str(e)}", exc_info=True)
+            "Unexpected error in admin_dashboard", exc_info=True)
         return render_template(
             'error.html', error_message="Terjadi kesalahan sistem. Tim kami telah diberitahu."), 500
 
