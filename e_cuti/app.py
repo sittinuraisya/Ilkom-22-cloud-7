@@ -45,10 +45,6 @@ from dotenv import load_dotenv
 from email.mime.text import MIMEText
 from sqlalchemy import text
 
-# --- Google APIs  ---
-from sendgrid.helpers.mail import Mail
-
-
 # --- Load .env Credentials ---
 load_dotenv('credentials/.env')
 
