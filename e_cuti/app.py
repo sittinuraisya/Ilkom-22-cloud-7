@@ -1156,8 +1156,7 @@ def ajukan_cuti():
             except Exception as e:
                 flash('Gagal menghitung hari kerja', 'error')
                 current_app.logger.error(
-                    f'Business day calculation error: {
-                        str(e)}')
+                f'Business day calculation error: {str(e)}')
                 return redirect(url_for('ajukan_cuti'))
 
             if jumlah_hari <= 0:
