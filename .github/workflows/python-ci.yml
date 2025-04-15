@@ -1,62 +1,23 @@
-name: Python CI
+name: CI/CD Pipeline
 
 on: [push, pull_request]
 
 jobs:
-  lint-and-test:
+  test:
     runs-on: ubuntu-latest
-    
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.10"
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install flake8 autopep8 autoflake black isort
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    
-    - name: Create cleanup script
-      run: |
-        cat > cleanup.py << 'EOF'
-        import os
-        import subprocess
-
-        def clean_code():
-            """Run all code cleaning tools in sequence"""
-            file_path = "e_cuti/app.py"
-            
-            print("Running autoflake...")
-            subprocess.run(["autoflake", "--in-place", "--remove-unused-variables", 
-                          "--remove-all-unused-imports", file_path])
-            
-            print("Running isort...")
-            subprocess.run(["isort", file_path])
-            
-            print("Running autopep8...")
-            subprocess.run(["autopep8", "--in-place", "--aggressive", file_path])
-            
-            print("Running black...")
-            subprocess.run(["black", file_path, "--line-length", "79"])
-            
-            print("Cleaning completed!")
-
-        if __name__ == "__main__":
-            clean_code()
-        EOF
-    
-    - name: Run code cleaning
-      run: |
-        python cleanup.py
-    
-    - name: Lint with flake8
-      run: |
-        flake8 e_cuti/app.py --show-source --statistics
-    
-    - name: Run tests
-      run: |
-        if [ -f setup.py ]; then python -m pytest; fi
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.9'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flask pytest
+      
+      - name: Run tests
+        run: pytest

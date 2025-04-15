@@ -1,0 +1,41 @@
+<<<<<<< HEAD
+echo "token.json" >> .gitignore
+echo "credentials.json" >> .gitignore
+
+.env
+config.py
+token.json  
+
+GOOGLE_CLIENT_ID=147130135261-gf3ekgbn2k5jia9dmr36lmm7ab7g356c.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=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
+
+
+credentials/.env
+*.enc
+__pycache__/
+=======
+# Ignore node_modules directory
+node_modules/
+
+# Ignore log files
+*.log
+
+# Ignore .env file
+>>>>>>> 8f2b1b15cb398e96388f541f1b7604aa592cd3c2
+.env
+
+# Ignore semua folder yang tidak penting
+CheckIn/
+event_attendance/
+event_checkin/
+tes_webcheckin/
+nanang/
+
+
+
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 8f2b1b15cb398e96388f541f1b7604aa592cd3c2
+

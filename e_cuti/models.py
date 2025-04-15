@@ -37,43 +37,32 @@ class Cuti(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    atasan_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)  # Tambahan: relasi ke atasan
-
     jenis_cuti = db.Column(db.String(100), nullable=False)
     tanggal_mulai = db.Column(db.Date, nullable=False)
     tanggal_selesai = db.Column(db.Date, nullable=False)
     jumlah_hari = db.Column(db.Integer)
     perihal_cuti = db.Column(db.String(255), nullable=False)
-
     status = db.Column(db.String(50), default='Pending')
     admin_notes = db.Column(db.Text)
-
     is_cancelled = db.Column(db.Boolean, default=False)
     cancel_reason = db.Column(db.String(255))
     cancelled_at = db.Column(db.DateTime)
-
     created_at = db.Column(db.DateTime, default=func.now())
     updated_at = db.Column(db.DateTime, onupdate=func.now())
-
     lampiran = db.Column(db.String(255))
-
-    # Relasi ke user yang mengajukan cuti
-    user = db.relationship('User', foreign_keys=[user_id], backref='cuti_pegawai')
-
-    # Relasi ke atasan (jika kamu ingin akses data atasannya)
-    atasan = db.relationship('User', foreign_keys=[atasan_id], backref='cuti_bawahan')
+    user = db.relationship('User', backref='cuti')
 
     def __init__(self, **kwargs):
         # Convert string dates to date objects
-        if 'tanggal_mulai' in kwargs and isinstance(kwargs['tanggal_mulai'], str):
+        if 'tanggal_mulai' in kwargs:
             kwargs['tanggal_mulai'] = datetime.strptime(kwargs['tanggal_mulai'], '%Y-%m-%d').date()
-        if 'tanggal_selesai' in kwargs and isinstance(kwargs['tanggal_selesai'], str):
+        if 'tanggal_selesai' in kwargs:
             kwargs['tanggal_selesai'] = datetime.strptime(kwargs['tanggal_selesai'], '%Y-%m-%d').date()
         
         super().__init__(**kwargs)
 
     def __repr__(self):
-        return f"<Cuti {self.jenis_cuti} - User: {self.user_id}, Atasan: {self.atasan_id}>"
+        return f"<Cuti {self.jenis_cuti} - {self.user_id}>"
 
 class LoginLog(db.Model):
     __tablename__ = 'login_logs'
