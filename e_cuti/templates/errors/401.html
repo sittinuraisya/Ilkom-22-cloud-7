@@ -1,0 +1,14 @@
+{% extends "errors/_error_base.html" %}
+
+{% block illustration %}
+    <img src="{{ url_for('static', filename='images/401.png') }}" alt="Unauthorized" class="error-illustration floating" style="width: 250px;">
+{% endblock %}
+
+{% block error_code %}401{% endblock %}
+
+{% block error_message %}Akses Dilarang!{% endblock %}
+
+{% block error_details %}
+    <p>Kamu butuh kunci ajaib untuk masuk ke sini! 🔑✨</p>
+    <div class="secret-animation">👮‍♂️ 🚫 🐶</div>
+{% endblock %}

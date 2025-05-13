@@ -1,377 +1,355 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard | E-Cuti: Sistem Digitalisasi Pengelolaan Cuti Pegawai</title>
-    
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <style>
-        :root {
-            --primary-color: #4e73df;
-            --secondary-color: #858796;
-            --success-color: #1cc88a;
-            --warning-color: #f6c23e;
-            --danger-color: #e74a3b;
-            --light-bg: #f8f9fc;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--light-bg);
-            color: #5a5c69;
-        }
-        
-        /* Navbar */
-        .navbar {
-            background-color: white;
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-            padding: 0.5rem 1rem;
-        }
-        
-        .navbar-brand {
-            font-weight: 700;
-            color: var(--primary-color);
-        }
-        
-        .nav-link {
-            font-weight: 500;
-            color: #b7b9cc;
-            padding: 0.5rem 1rem;
-            border-radius: 0.35rem;
-        }
-        
-        .nav-link:hover, .nav-link.active {
-            color: var(--primary-color);
-            background-color: rgba(78, 115, 223, 0.05);
-        }
-        
-        /* Cards */
-        .stat-card {
-            border: none;
-            border-radius: 0.5rem;
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
-            transition: all 0.3s ease;
-            border-left: 0.25rem solid;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 0.5rem 1.5rem 0 rgba(58, 59, 69, 0.15);
-        }
-        
-        .stat-card.total-cuti {
-            border-left-color: var(--primary-color);
-        }
-        
-        .stat-card.pending-cuti {
-            border-left-color: var(--warning-color);
-        }
-        
-        .stat-card.total-pegawai {
-            border-left-color: var(--success-color);
-        }
-        
-        /* Main Card */
-        .main-card {
-            border: none;
-            border-radius: 0.5rem;
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
-        }
-        
-        .main-card .card-header {
-            background-color: white;
-            border-bottom: 1px solid #e3e6f0;
-            font-weight: 600;
-            color: var(--primary-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        /* Table */
-        .table {
-            margin-bottom: 0;
-        }
-        
-        .table thead th {
-            border-bottom-width: 1px;
-            font-weight: 600;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--secondary-color);
-            background-color: #f8f9fc;
-            border-color: #e3e6f0;
-        }
-        
-        .table-hover tbody tr:hover {
-            background-color: rgba(78, 115, 223, 0.03);
-        }
-        
-        /* Badges */
-        .badge {
-            font-weight: 500;
-            padding: 0.35em 0.65em;
-        }
-        
-        /* Buttons */
-        .btn {
-            font-weight: 500;
-            border-radius: 0.35rem;
-        }
-        
-        .action-buttons .btn {
-            margin-right: 0.5rem;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard admin | E-Cuti: Sistem Digitalisasi Pengelolaan Cuti Pegawai</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" />
+
+  <style>
+    :root {
+      --primary: #4e73df;
+      --secondary: #858796;
+      --success: #1cc88a;
+      --warning: #f6c23e;
+      --danger: #e74a3b;
+      --light: #f8f9fc;
+      --dark: #5a5c69;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8f9fc;
+      margin: 0;
+      padding: 0;
+      color: #343a40;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    .container-fluid {
+      flex: 1;
+      padding: 1.5rem;
+    }
+
+    .navbar {
+      background-color: #fff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      padding: 0.5rem 1rem;
+      min-height: 60px;
+    }
+
+    .navbar-brand {
+      font-size: 1.1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+    }
+
+    .navbar-brand i {
+      font-size: 1.2rem;
+    }
+
+    .nav-link {
+      font-size: 0.85rem;
+      padding: 0.5rem 0.75rem;
+      font-weight: 500;
+    }
+
+    .nav-link.active {
+      color: var(--primary);
+    }
+
+    .stat-card {
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+      transition: all 0.2s ease;
+      border: none;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-card .card-body {
+      padding: 1.25rem;
+    }
+
+    .stat-card h5 {
+      font-size: 0.85rem;
+      color: var(--secondary);
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .stat-card h2 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-bottom: 0;
+    }
+
+    .card {
+      border: none;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+    }
+
+    .card-header {
+      background-color: #fff;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-header h5 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .card-header h5 i {
+      margin-right: 0.5rem;
+    }
+
+    .table {
+      font-size: 0.85rem;
+    }
+
+    .table th {
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--secondary);
+      font-size: 0.75rem;
+      padding: 0.75rem 1rem;
+      background-color: #f8f9fa;
+    }
+
+    .table td {
+      padding: 0.75rem 1rem;
+      vertical-align: middle;
+    }
+
+    .badge {
+      font-weight: 500;
+      font-size: 0.75rem;
+      padding: 0.35em 0.65em;
+    }
+
+    .btn-sm {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+    }
+
+    footer {
+      background: white;
+      padding: 0.75rem;
+      text-align: center;
+      border-top: 1px solid rgba(0, 0, 0, 0.05);
+      margin-top: auto;
+      font-size: 0.75rem;
+      color: var(--secondary);
+    }
+
+    .footer-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .footer-brand {
+      font-weight: 600;
+      color: var(--secondary);
+      font-size: 0.8rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .footer-copyright {
+      font-size: 0.7rem;
+      color: var(--secondary);
+      opacity: 0.8;
+    }
+
+    @media (max-width: 768px) {
+      .container-fluid {
+        padding: 1rem;
+      }
+
+      .navbar-brand {
+        font-size: 1rem;
+      }
+
+      .stat-card .card-body {
+        padding: 1rem;
+      }
+
+      .stat-card h2 {
+        font-size: 1.5rem;
+      }
+
+      .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+    }
+  </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <i class="bi bi-person-gear me-2"></i>Admin Dashboard
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+      <a class="navbar-brand text-primary" href="{{ url_for('admin.admin_dashboard') }}">
+        <i class="bi bi-person-gear me-2"></i>Admin Dashboard
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link {{ 'active' if request.endpoint == 'admin.admin_dashboard' }}" href="{{ url_for('admin.admin_dashboard') }}">
+              <i class="bi bi-house-door me-1"></i> Dashboard
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="{{ url_for('admin_dashboard') }}">
-                            <i class="bi bi-house-door me-1"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('manage_cuti') }}">
-                            <i class="bi bi-calendar-check me-1"></i> Kelola Cuti
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('manage_users') }}">
-                            <i class="bi bi-people me-1"></i> Kelola Pegawai
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('logout') }}">
-                            <i class="bi bi-box-arrow-right me-1"></i> Logout
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>A
-    </nav>
-
-    <!-- Main Content -->
-    <div class="container-fluid px-4 mt-4">
-        <!-- Stats Cards -->
-        <div class="row mb-4">
-            <div class="col-xl-4 col-md-6 mb-4">
-                <div class="card stat-card total-cuti h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h5 class="fw-bold text-primary">Total Cuti</h5>
-                                <h2 class="mb-0">{{ stats.total_cuti }}</h2>
-                            </div>
-                            <i class="bi bi-calendar-week text-primary" style="font-size: 2rem; opacity: 0.3;"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-4 col-md-6 mb-4">
-                <div class="card stat-card pending-cuti h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h5 class="fw-bold text-warning">Cuti Pending</h5>
-                                <h2 class="mb-0">{{ stats.pending_cuti }}</h2>
-                            </div>
-                            <i class="bi bi-hourglass-split text-warning" style="font-size: 2rem; opacity: 0.3;"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-4 col-md-6 mb-4">
-                <div class="card stat-card total-pegawai h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h5 class="fw-bold text-success">Total Pegawai</h5>
-                                <h2 class="mb-0">{{ stats.total_users }}</h2>
-                            </div>
-                            <i class="bi bi-people-fill text-success" style="font-size: 2rem; opacity: 0.3;"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Pengajuan Cuti Terbaru -->
-        <div class="card main-card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Pengajuan Cuti Terbaru</h5>
-                <a href="{{ url_for('manage_cuti') }}" class="btn btn-sm btn-primary">
-                    Lihat Semua <i class="bi bi-arrow-right ms-1"></i>
-                </a>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Nama Pegawai</th>
-                                <th>Jenis Cuti</th>
-                                <th>Tanggal</th>
-                                <th>Status</th>
-                                <th class="text-end">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for cuti in latest_cuti %}
-                            <tr>
-                                <td>{{ cuti.username }}</td>
-                                <td>{{ cuti.jenis_cuti }}</td>
-                                <td>{{ cuti.tanggal_mulai }} s/d {{ cuti.tanggal_selesai }}</td>
-                                <td>
-                                    <span class="badge bg-{{ 'success' if cuti.status == 'Approved' else 'warning' if cuti.status == 'Pending' else 'danger' }}">
-                                        {{ cuti.status }}
-                                    </span>
-                                </td>
-                                <td class="text-end action-buttons">
-                                    <a href="{{ url_for('manage_cuti') }}?search={{ cuti.username }}" class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-pencil-square"></i> Proses
-                                    </a>
-                                </td>
-                            </tr>
-                            {% else %}
-                            <tr>
-                                <td colspan="5" class="text-center py-4 text-muted">
-                                    <i class="bi bi-exclamation-circle me-2"></i>Tidak ada pengajuan cuti terbaru
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Charts Row -->
-        <div class="row mb-4">
-            <!-- Rekap Cuti per Status -->
-            <div class="col-lg-6 mb-4">
-                <div class="card main-card h-100">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Distribusi Status Cuti</h5>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="statusChart" height="250"></canvas>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Tren Pengajuan per Bulan -->
-            <div class="col-lg-6 mb-4">
-                <div class="card main-card h-100">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Tren Pengajuan per Bulan</h5>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="monthlyChart" height="250"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-4">
-            <a href="{{ url_for('manage_cuti') }}" class="btn btn-primary px-4">
-                <i class="bi bi-calendar-check me-2"></i> Kelola Cuti
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {{ 'active' if request.endpoint == 'admin.laporan_cuti' }}" href="{{ url_for('admin.laporan_cuti') }}">
+              <i class="bi bi-file-earmark-text me-1"></i> Laporan Cuti
             </a>
-            <a href="{{ url_for('manage_users') }}" class="btn btn-success px-4">
-                <i class="bi bi-people me-2"></i> Kelola Pegawai
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {{ 'active' if request.endpoint in ['admin.manajemen_atasan', 'admin.tambah_atasan', 'admin.edit_atasan'] }}" href="{{ url_for('admin.manajemen_atasan') }}">
+              <i class="bi bi-person-badge me-1"></i> Kelola Atasan
             </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {{ 'active' if request.endpoint in ['admin.manajemen_pegawai', 'admin.tambah_pegawai', 'admin.edit_pegawai'] }}" href="{{ url_for('admin.manajemen_pegawai') }}">
+              <i class="bi bi-people me-1"></i> Kelola Pegawai
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('auth.logout') }}">
+              <i class="bi bi-box-arrow-right me-1"></i> Logout
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container-fluid">
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="card stat-card h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between">
+              <div>
+                <h5>Total Cuti</h5>
+                <h2>{{ total_cuti }}</h2>
+              </div>
+              <i class="bi bi-calendar-week fs-2 text-primary opacity-25"></i>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card stat-card h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between">
+              <div>
+                <h5>Pending</h5>
+                <h2>{{ pending_cuti }}</h2>
+              </div>
+              <i class="bi bi-hourglass-split fs-2 text-warning opacity-25"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card stat-card h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between">
+              <div>
+                <h5>Total Pegawai</h5>
+                <h2>{{ total_pegawai }}</h2>
+              </div>
+              <i class="bi bi-people-fill fs-2 text-success opacity-25"></i>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Charts Script -->
-    <script>
-        // Status Distribution Chart
-        const statusCtx = document.getElementById('statusChart').getContext('2d');
-        const statusChart = new Chart(statusCtx, {
-            type: 'doughnut',
-            data: {
-                labels: {{ rekap_per_status | map(attribute='status') | list | tojson }},
-                datasets: [{
-                    data: {{ rekap_per_status | map(attribute='jumlah') | list | tojson }},
-                    backgroundColor: [
-                        '#4e73df',
-                        '#f6c23e',
-                        '#1cc88a',
-                        '#e74a3b'
-                    ],
-                    hoverBorderColor: "rgba(234, 236, 244, 1)",
-                }]
-            },
-            options: {
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right',
-                    }
-                },
-                cutout: '70%',
-            }
-        });
+    <!-- Table Section -->
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0 text-primary"><i class="bi bi-list-check me-2"></i>Pengajuan Terbaru</h5>
+        <a href="{{ url_for('admin.laporan_cuti') }}" class="btn btn-sm btn-primary">Lihat Semua</a>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Nama</th>
+                <th>Jenis Cuti</th>
+                <th>Tanggal</th>
+                <th>Status</th>
+                <th class="text-end">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for cuti in recent_requests %}
+              <tr>
+                <td>{{ cuti.pemohon.full_name }}</td>
+                <td>{{ cuti.jenis_cuti.value }}</td>
+                <td>{{ cuti.tanggal_mulai.strftime('%d/%m/%Y') }} - {{ cuti.tanggal_selesai.strftime('%d/%m/%Y') }}</td>
+                <td>
+                  <span class="badge bg-{{ 'success' if cuti.status.value == 'APPROVED' else 'warning' if cuti.status.value == 'PENDING' else 'danger' }}">
+                    {{ cuti.status.value }}
+                  </span>
+                </td>
+                <td class="text-end">
+                  <a href="{{ url_for('cuti.detail_cuti', cuti_id=cuti.id) }}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-eye"></i> Detail
+                  </a>
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="5" class="text-center py-4 text-muted">Tidak ada pengajuan cuti</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        // Monthly Trend Chart
-        const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
-        const monthlyChart = new Chart(monthlyCtx, {
-            type: 'line',
-            data: {
-                labels: {{ rekap_per_bulan | map(attribute='bulan') | list | tojson }},
-                datasets: [{
-                    label: 'Jumlah Pengajuan',
-                    data: {{ rekap_per_bulan | map(attribute='jumlah') | list | tojson }},
-                    backgroundColor: 'rgba(78, 115, 223, 0.05)',
-                    borderColor: 'rgba(78, 115, 223, 1)',
-                    pointBackgroundColor: 'rgba(78, 115, 223, 1)',
-                    pointBorderColor: '#fff',
-                    pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: 'rgba(78, 115, 223, 1)',
-                    tension: 0.3
-                }]
-            },
-            options: {
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            precision: 0
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                }
-            }
-        });
-    </script>
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-brand">{{ app_name }}</div>
+      <div class="footer-copyright">{{ organization }} © {{ now.year }} - All Rights Reserved</div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

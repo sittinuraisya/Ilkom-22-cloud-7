@@ -1,188 +1,734 @@
-{% extends "base.html" %}
-{% block title %}Persetujuan Cuti - Atasan{% endblock %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Cuti Pegawai | E-Cuti: Sistem Digitalisasi Pengelolaan Cuti Pegawai</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary: #4e73df;
+            --secondary: #858796;
+            --success: #1cc88a;
+            --warning: #f6c23e;
+            --danger: #e74a3b;
+            --info: #36b9cc;
+            --light: #f8f9fc;
+            --dark: #5a5c69;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fc;
+            margin: 0;
+            padding: 0;
+            color: #343a40;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            line-height: 1.5;
+        }
 
-{% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="fas fa-calendar-check me-2"></i>Persetujuan Cuti Pegawai</h2>
-    <a href="{{ url_for('atasan_dashboard') }}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left me-1"></i> Kembali
-    </a>
-</div>
+        .container-fluid {
+            flex: 1;
+            padding: 1.5rem;
+        }
 
-<!-- Filter Card -->
-<div class="card mb-4 shadow-sm">
-    <div class="card-header bg-primary text-white">
-        <i class="fas fa-filter me-1"></i> Filter Data
-    </div>
-    <div class="card-body">
-        <form method="GET" class="row g-3">
-            <div class="col-md-6">
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fas fa-search"></i></span>
-                    <input type="text" name="search" class="form-control" placeholder="Cari berdasarkan NIP/Nama..." value="{{ request.args.get('search', '') }}">
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fas fa-filter"></i></span>
-                    <select name="status" class="form-select">
-                        <option value="all" {% if request.args.get('status', 'all') == 'all' %}selected{% endif %}>Semua Status</option>
-                        <option value="Pending" {% if request.args.get('status') == 'Pending' %}selected{% endif %}>Pending</option>
-                        <option value="Approved" {% if request.args.get('status') == 'Approved' %}selected{% endif %}>Disetujui</option>
-                        <option value="Rejected" {% if request.args.get('status') == 'Rejected' %}selected{% endif %}>Ditolak</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-primary w-100">
-                    <i class="fas fa-search me-1"></i> Cari
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
+        /* Navbar */
+        .navbar {
+            background-color: var(--primary);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            padding: 0.5rem 1rem;
+            min-height: 60px;
+        }
 
-<!-- Tabel Cuti -->
-<div class="card shadow-sm">
-    <div class="card-header bg-primary text-white">
-        <h5 class="mb-0"><i class="fas fa-list me-1"></i> Daftar Pengajuan Cuti</h5>
-    </div>
-    <div class="card-body p-0">
-        {% if cuti_list.items %}
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>No</th>
-                        <th>NIP</th>
-                        <th>Nama Pegawai</th>
-                        <th>Jenis Cuti</th>
-                        <th>Tanggal Cuti</th>
-                        <th>Hari</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for cuti in cuti_list.items %}
-                    <tr>
-                        <td>{{ loop.index + (cuti_list.page - 1) * cuti_list.per_page }}</td>
-                        <td>{{ cuti.nip }}</td>
-                        <td>{{ cuti.username }}</td>
-                        <td>{{ cuti.jenis_cuti }}</td>
-                        <td>{{ cuti.tanggal_mulai|format_date }} - {{ cuti.tanggal_selesai|format_date }}</td>
-                        <td>{{ cuti.jumlah_hari }}</td>
-                        <td>
-                            <span class="badge rounded-pill bg-{{ 
-                                'success' if cuti.status == 'Approved' 
-                                else 'warning' if cuti.status == 'Pending' 
-                                else 'danger' 
-                            }}">
-                                {{ cuti.status }}
-                            </span>
-                        </td>
-                        <td>
-                            {% if cuti.status == 'Pending' %}
-                            <div class="d-flex gap-2">
-                                <button type="button" class="btn btn-sm btn-success" onclick="showApproveModal('{{ cuti.id }}', '{{ cuti.username }}', '{{ cuti.nip }}')">
-                                    <i class="fas fa-check"></i> Setujui
-                                </button>
-                                <button type="button" class="btn btn-sm btn-danger" onclick="showRejectModal('{{ cuti.id }}', '{{ cuti.username }}', '{{ cuti.nip }}')">
-                                    <i class="fas fa-times"></i> Tolak
-                                </button>
-                            </div>
-                            {% else %}
-                                <span class="text-muted">Tidak ada aksi</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        .navbar-brand {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white !important;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-brand i {
+            font-size: 1.2rem;
+            margin-right: 0.5rem;
+        }
+
+        .nav-link {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.75rem !important;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.85) !important;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: white !important;
+        }
+
+        /* Cards */
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 1rem;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header h5 {
+            font-size: 1rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .card-header h5 i {
+            margin-right: 0.5rem;
+        }
+
+        /* Stats Cards */
+        .stat-card .card-body {
+            padding: 1.25rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-card {
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+            transition: all 0.2s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .stat-card.total { background-color: rgba(78, 115, 223, 0.1); }
+        .stat-card.pending { background-color: rgba(246, 194, 62, 0.1); }
+        .stat-card.review { background-color: rgba(54, 185, 204, 0.1); }
+        .stat-card.approved { background-color: rgba(28, 200, 138, 0.1); }
+        .stat-card.rejected { background-color: rgba(231, 74, 59, 0.1); }
+        
+        .stat-card .icon-wrapper {
+            position: absolute;
+            right: 1.25rem;
+            top: 1.25rem;
+            opacity: 0.2;
+            font-size: 3rem;
+            z-index: 0;
+        }
+
+        /* Table */
+        .table {
+            font-size: 0.85rem;
+        }
+
+        .table th {
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--secondary);
+            font-size: 0.75rem;
+            padding: 0.75rem 1rem;
+            background-color: #f8f9fa;
+        }
+
+        .table td {
+            padding: 0.75rem 1rem;
+            vertical-align: middle;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(78, 115, 223, 0.03);
+        }
+
+        /* Badges */
+        .badge {
+            font-weight: 500;
+            font-size: 0.75rem;
+            padding: 0.35em 0.65em;
+        }
+
+        /* Buttons */
+        .btn {
+            font-size: 0.85rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+        }
+
+        .btn-sm {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .page-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .page-header p {
+            font-size: 0.9rem;
+            color: var(--secondary);
+            margin-bottom: 0;
+        }
+
+        /* Footer */
+        footer {
+            background: white;
+            padding: 0.75rem;
+            text-align: center;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            margin-top: auto;
+            font-size: 0.75rem;
+            color: var(--secondary);
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .footer-brand {
+            font-weight: 600;
+            color: var(--secondary);
+            font-size: 0.8rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .footer-copyright {
+            font-size: 0.7rem;
+            color: var(--secondary);
+            opacity: 0.8;
+        }
+
+        /* Profile Image */
+        .profile-img {
+            object-fit: cover;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container-fluid {
+                padding: 1rem;
+            }
+
+            .stat-card .icon-wrapper {
+                font-size: 2.5rem;
+                opacity: 0.15;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .action-buttons .btn {
+                width: 100%;
+            }
+        }
+
+        /* Modal */
+        .modal-header {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .modal-header .btn-close {
+            filter: invert(1);
+        }
+
+        /* Toast */
+        .toast {
+            min-width: 300px;
+            box-shadow: 0 0.15rem 1rem rgba(0, 0, 0, 0.15);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        .toast.show {
+            animation: slideIn 0.3s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('atasan.dashboard') }}">
+                <i class="bi bi-person-badge"></i>Atasan Dashboard
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('atasan.dashboard') }}">
+                            <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('atasan.manage_cuti') }}">
+                            <i class="bi bi-list-check me-1"></i> Kelola Cuti
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.logout') }}">
+                            <i class="bi bi-box-arrow-right me-1"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h2>Persetujuan Cuti</h2>
+            <p>Kelola pengajuan cuti dari bawahan Anda</p>
+            <p class="text-muted small">Terakhir diperbarui: {{ current_time }}</p>
         </div>
 
-        <!-- Pagination -->
-        <nav class="mt-3 px-3">
-            <ul class="pagination justify-content-center">
-                {% if cuti_list.has_prev %}
-                <li class="page-item">
-                    <a class="page-link" href="{{ url_for('manage_cuti', page=cuti_list.prev_num, search=request.args.get('search'), status=request.args.get('status')) }}">
-                        &laquo;
-                    </a>
-                </li>
-                {% endif %}
-
-                {% for p in cuti_list.iter_pages() %}
-                {% if p %}
-                <li class="page-item {% if p == cuti_list.page %}active{% endif %}">
-                    <a class="page-link" href="{{ url_for('manage_cuti', page=p, search=request.args.get('search'), status=request.args.get('status')) }}">{{ p }}</a>
-                </li>
-                {% else %}
-                <li class="page-item disabled"><span class="page-link">…</span></li>
-                {% endif %}
-                {% endfor %}
-
-                {% if cuti_list.has_next %}
-                <li class="page-item">
-                    <a class="page-link" href="{{ url_for('manage_cuti', page=cuti_list.next_num, search=request.args.get('search'), status=request.args.get('status')) }}">
-                        &raquo;
-                    </a>
-                </li>
-                {% endif %}
-            </ul>
-        </nav>
-        {% else %}
-        <div class="alert alert-info text-center m-3">
-            <i class="fas fa-info-circle me-2"></i> Tidak ada pengajuan cuti yang tersedia
-        </div>
-        {% endif %}
-    </div>
-</div>
-
-<!-- Modal Aksi -->
-<div class="modal fade" id="actionModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form method="POST" action="{{ url_for('manage_cuti') }}">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Konfirmasi</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
-                </div>
-                <div class="modal-body">
-                    <p id="modalMessage">Anda yakin ingin memproses pengajuan cuti ini?</p>
-                    <input type="hidden" name="cuti_id" id="modalCutiId">
-                    <input type="hidden" name="action" id="modalAction">
-                    <div class="mb-3">
-                        <label for="modalNotes" class="form-label">Catatan</label>
-                        <textarea class="form-control" id="modalNotes" name="atasan_notes" rows="3"></textarea>
+        <!-- Stats Cards -->
+        <div class="row g-3 mb-4">
+            <!-- Card Total -->
+            <div class="col-md-3">
+                <div class="card stat-card total h-100">
+                    <div class="card-body">
+                        <h6 class="text-uppercase text-muted mb-2" style="font-size: 0.75rem;">Total Cuti</h6>
+                        <h3 class="mb-0">{{ summary.total if summary.total is not none else 0 }}</h3>
+                        <i class="bi bi-calendar-week icon-wrapper text-primary"></i>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">
-                        Proses
-                    </button>
+            </div>
+            
+            <!-- Card Pending -->
+            <div class="col-md-3">
+                <div class="card stat-card pending h-100">
+                    <div class="card-body">
+                        <h6 class="text-uppercase text-muted mb-2" style="font-size: 0.75rem;">Menunggu</h6>
+                        <h3 class="mb-0">{{ summary.menunggu if summary.menunggu is not none else 0 }}</h3>
+                        <i class="bi bi-hourglass-split icon-wrapper text-warning"></i>
+                    </div>
                 </div>
-            </form>
+            </div>
+    
+            
+            <!-- Card Approved -->
+            <div class="col-md-3">
+                <div class="card stat-card approved h-100">
+                    <div class="card-body">
+                        <h6 class="text-uppercase text-muted mb-2" style="font-size: 0.75rem;">Disetujui</h6>
+                        <h3 class="mb-0">{{ summary.disetujui if summary.disetujui is not none else 0 }}</h3>
+                        <i class="bi bi-check-circle icon-wrapper text-success"></i>
+                    </div>
+                </div>
+            </div>
+        
+            <!-- Card Rejected -->
+            <div class="col-md-3">
+                <div class="card stat-card rejected h-100">
+                    <div class="card-body">
+                        <h6 class="text-uppercase text-muted mb-2" style="font-size: 0.75rem;">Ditolak</h6>
+                        <h3 class="mb-0">{{ summary.ditolak if summary.ditolak is not none else 0 }}</h3>
+                        <i class="bi bi-x-circle icon-wrapper text-danger"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Card -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-list-check me-2"></i>Daftar Pengajuan Cuti</h5>
+                <div class="d-flex">
+                    <div class="dropdown me-2">
+                        <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown">
+                            <i class="bi bi-funnel me-1"></i>Filter Status
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                            <li><a class="dropdown-item" href="?status=PENDING"><span class="badge bg-warning me-2">Pending</span>Menunggu</a></li>
+                            <li><a class="dropdown-item" href="?status=IN_REVIEW"><span class="badge bg-info me-2">Review</span>Dalam Review</a></li>
+                            <li><a class="dropdown-item" href="?status=APPROVED"><span class="badge bg-success me-2">Approved</span>Disetujui</a></li>
+                            <li><a class="dropdown-item" href="?status=REJECTED"><span class="badge bg-danger me-2">Rejected</span>Ditolak</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="?"><i class="bi bi-list-ul me-2"></i>Tampilkan Semua</a></li>
+                        </ul>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="periodDropdown" data-bs-toggle="dropdown">
+                            <i class="bi bi-calendar me-1"></i>Periode
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                            <li><a class="dropdown-item" href="?tahun={{ tahun_sekarang }}&bulan={{ bulan_sekarang }}">Bulan Ini</a></li>
+                            <li><a class="dropdown-item" href="?tahun={{ tahun_sekarang }}">Tahun Ini</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="?"><i class="bi bi-calendar4-range me-2"></i>Semua Periode</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if cuti_list %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Pegawai</th>
+                                <th>Jenis Cuti</th>
+                                <th>Periode</th>
+                                <th>Durasi</th>
+                                <th>Status</th>
+                                <th class="text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cuti in cuti_list %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        {% set profile_img_url = cuti.pemohon.foto_profil_url if hasattr(cuti.pemohon, 'foto_profil_url') else url_for('static', filename='images/profile-default.png') %}
+                                        <img src="{{ profile_img_url }}" 
+                                             class="rounded-circle me-3 profile-img" 
+                                             width="40" height="40" 
+                                             alt="{{ cuti.pemohon.full_name }}" 
+                                             onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/profile-default.png') }}'">
+                                        <div>
+                                            <h6 class="mb-1" style="font-size: 0.9rem;">{{ cuti.pemohon.full_name }}</h6>
+                                            <small class="text-muted d-block" style="font-size: 0.75rem;">{{ cuti.pemohon.jabatan or '-' }}</small>
+                                            <small class="text-muted" style="font-size: 0.7rem;">{{ cuti.pemohon.nip or '-' }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ cuti.detail.jenis }}</td>
+                                <td>
+                                    {{ cuti.detail.mulai }}<br>
+                                    <small class="text-muted" style="font-size: 0.75rem;">s/d {{ cuti.detail.selesai }}</small>
+                                </td>
+                                <td>{{ cuti.detail.hari }} hari</td>
+                                <td>
+                                    <span class="badge bg-{{ 'warning' if cuti.detail.status == 'PENDING' 
+                                                    else 'info' if cuti.detail.status == 'IN_REVIEW'
+                                                    else 'success' if cuti.detail.status == 'APPROVED'
+                                                    else 'danger' }}">
+                                        <i class="bi {{ 'bi-clock-history' if cuti.detail.status == 'PENDING'
+                                            else 'bi-search' if cuti.detail.status == 'IN_REVIEW'
+                                            else 'bi-check-circle' if cuti.detail.status == 'APPROVED'
+                                            else 'bi-x-circle' }} me-1"></i>
+                                        {{ cuti.detail.status_display }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group" role="group">
+                                        <!-- Detail Button -->
+                                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" 
+                                                data-bs-target="#detailModal{{ cuti.id }}">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        
+                                        {% if cuti.detail.status in ['PENDING', 'IN_REVIEW'] %}
+                                        <!-- Approve Button -->
+                                        <form action="{{ url_for('atasan.approve_cuti', cuti_id=cuti.id) }}" 
+                                            method="POST" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-success ms-1"
+                                                    onclick="return confirm('Setujui pengajuan cuti ini?')">
+                                                <i class="bi bi-check-lg"></i>
+                                            </button>
+                                        </form>
+                                        
+                                        <!-- Reject Button -->
+                                        <button class="btn btn-sm btn-outline-danger ms-1" data-bs-toggle="modal" 
+                                                data-bs-target="#rejectModal{{ cuti.id }}">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info text-center">
+                    <i class="bi bi-info-circle me-2"></i>Tidak ada pengajuan cuti yang perlu diproses saat ini.
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-function showApproveModal(cutiId, username, nip) {
-    document.getElementById('modalTitle').innerText = 'Setujui Cuti';
-    document.getElementById('modalMessage').innerText = `Setujui pengajuan cuti atas nama ${username} (NIP: ${nip})?`;
-    document.getElementById('modalCutiId').value = cutiId;
-    document.getElementById('modalAction').value = 'approve';
-    new bootstrap.Modal(document.getElementById('actionModal')).show();
-}
+    <!-- Modals for each cuti request -->
+    {% for cuti in cuti_list %}
+    <!-- Detail Modal -->
+    <div class="modal fade" id="detailModal{{ cuti.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-file-earmark-text me-2"></i>Detail Pengajuan Cuti
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <h6 class="text-muted mb-3">Informasi Pegawai</h6>
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="{{ cuti.pemohon.foto }}" class="rounded-circle me-3 profile-img" 
+                                    width="60" height="60" alt="{{ cuti.pemohon.nama }}"
+                                    onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/profile-default.png') }}'">
+                                <div>
+                                    <h5>{{ cuti.pemohon.nama }}</h5>
+                                    <p class="mb-1"><strong>NIP:</strong> {{ cuti.pemohon.nip }}</p>
+                                    <p class="mb-1"><strong>Jabatan:</strong> {{ cuti.pemohon.jabatan }}</p>
+                                    <p class="mb-1"><strong>Unit Kerja:</strong> {{ cuti.pemohon.unit_kerja or '-' }}</p>
+                                </div>
+                            </div>
+                            
+                            <h6 class="text-muted mb-3">Kontak</h6>
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="bi bi-envelope me-2"></i>{{ cuti.pemohon.email or '-' }}</li>
+                                <li><i class="bi bi-telephone me-2"></i>{{ cuti.pemohon.phone or '-' }}</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            <h6 class="text-muted mb-3">Detail Cuti</h6>
+                            <div class="row">
+                                <div class="col-6 mb-3">
+                                    <p class="mb-1"><strong>Jenis Cuti</strong></p>
+                                    <p>{{ cuti.detail.jenis }}</p>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <p class="mb-1"><strong>Status</strong></p>
+                                    {% if cuti.detail.status == 'PENDING' %}
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="bi bi-clock-history me-1"></i> Menunggu
+                                    </span>
+                                    {% elif cuti.detail.status == 'IN_REVIEW' %}
+                                    <span class="badge bg-info text-white">
+                                        <i class="bi bi-search me-1"></i> Dalam Review
+                                    </span>
+                                    {% elif cuti.detail.status == 'APPROVED' %}
+                                    <span class="badge bg-success text-white">
+                                        <i class="bi bi-check-circle me-1"></i> Disetujui
+                                    </span>
+                                    {% elif cuti.detail.status == 'REJECTED' %}
+                                    <span class="badge bg-danger text-white">
+                                        <i class="bi bi-x-circle me-1"></i> Ditolak
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <p class="mb-1"><strong>Tanggal Mulai</strong></p>
+                                    <p>{{ cuti.detail.mulai }}</p>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <p class="mb-1"><strong>Tanggal Selesai</strong></p>
+                                    <p>{{ cuti.detail.selesai }}</p>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <p class="mb-1"><strong>Durasi</strong></p>
+                                    <p>{{ cuti.detail.hari }} hari</p>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <p class="mb-1"><strong>Diajukan Pada</strong></p>
+                                    <p>{{ cuti.waktu.diajukan }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-3">Alasan Cuti</h6>
+                        <div class="bg-light p-3 rounded">
+                            <p class="mb-0">{{ cuti.detail.alasan }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if cuti.detail.lampiran %}
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-3">Lampiran</h6>
+                        <a href="{{ cuti.detail.lampiran }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-download me-1"></i> Unduh Lampiran
+                        </a>
+                        <small class="text-muted ms-2">Format: {{ cuti.detail.lampiran.split('.')[-1]|upper }}</small>
+                    </div>
+                    {% endif %}
+                    
+                    {% if cuti.detail.status == 'REJECTED' and cuti.alasan_penolakan %}
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-3">Alasan Penolakan</h6>
+                        <div class="bg-light p-3 rounded border-start border-3 border-danger">
+                            <p class="mb-0">{{ cuti.alasan_penolakan }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="modal-footer">
+                    {% if cuti.detail.status in ['PENDING', 'IN_REVIEW'] %}
+                    <form action="{{ url_for('atasan.approve_cuti', cuti_id=cuti.id) }}" method="POST" class="me-2">
+                        <button type="submit" class="btn btn-success"
+                                onclick="return confirm('Setujui pengajuan cuti ini?')">
+                            <i class="bi bi-check-lg me-1"></i> Setujui
+                        </button>
+                    </form>
+                    
+                    <button type="button" class="btn btn-danger me-2" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#rejectModal{{ cuti.id }}"
+                            data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-1"></i> Tolak
+                    </button>
+                    {% endif %}
+                    
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-1"></i> Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-function showRejectModal(cutiId, username, nip) {
-    document.getElementById('modalTitle').innerText = 'Tolak Cuti';
-    document.getElementById('modalMessage').innerText = `Tolak pengajuan cuti atas nama ${username} (NIP: ${nip})?`;
-    document.getElementById('modalCutiId').value = cutiId;
-    document.getElementById('modalAction').value = 'reject';
-    new bootstrap.Modal(document.getElementById('actionModal')).show();
-}
-</script>
-{% endblock %}
+    <!-- Reject Modal -->
+    <div class="modal fade" id="rejectModal{{ cuti.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form action="{{ url_for('atasan.reject_cuti', cuti_id=cuti.id) }}" method="POST" 
+                      id="rejectForm{{ cuti.id }}" class="needs-validation" novalidate>
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">
+                            <i class="bi bi-x-circle me-2"></i>Konfirmasi Penolakan
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            Anda akan menolak pengajuan cuti dari <strong>{{ cuti.pemohon.full_name }}</strong>.
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="alasan_penolakan{{ cuti.id }}" class="form-label">Alasan Penolakan <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="alasan_penolakan{{ cuti.id }}" name="alasan_penolakan" 
+                                    rows="4" required minlength="10"
+                                    placeholder="Masukkan alasan penolakan (minimal 10 karakter)"></textarea>
+                            <div class="invalid-feedback">Harap isi alasan penolakan minimal 10 karakter</div>
+                            <small class="text-muted">Alasan penolakan akan dikirimkan ke pemohon</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-arrow-left me-1"></i> Kembali
+                        </button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-ban me-1"></i> Tolak Cuti
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Notifikasi Toast -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-primary text-white">
+                <strong class="me-auto">Notifikasi Cuti</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toast-message">
+                Ada pengajuan cuti baru yang membutuhkan persetujuan Anda!
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+        <div class="footer-brand">{{ app_name }}</div>
+        <div class="footer-copyright">{{ organization }} © {{ now.year }} - All Rights Reserved</div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialize tooltips
+        document.addEventListener('DOMContentLoaded', function() {
+            // Enable tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+            
+            // Handle form validation
+            document.querySelectorAll('form[id^="rejectForm"]').forEach(form => {
+                form.addEventListener('submit', function(event) {
+                    const textarea = this.querySelector('textarea');
+                    if (!textarea.value.trim() || textarea.value.trim().length < 10) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        textarea.classList.add('is-invalid');
+                    } else {
+                        textarea.classList.remove('is-invalid');
+                    }
+                    this.classList.add('was-validated');
+                });
+            });
+
+            // Fungsi untuk menampilkan notifikasi
+            function showNotification(message) {
+                const toastEl = document.getElementById('liveToast');
+                const toastMessage = document.getElementById('toast-message');
+                
+                if (toastEl && toastMessage) {
+                    toastMessage.textContent = message;
+                    const toast = new bootstrap.Toast(toastEl);
+                    toast.show();
+                }
+            }
+            
+            // Tampilkan notifikasi jika ada pesan flash dari Flask
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        showNotification("{{ message }}");
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+{% extends "errors/_error_base.html" %}
+
+{% block title %}402 Payment Required{% endblock %}
+
+{% block illustration %}
+    <img src="{{ url_for('static', filename='images/402.png') }}" alt="Payment Required" class="error-illustration floating" style="width: 280px;">
+{% endblock %}
+
+{% block error_code %}402{% endblock %}
+
+{% block error_message %}Waktunya Bayar!{% endblock %}
+
+{% block error_details %}
+    <p>Sepertinya kamu perlu mengisi celengan dulu untuk mengakses ini! 🏦💰</p>
+    <div class="payment-animation">💸 🐷 🏧</div>
+    <p class="fun-fact"><small>Fun Fact: Error 402 jarang digunakan, jadi kamu menemukan halaman spesial!</small></p>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .payment-animation {
+        font-size: 2rem;
+        margin: 20px 0;
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+    }
+    
+    .payment-animation span {
+        animation: shake 1.5s infinite ease-in-out;
+        display: inline-block;
+    }
+    
+    .payment-animation span:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+    
+    .payment-animation span:nth-child(2) {
+        animation-delay: 0.3s;
+    }
+    
+    .payment-animation span:nth-child(3) {
+        animation-delay: 0.5s;
+    }
+    
+    @keyframes shake {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(-5deg); }
+        75% { transform: rotate(5deg); }
+    }
+    
+    .fun-fact {
+        background-color: #FFF3CD;
+        padding: 10px;
+        border-radius: 8px;
+        display: inline-block;
+        margin-top: 15px;
+    }
+</style>
+{% endblock %}

@@ -4,135 +4,144 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-lg-8">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                <h3 class="mb-0"><i class="bi bi-person-plus me-2"></i>Registrasi Pegawai Baru</h3>
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-primary text-white py-3">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-person-plus fs-4 me-3"></i>
+                    <h4 class="mb-0">Registrasi Pegawai Baru</h4>
+                </div>
             </div>
-            <div class="card-body">
-                <form method="POST" action="{{ url_for('register') }}" enctype="multipart/form-data" id="registerForm">
-                    <div class="row g-3">
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('auth.register') }}" enctype="multipart/form-data" id="registerForm">
+                    <div class="row g-4">
                         <!-- Data Akun -->
                         <div class="col-md-6">
-                            <h5 class="border-bottom pb-2 mb-3">Informasi Akun</h5>
+                            <div class="section-header mb-3">
+                                <h5 class="fw-semibold text-primary mb-0"><i class="bi bi-person-badge me-2"></i>Informasi Akun</h5>
+                                <div class="divider"></div>
+                            </div>
                             
-                            <div class="mb-3">
-                                <label for="username" class="form-label">Username</label>
-                                <input type="text" class="form-control" id="username" name="username" required>
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
+                                <label for="username">Username</label>
                                 <div class="invalid-feedback">Username harus diisi</div>
                             </div>
                             
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" required>
+                            <div class="form-floating mb-3">
+                                <input type="email" class="form-control" id="email" name="email" placeholder="Email" required>
+                                <label for="email">Email</label>
                                 <div class="invalid-feedback">Email harus valid</div>
                             </div>
                             
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <input type="password" class="form-control" id="password" name="password" minlength="8" required>
+                            <div class="form-floating mb-3">
+                                <input type="password" class="form-control" id="password" name="password" placeholder="Password" minlength="8" required>
+                                <label for="password">Password</label>
                                 <div class="invalid-feedback">Password minimal 8 karakter</div>
                             </div>
                             
-                            <div class="mb-3">
-                                <label for="confirm_password" class="form-label">Konfirmasi Password</label>
-                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                            <div class="form-floating mb-3">
+                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Konfirmasi Password" required>
+                                <label for="confirm_password">Konfirmasi Password</label>
                                 <div class="invalid-feedback">Password tidak cocok</div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="role" class="form-label">Role</label>
-                                <select class="form-select" id="role" name="role" required>
-                                    <option value="" disabled selected>Pilih Role</option>
-                                    <option value="pegawai">Pegawai</option>
-                                    <option value="admin">Admin</option>
-                                </select>
-                                <div class="invalid-feedback">Role harus dipilih</div>
                             </div>
                         </div>
 
                         <!-- Data Pribadi -->
                         <div class="col-md-6">
-                            <h5 class="border-bottom pb-2 mb-3">Biodata Pegawai</h5>
+                            <div class="section-header mb-3">
+                                <h5 class="fw-semibold text-primary mb-0"><i class="bi bi-file-person me-2"></i>Biodata Pegawai</h5>
+                                <div class="divider"></div>
+                            </div>
                             
-                            <div class="mb-3">
-                                <label for="nip" class="form-label">NIP</label>
-                                <input type="text" class="form-control" id="nip" name="nip" required>
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="nip" name="nip" placeholder="NIP" required>
+                                <label for="nip">NIP</label>
                                 <div class="invalid-feedback">NIP harus diisi</div>
                             </div>
                             
-                            <div class="mb-3">
-                                <label for="jabatan" class="form-label">Jabatan</label>
-                                <input type="text" class="form-control" id="jabatan" name="jabatan" required>
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="jabatan" name="jabatan" placeholder="Jabatan" required>
+                                <label for="jabatan">Jabatan</label>
                                 <div class="invalid-feedback">Jabatan harus diisi</div>
                             </div>
                             
-                            <div class="mb-3">
-                                <label for="golongan" class="form-label">Golongan</label>
-                                <input type="text" class="form-control" id="golongan" name="golongan" required>
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="golongan" name="golongan" placeholder="Golongan" required>
+                                <label for="golongan">Golongan</label>
                                 <div class="invalid-feedback">Golongan harus diisi</div>
                             </div>
-                            
-                            <div class="mb-3">
-                                <label for="tempat_lahir" class="form-label">Tempat Lahir</label>
-                                <input type="text" class="form-control" id="tempat_lahir" name="tempat_lahir" required>
+                        </div>
+
+                        <!-- Data Tambahan -->
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="tempat_lahir" name="tempat_lahir" placeholder="Tempat Lahir" required>
+                                <label for="tempat_lahir">Tempat Lahir</label>
                                 <div class="invalid-feedback">Tempat lahir harus diisi</div>
                             </div>
                             
-                            <div class="mb-3">
-                                <label for="tanggal_lahir" class="form-label">Tanggal Lahir</label>
+                            <div class="form-floating mb-3">
                                 <input type="date" class="form-control" id="tanggal_lahir" name="tanggal_lahir" max="{{ today }}" required>
+                                <label for="tanggal_lahir">Tanggal Lahir</label>
                                 <div class="invalid-feedback">Tanggal lahir harus valid</div>
                             </div>
                             
-                            <div class="mb-3">
-                                <label for="jenis_kelamin" class="form-label">Jenis Kelamin</label>
+                            <div class="form-floating mb-3">
                                 <select class="form-select" id="jenis_kelamin" name="jenis_kelamin" required>
-                                    <option value="" disabled selected>Pilih Jenis Kelamin</option>
+                                    <option value="" disabled selected></option>
                                     <option value="L">Laki-laki</option>
                                     <option value="P">Perempuan</option>
                                 </select>
+                                <label for="jenis_kelamin">Jenis Kelamin</label>
                                 <div class="invalid-feedback">Jenis kelamin harus dipilih</div>
                             </div>
                         </div>
 
                         <!-- Kontak & Foto -->
-                        <div class="col-12">
-                            <h5 class="border-bottom pb-2 mb-3">Kontak & Foto Profil</h5>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="phone" class="form-label">Nomor Telepon (Opsional)</label>
-                                    <input type="tel" class="form-control" id="phone" name="phone">
-                                    <small class="text-muted">Digunakan untuk notifikasi penting</small>
-                                </div>
-                                
-                                <div class="col-md-6 mb-3">
-                                    <label for="foto_profil" class="form-label">Foto Profil</label>
-                                    <input type="file" class="form-control" id="foto_profil" name="foto_profil" accept="image/jpeg, image/png">
-                                    <small class="text-muted">Format: JPG/PNG (max 2MB)</small>
-                                    <div class="invalid-feedback">Format file tidak didukung</div>
-                                </div>
+                        <div class="col-md-6">
+                            <div class="section-header mb-3">
+                                <h5 class="fw-semibold text-primary mb-0"><i class="bi bi-telephone me-2"></i>Kontak & Foto</h5>
+                                <div class="divider"></div>
+                            </div>
+                            
+                            <div class="form-floating mb-3">
+                                <input type="tel" class="form-control" id="phone" name="phone" placeholder="Nomor Telepon">
+                                <label for="phone">Nomor Telepon (Opsional)</label>
+                                <small class="text-muted ms-2">Digunakan untuk notifikasi penting</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="foto_profil" class="form-label small text-muted">Foto Profil (Opsional)</label>
+                                <input type="file" class="form-control shadow-sm" id="foto_profil" name="foto_profil" accept="image/jpeg, image/png">
+                                <small class="text-muted ms-2">Format: JPG/PNG (max 2MB)</small>
+                                <div class="invalid-feedback">Format file tidak didukung</div>
                             </div>
                         </div>
 
                         <!-- Email Verification Notice -->
                         <div class="col-12">
-                            <div class="alert alert-info">
-                                <h6><i class="bi bi-envelope-check"></i> Verifikasi Email</h6>
-                                <p>Setelah registrasi, link verifikasi akan dikirim ke email Anda. Akun harus diverifikasi sebelum bisa login.</p>
+                            <div class="alert alert-primary shadow-sm border-0">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-envelope-check fs-4 me-3"></i>
+                                    <div>
+                                        <h6 class="mb-1">Verifikasi Email</h6>
+                                        <p class="mb-0 small">Setelah registrasi, link verifikasi akan dikirim ke email Anda. Akun harus diverifikasi sebelum bisa login.</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Submit Button -->
-                        <div class="col-12 mt-3">
-                            <button type="submit" class="btn btn-primary w-100 py-2">
-                                <i class="bi bi-person-plus"></i> Daftarkan Pegawai
+                        <div class="col-12 mt-2">
+                            <button type="submit" class="btn btn-primary btn-lg w-100 py-3 shadow">
+                                <i class="bi bi-person-plus me-2"></i> Daftarkan Pegawai
                             </button>
                         </div>
                     </div>
                 </form>
 
-                <div class="text-center mt-4">
-                    <p class="mb-0">Sudah punya akun? <a href="{{ url_for('login') }}" class="text-decoration-none">Login disini</a></p>
+                <div class="text-center mt-4 pt-2">
+                    <p class="mb-0 small text-muted">Sudah punya akun? <a href="{{ url_for('auth.login') }}" class="text-decoration-none fw-semibold">Login disini</a></p>
                 </div>
             </div>
         </div>
@@ -197,13 +206,85 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <style>
+.card {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.card-header {
+    border-radius: 0 !important;
+}
+
+.section-header {
+    position: relative;
+}
+
+.section-header h5 {
+    position: relative;
+    display: inline-block;
+    background: white;
+    padding-right: 15px;
+}
+
+.divider {
+    height: 1px;
+    background: linear-gradient(90deg, rgba(13,110,253,0.2) 0%, rgba(13,110,253,0.5) 50%, rgba(13,110,253,0.2) 100%);
+    position: absolute;
+    bottom: 8px;
+    left: 0;
+    right: 0;
+    z-index: -1;
+}
+
+.form-floating label {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.form-control, .form-select {
+    border-radius: 8px;
+    padding: 12px 16px;
+    border: 1px solid #dee2e6;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13,110,253,0.1);
+}
+
+.btn-primary {
+    border-radius: 8px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(13,110,253,0.3) !important;
+}
+
 .was-validated .form-control:invalid,
 .was-validated .form-select:invalid {
     border-color: #dc3545;
+    background-image: none;
+    padding-right: 16px;
 }
+
 .was-validated .form-control:valid,
 .was-validated .form-select:valid {
-    border-color: #28a745;
+    border-color: #198754;
+    background-image: none;
+}
+
+.invalid-feedback {
+    font-size: 0.8rem;
+    margin-top: 4px;
+}
+
+.alert {
+    border-radius: 8px;
 }
 </style>
 {% endblock %}

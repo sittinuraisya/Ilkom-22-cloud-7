@@ -1,17 +1,15 @@
-{% extends "errors/base_error.html" %}
+{% extends "errors/_error_base.html" %}
 
-{% block title %}Kesalahan Server{% endblock %}
+{% block illustration %}
+    <img src="{{ url_for('static', filename='images/500.png') }}" alt="Server Error" class="error-illustration floating" style="width: 270px;">
+{% endblock %}
 
-{% block content %}
-    <div class="error-icon text-danger">
-        <i class="fas fa-server"></i>
-    </div>
-    <h1>500 - Kesalahan Server</h1>
-    <p class="lead">Terjadi kesalahan internal pada sistem.</p>
-    {% if config.DEBUG %}
-        <div class="alert alert-danger mt-3 text-start">
-            <strong>Debug Info:</strong><br>
-            <pre>{{ error.description if error else '' }}</pre>
-        </div>
-    {% endif %}
+{% block error_code %}500{% endblock %}
+
+{% block error_message %}Server Sedang Kacau!{% endblock %}
+
+{% block error_details %}
+    <p>Tim robot kami sedang berusaha memperbaikinya! 🤖🔧</p>
+    <div class="robot-animation">⚡ 🛠️ 💥</div>
+    <p class="tech-details"><small>{{ error }}</small></p>
 {% endblock %}

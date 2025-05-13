@@ -1,0 +1,17 @@
+Status Pengajuan Cuti: {{ status }}
+
+Halo {{ user.full_name }},
+
+Pengajuan cuti Anda dengan detail berikut telah {{ status }}:
+
+- Jenis Cuti: {{ leave.jenis_cuti.value }}
+- Tanggal: {{ leave.tanggal_mulai.strftime('%d %B %Y') }} hingga {{ leave.tanggal_selesai.strftime('%d %B %Y') }}
+- Jumlah Hari: {{ leave.jumlah_hari }} hari
+- Disetujui oleh: {{ approver }}
+{% if status == 'REJECTED' and rejection_reason %}
+- Alasan Penolakan: {{ rejection_reason }}
+{% endif %}
+
+Silakan login ke sistem untuk melihat detail lebih lanjut.
+
+© {{ current_year }} Sistem e-Cuti. Pesan ini dikirim secara otomatis.

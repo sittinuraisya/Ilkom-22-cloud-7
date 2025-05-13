@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ subject }}</title>
+</head>
+<body>
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #2c3e50;">Notifikasi E-Cuti</h2>
+        
+        {% if type == 'verification' %}
+        <p>Halo {{ user.username }},</p>
+        <p>Silakan verifikasi email Anda dengan mengklik tombol berikut:</p>
+        <a href="{{ verification_link }}" style="background-color: #3498db; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Verifikasi Email</a>
+        
+        {% elif type == 'reset_password' %}
+        <p>Anda menerima email ini karena meminta reset password.</p>
+        <p>Silakan klik tombol berikut untuk reset password:</p>
+        <a href="{{ reset_link }}" style="background-color: #3498db; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Reset Password</a>
+        <p>Link akan kadaluarsa dalam 1 jam.</p>
+        
+        {% elif type == 'cuti_approved' %}
+        <p>Pengajuan cuti Anda telah disetujui:</p>
+        <ul>
+            <li>Jenis Cuti: {{ data.jenis_cuti }}</li>
+            <li>Periode: {{ data.tanggal_mulai }} hingga {{ data.tanggal_selesai }}</li>
+            <li>Status: <strong>Disetujui</strong></li>
+        </ul>
+        
+        {% elif type == 'cuti_rejected' %}
+        <p>Pengajuan cuti Anda telah ditolak:</p>
+        <ul>
+            <li>Jenis Cuti: {{ data.jenis_cuti }}</li>
+            <li>Periode: {{ data.tanggal_mulai }} hingga {{ data.tanggal_selesai }}</li>
+            <li>Status: <strong>Ditolak</strong></li>
+            <li>Keterangan: {{ data.catatan or '-' }}</li>
+        </ul>
+        {% endif %}
+        
+        <p style="margin-top: 20px; color: #7f8c8d; font-size: 0.9em;">
+            Jika Anda tidak merasa melakukan tindakan ini, silakan abaikan email ini.
+        </p>
+    </div>
+</body>
+</html>

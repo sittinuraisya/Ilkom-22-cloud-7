@@ -1,0 +1,13 @@
+Halo {{ username }},
+
+Terima kasih telah mendaftar di Sistem E-Cuti. Untuk menyelesaikan proses registrasi, silakan verifikasi alamat email Anda dengan mengklik tautan berikut:
+
+{{ verify_url }}
+
+Tautan ini akan kadaluarsa dalam 24 jam. Jika Anda tidak melakukan permintaan ini, abaikan email ini.
+
+Salam,
+Tim E-Cuti
+
+-----------------------------------------
+Ini adalah email otomatis, mohon tidak membalas.

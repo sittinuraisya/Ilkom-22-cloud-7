@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Selamat Datang Admin</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { color: #4361ee; text-align: center; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        .credentials { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        .login-btn { display: inline-block; background: #4361ee; color: white; padding: 10px 20px; 
+                    text-decoration: none; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Selamat Datang Admin</h2>
+    </div>
+    
+    <p>Halo {{ user.full_name }},</p>
+    
+    <p>Berikut detail akun administrator Anda:</p>
+    
+    <div class="credentials">
+        <p><strong>Username:</strong> {{ user.username }}</p>
+        <p><strong>Password Sementara:</strong> {{ password }}</p>
+    </div>
+    
+    <p>Silakan login menggunakan kredensial di atas:</p>
+    <a href="{{ login_url }}" class="login-btn">Login Sekarang</a>
+    
+    <p style="margin-top: 20px;"><strong>Penting:</strong> Harap ganti password Anda setelah login pertama kali.</p>
+    
+    <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #eee; font-size: 0.9em; color: #777;">
+        <p>&copy; {{ current_year }} E-Cuti - Sistem Administrasi</p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,175 @@
+:root {
+    --primary: #FF6B6B;
+    --secondary: #4ECDC4;
+    --accent: #FFE66D;
+    --dark: #292F36;
+    --light: #F7FFF7;
+}
+
+body.error-page {
+    background-color: #f9f9f9;
+    font-family: 'Comic Neue', cursive;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    background-image: radial-gradient(circle at 10% 20%, rgba(255, 200, 124, 0.1) 0%, rgba(78, 205, 196, 0.1) 90%);
+}
+
+.error-container {
+    text-align: center;
+    max-width: 600px;
+    padding: 40px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.error-container::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    border: 3px dashed var(--secondary);
+    border-radius: 25px;
+    animation: rotate 20s linear infinite;
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+@keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.error-illustration {
+    max-width: 250px;
+    margin: 0 auto 30px;
+    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1));
+}
+
+h1 {
+    font-size: 5rem;
+    margin: 0;
+    color: var(--primary);
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+    font-family: 'Poppins', sans-serif;
+}
+
+.error-message {
+    font-size: 1.5rem;
+    color: var(--dark);
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+
+.error-details {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.home-button {
+    display: inline-block;
+    padding: 12px 25px;
+    background-color: var(--primary);
+    color: white;
+    text-decoration: none;
+    border-radius: 50px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 0 rgba(209, 83, 83, 0.8);
+    position: relative;
+    overflow: hidden;
+}
+
+.home-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 7px 0 rgba(209, 83, 83, 0.8);
+    background-color: #ff5252;
+}
+
+.home-button:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 rgba(209, 83, 83, 0.8);
+}
+
+.button-icon {
+    margin-right: 8px;
+    transition: transform 0.3s;
+}
+
+.home-button:hover .button-icon {
+    transform: scale(1.2);
+}
+
+/* Animasi floating */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.floating {
+    animation: float 3s ease-in-out infinite;
+}
+
+/* Tambahkan di error_styles.css */
+
+.error-illustration {
+    max-width: 300px;
+    margin: 0 auto 30px;
+    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.15));
+    transition: transform 0.3s ease;
+}
+
+.error-illustration:hover {
+    transform: rotate(5deg) scale(1.05);
+}
+
+.emoji-animation,
+.secret-animation,
+.dino-animation,
+.alien-animation,
+.robot-animation {
+    font-size: 2rem;
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.emoji-animation span,
+.secret-animation span,
+.dino-animation span,
+.alien-animation span,
+.robot-animation span {
+    animation: bounce 2s infinite ease-in-out;
+    display: inline-block;
+}
+
+.emoji-animation span:nth-child(2),
+.secret-animation span:nth-child(2),
+.dino-animation span:nth-child(2),
+.alien-animation span:nth-child(2),
+.robot-animation span:nth-child(2) {
+    animation-delay: 0.3s;
+}
+
+.emoji-animation span:nth-child(3),
+.secret-animation span:nth-child(3),
+.dino-animation span:nth-child(3),
+.alien-animation span:nth-child(3),
+.robot-animation span:nth-child(3) {
+    animation-delay: 0.6s;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}

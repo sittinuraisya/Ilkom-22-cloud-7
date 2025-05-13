@@ -1,0 +1,14 @@
+Selamat Datang Admin
+
+Halo {{ user.full_name }},
+
+Berikut detail akun administrator Anda:
+
+Username: {{ user.username }}
+Password Sementara: {{ password }}
+
+Silakan login di: {{ login_url }}
+
+Penting: Harap ganti password Anda setelah login pertama kali.
+
+© {{ current_year }} E-Cuti - Sistem Administrasi
