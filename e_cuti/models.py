@@ -87,6 +87,8 @@ class User(UserMixin, db.Model):
     email_verified = db.Column(db.Boolean, default=False)
     email_verified_at = db.Column(db.DateTime)
     verification_token = db.Column(db.String(100))
+    verification_attempts = db.Column(db.Integer, default=0, nullable=False)
+    last_verification_sent = db.Column(db.DateTime, nullable=True)
     reset_token = db.Column(db.String(100))
     reset_token_expiry = db.Column(db.DateTime)
     
@@ -195,6 +197,7 @@ class User(UserMixin, db.Model):
         
         return url_for('static', filename='images/profile-default.png')
     
+    
     @validates('role')
     def validate_role(self, key, role):
         if isinstance(role, str):
@@ -214,14 +217,15 @@ class User(UserMixin, db.Model):
         return gender.upper()
 
     def set_password(self, password):
-        """Set password with secure hashing"""
-        self.password = generate_password_hash(password, method='pbkdf2:sha256')
+        """Hash password dan set last_password_change"""
+        self.password = generate_password_hash(password)
         self.last_password_change = datetime.utcnow()
+        self.must_change_password = False  # Reset status ganti password
 
     def check_password(self, password):
-        """Check password against stored hash"""
+        """Verifikasi password dengan werkzeug"""
         return check_password_hash(self.password, password)
-
+    
     def update_login_info(self):
         """Update login timestamps and reset attempts"""
         self.last_login = datetime.now(timezone.utc)
@@ -245,43 +249,41 @@ class User(UserMixin, db.Model):
         return secrets.token_urlsafe(length)
 
     def generate_email_token(self):
-        """Generate secure email verification token"""
-        s = URLSafeTimedSerializer(
-            secret_key=current_app.config['SECRET_KEY'],
-            salt='email-verify-' + current_app.config['SECURITY_PASSWORD_SALT']
-        )
-        return s.dumps({
-            'user_id': self.id,
-            'email': self.email,  # Tambahkan email untuk verifikasi tambahan
-            'timestamp': datetime.utcnow().timestamp()
-        })
-
-    def generate_email_verification_token(self):
-        """Generate email verification token"""
+        """Generate token sederhana"""
         s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
         return s.dumps({'user_id': self.id, 'email': self.email})
 
+    def generate_email_verification_token(self):
+        """Generate token verifikasi email dengan expiry"""
+        s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+        return s.dumps({
+            'user_id': self.id,
+            'email': self.email,
+            'salt': secrets.token_hex(8)  # Tambahan salt untuk keamanan
+        }, salt='email-verify')
 
     @staticmethod
     def verify_email_token(token):
-        """Verify email token and return user if valid"""
-        from utils.tokens import verify_email_token
-        
-        token_data = verify_email_token(token)
-        if not token_data:
-            return None
-
-        # Find user with security filters
-        user = User.query.filter(
-            User.id == token_data['user_id'],
-            User.email == token_data['email'],  # Verify email matches
-            User.is_active == True
-        ).first()
-
-        if not user:
-            current_app.logger.warning(f"User not found or inactive: {token_data.get('user_id')}")
+        """Verifikasi token email dengan pengecekan tambahan"""
+        try:
+            s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+            data = s.loads(token, max_age=86400, salt='email-verify')  # 24 jam
             
-        return user
+            # Validasi data token
+            if not all(k in data for k in ['user_id', 'email', 'salt']):
+                return None
+                
+            user = User.query.filter(
+                User.id == data['user_id'],
+                User.email == data['email']
+            ).first()
+            
+            # Pastikan user belum terverifikasi
+            if user and not user.email_verified:
+                return user
+            return None
+        except:
+            return None
     
     def generate_password_reset_token(self):
         """Generate secure password reset token"""

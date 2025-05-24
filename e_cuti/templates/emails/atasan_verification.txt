@@ -1,0 +1,14 @@
+Halo {{ user.full_name }},
+
+Anda telah didaftarkan sebagai Atasan di Sistem E-Cuti.
+
+Detail Akun:
+- Username: {{ user.username }}
+- Password: {{ plain_password }}
+- NIP: {{ user.nip }}
+- Jabatan: {{ user.jabatan }}
+
+Verifikasi akun Anda di: {{ verify_url }}
+Link berlaku 24 jam.
+
+Jika Anda tidak mendaftar, abaikan email ini.

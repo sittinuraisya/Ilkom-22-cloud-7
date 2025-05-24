@@ -188,6 +188,41 @@
                 gap: 1rem;
             }
         }
+
+        /* Verification status */
+        .verification-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .verification-badge.verified {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .verification-badge.unverified {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        /* Resend button */
+        .btn-resend {
+            transition: all 0.3s;
+        }
+
+        .btn-resend:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Disabled state */
+        .btn-resend:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
     </style>
 </head>
 <body>
@@ -242,7 +277,45 @@
                 </a>
             </div>
             <div class="card-body">
+                <!-- Verification Status Alert -->
+                <div class="alert {% if atasan.email_verified %}alert-success{% else %}alert-warning{% endif %}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi {% if atasan.email_verified %}bi-check-circle{% else %}bi-exclamation-triangle{% endif %} me-2"></i>
+                            Status Verifikasi: 
+                            <strong>
+                                {% if atasan.email_verified %}
+                                    <span class="text-success">Terverifikasi</span>
+                                {% else %}
+                                    <span class="text-danger">Belum Terverifikasi</span>
+                                {% endif %}
+                            </strong>
+                            {% if not atasan.email_verified and last_sent %}
+                                <div class="text-muted small mt-1">
+                                    Terakhir dikirim: {{ last_sent.strftime('%d-%m-%Y %H:%M') }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% if not atasan.email_verified %}
+                            <form method="POST" class="d-inline">
+                                <button type="submit" name="resend_verification" 
+                                        class="btn btn-sm {% if atasan.verification_attempts|default(0) >= 3 %}btn-danger{% else %}btn-warning{% endif %}"
+                                        {% if atasan.verification_attempts|default(0) >= 5 %}disabled{% endif %}>
+                                    <i class="bi bi-envelope-arrow-up me-1"></i> 
+                                    Kirim Ulang 
+                                    {% if atasan.verification_attempts|default(0) > 0 %}
+                                        <span class="badge bg-light text-dark ms-1">
+                                            {{ atasan.verification_attempts|default(0) }}/5
+                                        </span>
+                                    {% endif %}
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+    
                 <form method="POST" enctype="multipart/form-data">
+                    <!-- Existing form fields -->
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="nip" class="form-label">NIP</label>

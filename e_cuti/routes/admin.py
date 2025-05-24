@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from flask_mail import Message
 from extensions import db, mail
 from functools import wraps
-import click, logging, random, string
+import click, logging, random, string, re, secrets
 from models import User, UserRole, AuditLog, Notification, Cuti, CutiStatus, JenisCuti, db
 from werkzeug.security import generate_password_hash
 from datetime import datetime, timedelta
@@ -13,7 +13,8 @@ from io import BytesIO
 from fpdf import FPDF
 from sqlalchemy import extract, or_, and_, func, text
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
-from services.email import send_welcome_email, send_admin_verification_email, send_admin_status_email, send_admin_password_reset_email, EmailSendError
+from services.email import send_welcome_email, send_admin_verification_email, send_admin_status_email, send_email
+from services.email import send_admin_password_reset_email, send_atasan_verification_email, EmailSendError
 from services.report_generator import generate_excel_report, generate_pdf_report
 from utils.decorators import role_required
 from utils.tokens import generate_email_token
@@ -756,70 +757,118 @@ def manajemen_atasan():
 def tambah_atasan():
     if request.method == 'POST':
         form_data = request.form.to_dict()
-        
-        # Validasi
-        errors = []
-        if not form_data.get('nip'): errors.append('NIP wajib diisi')
-        if not form_data.get('username'): errors.append('Username wajib diisi')
-        if not form_data.get('email'): errors.append('Email wajib diisi')
-        if not form_data.get('full_name'): errors.append('Nama lengkap wajib diisi')  # Changed from full_name to name
-        if not form_data.get('jabatan'): errors.append('Jabatan wajib diisi')
-        
-        # Simplified email validation
-        email = form_data.get('email', '').strip()
-        if '@' not in email or '.' not in email.split('@')[-1]:
-            errors.append('Format email tidak valid')
-            
-        if 'password' in form_data and form_data['password']:
-            if len(form_data['password']) < 8:
-                errors.append('Password minimal 8 karakter')
-            if form_data['password'] != form_data.get('confirm_password', ''):
-                errors.append('Konfirmasi password tidak sama')
-        
-        if errors:
-            for error in errors:
-                flash(error, 'error')
-            return render_template('admin/tambah_atasan.html', form=form_data)
+        field_errors = {}
+
+        # Validasi NIP
+        nip = form_data.get('nip', '').strip()
+        if not nip:
+            field_errors['nip'] = 'NIP wajib diisi'
+        elif not nip.isdigit() or len(nip) != 18:
+            field_errors['nip'] = 'NIP harus 18 digit angka'
+
+        # Validasi Username
+        username = form_data.get('username', '').strip()
+        if not username:
+            field_errors['username'] = 'Username wajib diisi'
+        elif len(username) < 3 or len(username) > 20:
+            field_errors['username'] = 'Username harus 3-20 karakter'
+        elif not username.isalnum():
+            field_errors['username'] = 'Username hanya boleh huruf dan angka'
+
+        # Validasi Email
+        email = form_data.get('email', '').strip().lower()
+        if not email:
+            field_errors['email'] = 'Email wajib diisi'
+        elif not re.match(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$', email):
+            field_errors['email'] = 'Format email tidak valid'
+
+        # Validasi Password
+        password = form_data.get('password', '')
+        confirm_password = form_data.get('confirm_password', '')
+        if not password:
+            field_errors['password'] = 'Password wajib diisi'
+        elif len(password) < 8:
+            field_errors['password'] = 'Password minimal 8 karakter'
+        elif not any(char.isdigit() for char in password):
+            field_errors['password'] = 'Password harus mengandung angka'
+        elif not any(char.isupper() for char in password):
+            field_errors['password'] = 'Password harus mengandung huruf besar'
+        elif password != confirm_password:
+            field_errors['confirm_password'] = 'Konfirmasi password tidak cocok'
+
+        if field_errors:
+            for field, message in field_errors.items():  # Sekarang bisa pakai .items()
+                flash(message, 'error')
+            return render_template('admin/tambah_atasan.html', 
+                                form=form_data,
+                                field_errors=field_errors)
         
         try:
             # Cek duplikat
             existing = User.query.filter(
                 (User.nip == form_data['nip']) |
-                (User.username == form_data['username']) |
-                (User.email == form_data['email'])
+                (func.lower(User.username) == func.lower(form_data['username'])) |
+                (func.lower(User.email) == func.lower(form_data['email']))
             ).first()
             
             if existing:
                 flash('NIP/Username/Email sudah terdaftar', 'error')
                 return render_template('admin/tambah_atasan.html', form=form_data)
             
-            # Buat atasan baru
+            # Buat atasan baru dengan password yang diinput
             atasan = User(
                 nip=form_data['nip'],
                 username=form_data['username'],
-                email=form_data['email'],
-                password=generate_password_hash(form_data['password']),
-                full_name=form_data['full_name'],  # Changed to match form field name
+                email=form_data['email'].lower(),
+                full_name=form_data['full_name'],
                 jabatan=form_data['jabatan'],
                 golongan=form_data.get('golongan', ''),
                 role=UserRole.ATASAN,
-                email_verified=True,
+                email_verified=False,
+                must_change_password=False,
                 created_by=current_user.id
             )
+            
+            # Set password (akan otomatis di-hash oleh event listener)
+            atasan.password = form_data['password']
             
             db.session.add(atasan)
             db.session.commit()
             
-            flash('Atasan berhasil ditambahkan', 'success')
+            # Kirim email verifikasi
+            try:
+                token = atasan.generate_email_verification_token()
+                verify_url = url_for('auth.verify_email', token=token, _external=True)
+                
+                msg = Message(
+                    "Verifikasi Akun Atasan E-Cuti",
+                    sender=current_app.config['MAIL_DEFAULT_SENDER'],
+                    recipients=[atasan.email]
+                )
+                
+                msg.html = render_template(
+                    "emails/atasan_verification.html",
+                    user=atasan,
+                    verify_url=verify_url
+                )
+                
+                mail.send(msg)
+                flash('Atasan berhasil ditambahkan. Email verifikasi telah dikirim.', 'success')
+                
+            except Exception as e:
+                current_app.logger.error(f"Gagal mengirim email: {str(e)}")
+                flash('Atasan berhasil ditambahkan, tetapi gagal mengirim email verifikasi.', 'warning')
+            
             return redirect(url_for('admin.manajemen_atasan'))
             
         except Exception as e:
             db.session.rollback()
-            flash('Terjadi kesalahan saat menyimpan data', 'error')
-            current_app.logger.error(f"Error adding atasan: {str(e)}")
+            current_app.logger.error(f"Error: {str(e)}")
+            flash('Terjadi kesalahan sistem', 'error')
             return render_template('admin/tambah_atasan.html', form=form_data)
     
-    return render_template('admin/tambah_atasan.html')
+    return render_template('admin/tambah_atasan.html', form={}, field_errors={})
+
 
 @admin_bp.route('/edit-atasan/<int:atasan_id>', methods=['GET', 'POST'])
 @login_required
@@ -827,29 +876,105 @@ def tambah_atasan():
 def edit_atasan(atasan_id):
     atasan = User.query.get_or_404(atasan_id)
     
+    # Initialize verification attempts if None
+    atasan.verification_attempts = atasan.verification_attempts or 0
+    
     if request.method == 'POST':
+        # Handle resend verification request
+        if 'resend_verification' in request.form:
+            try:
+                if atasan.email_verified:
+                    flash('Akun ini sudah terverifikasi', 'info')
+                    return redirect(url_for('admin.edit_atasan', atasan_id=atasan_id))
+                
+                if atasan.verification_attempts >= 5:
+                    flash('Sudah mencapai batas maksimal pengiriman verifikasi (5x)', 'error')
+                    return redirect(url_for('admin.edit_atasan', atasan_id=atasan_id))
+                
+                # Generate and send verification email
+                token = atasan.generate_email_token()
+                verify_url = url_for('auth.verify_email', token=token, _external=True)
+                
+                msg = Message(
+                    "Verifikasi Akun Atasan E-Cuti",
+                    sender=current_app.config['MAIL_DEFAULT_SENDER'],
+                    recipients=[atasan.email]
+                )
+                
+                msg.html = render_template(
+                    "emails/atasan_verification.html",
+                    user=atasan,
+                    verify_url=verify_url,
+                    expiry_hours=24
+                )
+                
+                msg.body = f"Halo {atasan.full_name},\n\nSilakan verifikasi email Anda: {verify_url}"
+                
+                mail.send(msg)
+                
+                # Update verification records
+                atasan.verification_attempts += 1
+                atasan.last_verification_sent = datetime.utcnow()
+                db.session.commit()
+                
+                flash('Email verifikasi telah dikirim ulang', 'success')
+                return redirect(url_for('admin.edit_atasan', atasan_id=atasan_id))
+                
+            except Exception as e:
+                db.session.rollback()
+                current_app.logger.error(f"Gagal mengirim verifikasi ulang: {str(e)}", exc_info=True)
+                flash('Gagal mengirim email verifikasi ulang', 'error')
+                return redirect(url_for('admin.edit_atasan', atasan_id=atasan_id))
+
+        # Handle profile update
         form_data = request.form.to_dict()
+        errors = {}
         
-        # Validasi
-        errors = []
-        if not form_data.get('nip'): errors.append('NIP wajib diisi')
-        if not form_data.get('username'): errors.append('Username wajib diisi')
-        if not form_data.get('email'): errors.append('Email wajib diisi')
-        if not form_data.get('full_name'): errors.append('Nama lengkap wajib diisi')
-        if not form_data.get('jabatan'): errors.append('Jabatan wajib diisi')
-        
-        # Simplified email validation
-        email = form_data.get('email', '').strip()
-        if '@' not in email or '.' not in email.split('@')[-1]:
-            errors.append('Format email tidak valid')
+        # Validation
+        if not form_data.get('nip'):
+            errors['nip'] = 'NIP wajib diisi'
+        elif len(form_data['nip']) != 18 or not form_data['nip'].isdigit():
+            errors['nip'] = 'NIP harus 18 digit angka'
             
+        if not form_data.get('username'):
+            errors['username'] = 'Username wajib diisi'
+        elif len(form_data['username']) < 3 or len(form_data['username']) > 20:
+            errors['username'] = 'Username harus 3-20 karakter'
+        elif not form_data['username'].isalnum():
+            errors['username'] = 'Username hanya boleh huruf dan angka'
+            
+        if not form_data.get('email'):
+            errors['email'] = 'Email wajib diisi'
+        elif not re.match(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$', form_data['email']):
+            errors['email'] = 'Format email tidak valid'
+            
+        if not form_data.get('full_name'):
+            errors['full_name'] = 'Nama lengkap wajib diisi'
+            
+        if not form_data.get('jabatan'):
+            errors['jabatan'] = 'Jabatan wajib diisi'
+            
+        if form_data.get('password'):
+            if len(form_data['password']) < 8:
+                errors['password'] = 'Password minimal 8 karakter'
+            elif not any(c.isdigit() for c in form_data['password']):
+                errors['password'] = 'Password harus mengandung angka'
+            elif not any(c.isupper() for c in form_data['password']):
+                errors['password'] = 'Password harus mengandung huruf besar'
+            elif form_data['password'] != form_data.get('confirm_password', ''):
+                errors['confirm_password'] = 'Konfirmasi password tidak cocok'
+
         if errors:
-            for error in errors:
-                flash(error, 'error')
-            return render_template('admin/edit_atasan.html', atasan=atasan)
+            for field, message in errors.items():
+                flash(message, 'error')
+            return render_template('admin/edit_atasan.html',
+                                atasan=atasan,
+                                form=form_data,
+                                field_errors=errors,
+                                is_unverified=not atasan.email_verified)
         
         try:
-            # Cek duplikat (kecuali diri sendiri)
+            # Check for duplicates
             existing = User.query.filter(
                 (User.id != atasan_id) & (
                     (User.nip == form_data['nip']) |
@@ -859,10 +984,13 @@ def edit_atasan(atasan_id):
             ).first()
             
             if existing:
-                flash('NIP/Username/Email sudah terdaftar', 'error')
-                return render_template('admin/edit_atasan.html', atasan=atasan)
+                flash('Data sudah terdaftar (NIP/Username/Email)', 'error')
+                return render_template('admin/edit_atasan.html',
+                                    atasan=atasan,
+                                    form=form_data,
+                                    is_unverified=not atasan.email_verified)
             
-            # Update data
+            # Update profile
             atasan.nip = form_data['nip']
             atasan.username = form_data['username']
             atasan.email = form_data['email']
@@ -870,21 +998,37 @@ def edit_atasan(atasan_id):
             atasan.jabatan = form_data['jabatan']
             atasan.golongan = form_data.get('golongan', '')
             
-            # Update password jika diisi
+            # Update password if changed
             if form_data.get('password'):
                 atasan.password = generate_password_hash(form_data['password'])
+                atasan.must_change_password = True
             
             db.session.commit()
-            
             flash('Data atasan berhasil diperbarui', 'success')
             return redirect(url_for('admin.manajemen_atasan'))
             
         except Exception as e:
             db.session.rollback()
+            current_app.logger.error(f"Error update atasan: {str(e)}", exc_info=True)
             flash('Terjadi kesalahan saat menyimpan data', 'error')
-            current_app.logger.error(f"Error updating atasan: {str(e)}")
     
-    return render_template('admin/edit_atasan.html', atasan=atasan)
+    # For GET request or failed POST
+    form_data = {
+        'nip': atasan.nip,
+        'username': atasan.username,
+        'email': atasan.email,
+        'full_name': atasan.full_name,
+        'jabatan': atasan.jabatan,
+        'golongan': atasan.golongan
+    }
+    
+    return render_template('admin/edit_atasan.html',
+                         atasan=atasan,
+                         form=form_data,
+                         field_errors={},
+                         is_unverified=not atasan.email_verified,
+                         last_sent=atasan.last_verification_sent,
+                         attempts_left=max(0, 5 - (atasan.verification_attempts or 0)))
 
 @admin_bp.route('/hapus-atasan/<int:atasan_id>', methods=['POST'])
 @login_required

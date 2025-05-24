@@ -28,42 +28,37 @@ def verify_token(token, salt=None, max_age=3600):
         return None
 
 def send_email(to, subject, template, **kwargs):
-    """
-    Base email sending function
-    
-    Args:
-        to: Email recipient or list of recipients
-        subject: Email subject
-        template: Base template name (without .html/.txt)
-        **kwargs: Template variables
-    """
+    """Send email with HTML/plain text and optional attachments."""
     try:
-        # Ensure recipients is always a list
-        recipients = [to] if isinstance(to, str) else to
-        
         msg = Message(
             subject=subject,
             sender=current_app.config['MAIL_DEFAULT_SENDER'],
-            recipients=recipients
+            recipients=[to] if isinstance(to, str) else to  # Handle single/multiple recipients
         )
         
-        # Render both HTML and plaintext versions
-        msg.html = render_template(f'emails/{template}.html', **kwargs)
-        msg.body = render_template(f'emails/{template}.txt', **kwargs)
+        # Render both HTML and plain text
+        msg.html = render_template(f"emails/{template}.html", **kwargs)
+        msg.body = render_template(f"emails/{template}.txt", **kwargs)
         
-        if current_app.config['MAIL_SUPPRESS_SEND']:
-            logging.info("Email suppressed (would send to %s): %s", recipients, msg.html)
+        # Attachments (if provided)
+        for attachment in kwargs.get('attachments', []):
+            with current_app.open_resource(attachment['path']) as fp:
+                msg.attach(
+                    filename=attachment['filename'],
+                    content_type=attachment['content_type'],
+                    data=fp.read()
+                )
+        
+        if current_app.config.get('MAIL_SUPPRESS_SEND', False):
+            current_app.logger.info(f"Email suppressed (test mode): {subject}")
             return True
             
         mail.send(msg)
-        logging.info("Email sent to %s - Subject: %s", recipients, subject)
+        current_app.logger.info(f"Email sent to {to}: {subject}")
         return True
-        
     except Exception as e:
-        logging.error("Failed to send email to %s: %s", recipients, str(e), exc_info=True)
-        raise EmailSendError(f"Failed to send email: {str(e)}")
-
-
+        current_app.logger.error(f"Failed to send email to {to}: {str(e)}")
+        raise EmailSendError(f"Email failed: {str(e)}")
 
 def send_verification_email(user):
     """Send email verification with proper error handling"""
@@ -152,6 +147,28 @@ def send_admin_status_email(user, action_by, is_active):
         current_app.logger.info(f"Status email sent to {user.email}")
     except Exception as e:
         current_app.logger.error(f"Failed to send status email: {str(e)}")
+
+def send_atasan_verification_email(user, plain_password):
+    """Kirim email verifikasi dengan template yang lebih baik"""
+    token = user.generate_email_token()
+    verify_url = url_for('auth.verify_email', token=token, _external=True)
+    login_url = url_for('auth.login', _external=True)
+    
+    msg = Message(
+        "Verifikasi Akun Atasan E-Cuti",
+        sender=current_app.config['MAIL_DEFAULT_SENDER'],
+        recipients=[user.email]
+    )
+    
+    msg.html = render_template(
+        "emails/atasan_verification.html",
+        user=user,
+        verify_url=verify_url,
+        login_url=login_url,
+        temporary_password=temp_password,
+        expiry_hours=24,
+        current_year=datetime.now().year
+    )
 
 def send_admin_password_reset_email(user, new_password):
     """Kirim email reset password"""
@@ -267,35 +284,6 @@ def verify_email_token(token, max_age=86400):
     except:
         return None
     
-def send_email(to, subject, template, **kwargs):
-    """Send email using Flask-Mail with error handling"""
-    try:
-        msg = Message(
-            subject=subject,
-            sender=current_app.config['MAIL_DEFAULT_SENDER'],
-            recipients=[to]
-        )
-        
-        # Render both HTML and plain text versions
-        msg.html = render_template(f"emails/{template}.html", **kwargs)
-        msg.body = render_template(f"emails/{template}.txt", **kwargs)
-        
-        # Add attachments if any
-        if 'attachments' in kwargs:
-            for attachment in kwargs['attachments']:
-                with current_app.open_resource(attachment['path']) as fp:
-                    msg.attach(
-                        filename=attachment['filename'],
-                        content_type=attachment['content_type'],
-                        data=fp.read()
-                    )
-        
-        mail.send(msg)
-        current_app.logger.info(f"Email sent to {to} with subject '{subject}'")
-        return True
-    except Exception as e:
-        current_app.logger.error(f"Failed to send email to {to}: {str(e)}")
-        return False
 
 def send_leave_status_email(user, status, approver, leave_details, rejection_reason=None):
     """Send leave status notification email"""

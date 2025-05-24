@@ -256,7 +256,7 @@
     <!-- Main Content -->
     <div class="container">
         <div class="card mb-4">
-            <div class="card-header">
+            <div class="card-header bg-primary text-white">
                 <h5 class="mb-0"><i class="bi bi-person-plus me-2"></i>Tambah Akun Atasan</h5>
             </div>
             <div class="card-body">
@@ -265,6 +265,7 @@
                     {% if messages %}
                         {% for category, message in messages %}
                             <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                <i class="bi {% if category == 'success' %}bi-check-circle{% else %}bi-exclamation-triangle{% endif %} me-2"></i>
                                 {{ message }}
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
@@ -273,64 +274,131 @@
                 {% endwith %}
                 
                 <!-- Form -->
-                <form method="POST" action="{{ url_for('admin.tambah_atasan') }}" id="atasanForm">
+                <form method="POST" action="{{ url_for('admin.tambah_atasan') }}" id="atasanForm" class="needs-validation" novalidate>
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="nip" class="form-label">NIP <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="nip" name="nip" value="{{ form.nip if form }}" required>
-                            <div class="invalid-feedback">NIP wajib diisi</div>
+                            <input type="text" class="form-control {% if field_errors and 'nip' in field_errors %}is-invalid{% endif %}" 
+                                id="nip" name="nip" value="{{ form.nip if form else '' }}" 
+                                pattern="\d{18}" title="Harus 18 digit angka" required>
+                            <div class="invalid-feedback">
+                                {{ field_errors.nip if field_errors and 'nip' in field_errors else 'NIP harus 18 digit angka' }}
+                            </div>
+                            <small class="form-text text-muted">Contoh: 200411092024011008</small>
                         </div>
                         <div class="col-md-6">
                             <label for="username" class="form-label">Username <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="username" name="username" value="{{ form.username if form }}" required>
-                            <div class="invalid-feedback">Username wajib diisi</div>
+                            <input type="text" class="form-control {% if field_errors and 'username' in field_errors %}is-invalid{% endif %}" 
+                                id="username" name="username" value="{{ form.username if form else '' }}" 
+                                minlength="3" maxlength="20" pattern="[a-zA-Z0-9]+" required>
+                            <div class="invalid-feedback">
+                                {{ field_errors.username if field_errors and 'username' in field_errors else '3-20 karakter (huruf/angka saja)' }}
+                            </div>
+                            <small class="form-text text-muted">Contoh: atasan23</small>
                         </div>
                     </div>
                     
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="full_name" class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="full_name" name="full_name" 
-                                   value="{{ form.full_name if form else '' }}" required>
-                            <div class="invalid-feedback">Nama lengkap wajib diisi</div>
+                            <input type="text" class="form-control {% if field_errors and 'full_name' in field_errors %}is-invalid{% endif %}" 
+                                id="full_name" name="full_name" value="{{ form.full_name if form else '' }}" required>
+                            <div class="invalid-feedback">
+                                {{ field_errors.full_name if field_errors and 'full_name' in field_errors else 'Nama lengkap wajib diisi' }}
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
-                            <input type="email" class="form-control" id="email" name="email" value="{{ form.email if form }}" required>
-                            <div class="invalid-feedback">Email wajib diisi dan harus valid</div>
+                            <input type="email" class="form-control {% if field_errors and 'email' in field_errors %}is-invalid{% endif %}" 
+                                id="email" name="email" value="{{ form.email if form else '' }}" required>
+                            <div class="invalid-feedback">
+                                {{ field_errors.email if field_errors and 'email' in field_errors else 'Format email tidak valid' }}
+                            </div>
+                            <small class="form-text text-muted">Contoh: atasan@instansi.go.id</small>
                         </div>
                     </div>
                     
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" id="password" name="password" required minlength="8">
-                            <div class="invalid-feedback">Password minimal 8 karakter</div>
+                            <div class="input-group">
+                                <input type="password" class="form-control {% if field_errors and 'password' in field_errors %}is-invalid{% endif %}" 
+                                    id="password" name="password" minlength="8" required>
+                                <button class="btn btn-outline-secondary toggle-password" type="button">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            <div class="invalid-feedback">
+                                {{ field_errors.password if field_errors and 'password' in field_errors else 'Minimal 8 karakter, mengandung angka dan huruf besar' }}
+                            </div>
+                            <div class="password-strength mt-2">
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <small class="text-muted">Kekuatan password: <span class="strength-text">Lemah</span></small>
+                            </div>
                         </div>
+                        
+                        <div class="alert alert-info mt-4">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Catatan:</strong> Password yang Anda buat hanya untuk validasi. Sistem akan membuat password acak yang dikirim ke email atasan.
+                        </div>
+
                         <div class="col-md-6">
                             <label for="confirm_password" class="form-label">Konfirmasi Password <span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
-                            <div class="invalid-feedback">Konfirmasi password harus sama</div>
+                            <div class="input-group">
+                                <input type="password" class="form-control {% if field_errors and 'confirm_password' in field_errors %}is-invalid{% endif %}" 
+                                    id="confirm_password" name="confirm_password" required>
+                                <button class="btn btn-outline-secondary toggle-password" type="button">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            <div class="invalid-feedback">
+                                {{ field_errors.confirm_password if field_errors and 'confirm_password' in field_errors else 'Password tidak cocok' }}
+                            </div>
                         </div>
                     </div>
                     
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="jabatan" class="form-label">Jabatan <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="jabatan" name="jabatan" value="{{ form.jabatan if form }}" required>
-                            <div class="invalid-feedback">Jabatan wajib diisi</div>
+                            <input type="text" class="form-control {% if field_errors and 'jabatan' in field_errors %}is-invalid{% endif %}" 
+                                id="jabatan" name="jabatan" value="{{ form.jabatan if form else '' }}" required>
+                            <div class="invalid-feedback">
+                                {{ field_errors.jabatan if field_errors and 'jabatan' in field_errors else 'Jabatan wajib diisi' }}
+                            </div>
+                            <small class="form-text text-muted">Contoh: Kepala Bagian SDM</small>
                         </div>
                         <div class="col-md-6">
                             <label for="golongan" class="form-label">Golongan</label>
-                            <input type="text" class="form-control" id="golongan" name="golongan" value="{{ form.golongan if form }}">
+                            <select class="form-select" id="golongan" name="golongan">
+                                <option value="">Pilih Golongan</option>
+                                <option value="I/a" {% if form and form.golongan == 'I/a' %}selected{% endif %}>I/a</option>
+                                <option value="I/b" {% if form and form.golongan == 'I/b' %}selected{% endif %}>I/b</option>
+                                <option value="I/c" {% if form and form.golongan == 'I/c' %}selected{% endif %}>I/c</option>
+                                <option value="II/a" {% if form and form.golongan == 'II/a' %}selected{% endif %}>II/a</option>
+                                <option value="II/b" {% if form and form.golongan == 'II/b' %}selected{% endif %}>II/b</option>
+                                <option value="II/c" {% if form and form.golongan == 'II/c' %}selected{% endif %}>II/c</option>
+                                <option value="III/a" {% if form and form.golongan == 'III/a' %}selected{% endif %}>III/a</option>
+                                <option value="III/b" {% if form and form.golongan == 'III/b' %}selected{% endif %}>III/b</option>
+                                <option value="III/c" {% if form and form.golongan == 'III/c' %}selected{% endif %}>III/c</option>
+                                <option value="IV/a" {% if form and form.golongan == 'IV/a' %}selected{% endif %}>IV/a</option>
+                                <option value="IV/b" {% if form and form.golongan == 'IV/b' %}selected{% endif %}>IV/b</option>
+                                <option value="IV/c" {% if form and form.golongan == 'IV/c' %}selected{% endif %}>IV/c</option>
+                            </select>
                         </div>
+                    </div>
+                    
+                    <div class="alert alert-info mt-4">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Informasi:</strong> Setelah ditambahkan, atasan akan menerima email verifikasi berisi password sementara dan instruksi untuk login pertama kali.
                     </div>
                     
                     <div class="d-flex justify-content-between mt-4">
                         <a href="{{ url_for('admin.manajemen_atasan') }}" class="btn btn-secondary">
                             <i class="bi bi-arrow-left me-1"></i> Kembali
                         </a>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
                             <i class="bi bi-person-plus me-1"></i> Tambah Akun Atasan
                         </button>
                     </div>
@@ -445,6 +513,95 @@
                     }
                 }
             });
+
+            // Client-side validation
+            (function() {
+                'use strict';
+                const forms = document.querySelectorAll('.needs-validation');
+                
+                Array.from(forms).forEach(form => {
+                form.addEventListener('submit', function(event) {
+                    if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+                });
+            })();
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle show/hide password
+            document.querySelectorAll('.toggle-password').forEach(button => {
+                button.addEventListener('click', function() {
+                    const input = this.previousElementSibling;
+                    const icon = this.querySelector('i');
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.classList.replace('bi-eye', 'bi-eye-slash');
+                    } else {
+                        input.type = 'password';
+                        icon.classList.replace('bi-eye-slash', 'bi-eye');
+                    }
+                });
+            });
+        
+            // Password strength indicator
+            const passwordInput = document.getElementById('password');
+            const progressBar = document.querySelector('.progress-bar');
+            const strengthText = document.querySelector('.strength-text');
+        
+            if (passwordInput) {
+                passwordInput.addEventListener('input', function() {
+                    const password = this.value;
+                    let strength = 0;
+                    
+                    // Check length
+                    if (password.length >= 8) strength += 1;
+                    if (password.length >= 12) strength += 1;
+                    
+                    // Check for numbers
+                    if (/\d/.test(password)) strength += 1;
+                    
+                    // Check for uppercase
+                    if (/[A-Z]/.test(password)) strength += 1;
+                    
+                    // Check for special chars
+                    if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+                    
+                    // Update UI
+                    const width = strength * 25;
+                    progressBar.style.width = `${width}%`;
+                    
+                    let color = 'bg-danger';
+                    let text = 'Lemah';
+                    
+                    if (strength >= 4) {
+                        color = 'bg-success';
+                        text = 'Kuat';
+                    } else if (strength >= 2) {
+                        color = 'bg-warning';
+                        text = 'Sedang';
+                    }
+                    
+                    progressBar.className = `progress-bar ${color}`;
+                    strengthText.textContent = text;
+                    strengthText.className = `strength-text ${color.replace('bg-', 'text-')}`;
+                });
+            }
+        
+            // Form validation
+            const form = document.getElementById('atasanForm');
+            if (form) {
+                form.addEventListener('submit', function(event) {
+                    if (!this.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    this.classList.add('was-validated');
+                }, false);
+            }
         });
     </script>
 </body>

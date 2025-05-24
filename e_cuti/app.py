@@ -22,6 +22,8 @@ def create_app(config_class='config.Config'):
     # Load configuration
     app.config.from_object(config_class)
 
+    from config import Config
+    
     # Configure logging
     logging.basicConfig(
         level=logging.INFO,

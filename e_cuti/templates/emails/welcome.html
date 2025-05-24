@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Selamat Datang</title>
+    <style>
+        .credentials {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .warning {
+            color: #dc3545;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #2c3e50;">Selamat Datang di Sistem E-Cuti</h2>
+        
+        <p>Halo {{ user.full_name }},</p>
+        
+        <p>Akun Anda sebagai <strong>{{ user.role.value }}</strong> telah aktif.</p>
+        
+        <div class="credentials">
+            <p><strong>Username:</strong> {{ user.username }}</p>
+            <p><strong>Password Sementara:</strong> {{ temp_password }}</p>
+        </div>
+        
+        <a href="{{ login_url }}" style="display: inline-block; padding: 10px 20px; 
+           background: #28a745; color: white; text-decoration: none; border-radius: 5px;">
+            Login Sekarang
+        </a>
+        
+        <p class="warning">
+            Anda akan diminta untuk mengganti password saat login pertama!
+        </p>
+        
+        <p style="font-size: 0.9em; color: #6c757d;">
+            Jika Anda tidak mendaftar akun ini, segera hubungi administrator.
+        </p>
+    </div>
+</body>
+</html>

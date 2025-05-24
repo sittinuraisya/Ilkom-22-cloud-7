@@ -16,7 +16,7 @@ def dashboard():
     if current_user.role == UserRole.SUPERADMIN:
         return redirect(url_for('admin.super_dashboard'))
     elif current_user.role == UserRole.ADMIN:
-        return redirect(url_for('admin.dashboard'))
+        return redirect(url_for('admin.admin_dashboard'))
     elif current_user.role == UserRole.ATASAN:
         return redirect(url_for('atasan.dashboard'))
     else:

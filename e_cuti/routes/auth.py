@@ -1,26 +1,27 @@
 from flask import Blueprint, request, render_template, flash, redirect, url_for, jsonify, current_app, session
 from flask_login import login_user, logout_user, current_user, login_required
+from flask_mail import Message
 from werkzeug.exceptions import BadRequest
 from werkzeug.security import generate_password_hash
 from sqlalchemy import func
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from datetime import datetime, timezone, timedelta
 from markupsafe import Markup
 import logging
 
 # Local imports
-from models import User, UserRole
-from extensions import db
+from models import User, UserRole, AuditLog
+from extensions import db, mail
 from services.auth import (
     authenticate_user,
     handle_failed_login,
     register_new_user,
     is_account_locked
 )
-from services.email import send_verification_email, send_password_reset_email
+from services.email import send_verification_email, send_password_reset_email, send_welcome_email
 from utils.validators import validate_registration_form
 from utils.decorators import logout_required
-from utils.security_utils import generate_secure_token, verify_secure_token
+from utils.security_utils import generate_secure_password
 from controllers.auth_controller import AuthController
 
 auth_bp = Blueprint('auth', __name__, template_folder='templates/auth')
@@ -31,13 +32,14 @@ def login():
         try:
             username = request.form.get('username', '').strip().lower()
             password = request.form.get('password', '')
-            remember = 'remember' in request.form  # Check if remember me was checked
+            remember = 'remember' in request.form
 
-            # Input validation
+            # Validasi input
             if not username or not password:
                 flash('Username/email dan password harus diisi', 'error')
                 return render_template('auth/login.html')
 
+            # Cari user
             user = User.query.filter(
                 (func.lower(User.username) == username) |
                 (func.lower(User.email) == username)
@@ -48,18 +50,18 @@ def login():
                 flash('Username/email atau password salah', 'error')
                 return render_template('auth/login.html')
 
-            # Check email verification
+            # Verifikasi email
             if not user.email_verified:
                 token = user.generate_email_token()
                 verify_url = url_for('auth.verify_email', token=token, _external=True)
-                
                 flash(Markup(
-                    f'Email belum diverifikasi. Silakan cek inbox/spam di <a href="https://mail.google.com/mail/u/0/#search/from%3A{current_app.config["MAIL_USERNAME"]}" target="_blank" style="color: #2563eb; text-decoration: underline;">Gmail Anda</a> '
-                    f'atau <a href="#" onclick="resendVerification(event, \'{user.email}\')" style="color: #2563eb; text-decoration: underline;">kirim ulang email verifikasi</a>.'
+                    f'Email belum diverifikasi. Silakan cek email Anda atau '
+                    f'<a href="#" onclick="resendVerification(event, \'{user.email}\')">'
+                    'kirim ulang email verifikasi</a>.'
                 ), 'error')
                 return render_template('auth/login.html')
 
-            # Verify password
+            # Perbaikan utama: Izinkan login jika must_change_password=True
             if not user.check_password(password):
                 user.increment_login_attempts()
                 db.session.commit()
@@ -67,18 +69,23 @@ def login():
                 flash('Username/email atau password salah', 'error')
                 return render_template('auth/login.html')
 
-            # Successful login - Tambahkan parameter remember
-            login_user(user, remember=remember)  # Ini yang diperbaiki
+            # Login berhasil
+            login_user(user, remember=remember)
             user.reset_login_attempts()
-            db.session.commit()
             
-            current_app.logger.info(f"User logged in: {user.username} (Role: {user.role.name})")
+            # Redirect ke halaman ganti password jika perlu
+            if user.must_change_password:
+                db.session.commit()
+                flash('Silakan ganti password Anda terlebih dahulu', 'info')
+                return redirect(url_for('auth.change_password'))
+            
+            db.session.commit()
+            current_app.logger.info(f"User logged in: {user.username}")
             flash('Login berhasil!', 'success')
-
             return redirect_based_on_role(user.role)
 
         except Exception as e:
-            current_app.logger.error(f"Login error: {str(e)}", exc_info=True)
+            current_app.logger.error(f"Login error: {str(e)}")
             flash('Terjadi kesalahan sistem saat login', 'error')
             return render_template('auth/login.html')
 
@@ -168,28 +175,66 @@ def verify_email(token):
         user = User.verify_email_token(token)
         
         if not user:
-            flash('Link verifikasi tidak valid atau kadaluarsa', 'error')
+            current_app.logger.warning(f"Invalid verification token: {token}")
+            flash('Link verifikasi tidak valid atau sudah kadaluarsa.', 'error')
             return redirect(url_for('auth.login'))
-        
-        if user.email_verified:
-            flash('Email sudah diverifikasi sebelumnya', 'info')
-        else:
-            user.email_verified = True
-            user.email_verified_at = datetime.utcnow()
-            user.is_active = True  # Ensure account is activated
-            db.session.commit()
-            
-            if user.role == UserRole.ADMIN:
-                flash('Verifikasi admin berhasil! Akun Anda sekarang aktif.', 'success')
-            else:
-                flash('Email berhasil diverifikasi!', 'success')
 
+        # Jika sudah terverifikasi, langsung redirect
+        if user.email_verified:
+            flash('Email Anda sudah terverifikasi sebelumnya.', 'info')
+            return redirect(url_for('auth.login'))
+
+        # Proses verifikasi
+        user.email_verified = True
+        user.email_verified_at = datetime.utcnow()
+        user.is_active = True
+        user.reset_login_attempts()  # Reset semua attempt login
+        
+        db.session.commit()
+
+        current_app.logger.info(f"Email verified for user {user.id}")
+        flash('Verifikasi berhasil! Silakan login dengan akun Anda.', 'success')
+        return redirect(url_for('auth.login'))
+
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        current_app.logger.error(f"Database error during verification: {str(e)}")
+        flash('Terjadi kesalahan sistem. Silakan coba lagi.', 'error')
         return redirect(url_for('auth.login'))
 
     except Exception as e:
-        current_app.logger.error(f"Email verification error for token {token}: {str(e)}")
-        flash('Terjadi kesalahan saat verifikasi email', 'error')
-        return redirect(url_for('auth.register'))
+        current_app.logger.error(f"Unexpected verification error: {str(e)}")
+        flash('Terjadi kesalahan saat verifikasi. Silakan hubungi admin.', 'error')
+        return redirect(url_for('auth.login'))
+    
+
+@auth_bp.route('/change-password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    if not current_user.must_change_password:
+        return redirect(url_for('dashboard'))
+    
+    if request.method == 'POST':
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+        
+        if new_password != confirm_password:
+            flash('Konfirmasi password tidak cocok', 'error')
+            return render_template('auth/change_password.html')
+            
+        if len(new_password) < 8:
+            flash('Password minimal 8 karakter', 'error')
+            return render_template('auth/change_password.html')
+            
+        # Update password
+        current_user.set_password(new_password)
+        current_user.must_change_password = False
+        db.session.commit()
+        
+        flash('Password berhasil diubah!', 'success')
+        return redirect(url_for('dashboard'))
+    
+    return render_template('auth/change_password.html')
 
 @auth_bp.route('/logout')
 @login_required
@@ -226,36 +271,114 @@ def logout():
         flash('Terjadi kesalahan saat logout', 'error')
         return redirect(url_for('main.index'))
 
-@auth_bp.route('/change-password', methods=['POST'])
-@login_required
 def change_password():
-    # Get data from form instead of JSON
+    # Ambil data dari form
     current_password = request.form.get('current_password')
     new_password = request.form.get('new_password')
     confirm_password = request.form.get('confirm_password')
     
+    # Validasi dasar
     if not all([current_password, new_password, confirm_password]):
         flash('Semua field harus diisi', 'error')
         return redirect(url_for('profile.edit_profil'))
     
+    # Validasi kecocokan password baru
     if new_password != confirm_password:
         flash('Password baru dan konfirmasi password tidak cocok', 'error')
         return redirect(url_for('profile.edit_profil'))
     
+    # Validasi password saat ini
     if not current_user.check_password(current_password):
         flash('Password saat ini salah', 'error')
         return redirect(url_for('profile.edit_profil'))
     
+    # Validasi panjang password baru
+    if len(new_password) < 8:
+        flash('Password baru minimal 8 karakter', 'error')
+        return redirect(url_for('profile.edit_profil'))
+    
+    # Validasi password tidak boleh sama dengan yang lama
+    if current_user.check_password(new_password):
+        flash('Password baru tidak boleh sama dengan password lama', 'error')
+        return redirect(url_for('profile.edit_profil'))
+    
+    # Validasi kekuatan password
+    if not any(char.isdigit() for char in new_password):
+        flash('Password harus mengandung minimal 1 angka', 'error')
+        return redirect(url_for('profile.edit_profil'))
+    
+    if not any(char.isupper() for char in new_password):
+        flash('Password harus mengandung minimal 1 huruf besar', 'error')
+        return redirect(url_for('profile.edit_profil'))
+    
     try:
-        current_user.set_password(new_password)
+        # Update password
+        current_user.password = generate_password_hash(new_password)
+        current_user.must_change_password = False  # Reset flag jika ada
+        current_user.last_password_change = datetime.utcnow()
+        
+        # Log perubahan password
+        audit_log = AuditLog(
+            user_id=current_user.id,
+            action='change_password',
+            ip_address=request.remote_addr,
+            user_agent=request.user_agent.string,
+            details='User changed password'
+        )
+        db.session.add(audit_log)
+        
         db.session.commit()
-        flash('Password berhasil diubah', 'success')
+        
+        # Kirim notifikasi email
+        send_password_change_notification(current_user)
+        
+        flash('Password berhasil diubah. Silakan login kembali dengan password baru.', 'success')
+        
+        # Logout user setelah perubahan password
+        logout_user()
+        return redirect(url_for('auth.login'))
+        
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error(f"Password change error: {str(e)}")
-        flash('Gagal mengubah password', 'error')
-    
-    return redirect(url_for('profile.edit_profil'))
+        current_app.logger.error(f"Gagal mengubah password: {str(e)}", 
+                              exc_info=True,
+                              extra={'user_id': current_user.id})
+        flash('Terjadi kesalahan saat mengubah password', 'error')
+        return redirect(url_for('profile.edit_profil'))
+
+
+def send_password_change_notification(user):
+    """Kirim email notifikasi perubahan password"""
+    try:
+        msg = Message(
+            "Notifikasi Perubahan Password",
+            sender=current_app.config['MAIL_DEFAULT_SENDER'],
+            recipients=[user.email]
+        )
+        
+        msg.html = render_template(
+            "emails/password_changed.html",
+            user=user,
+            change_time=datetime.utcnow(),
+            ip_address=request.remote_addr,
+            current_year=datetime.now().year
+        )
+        
+        msg.body = f"""
+        Halo {user.full_name},
+        
+        Password akun Anda baru saja diubah pada:
+        Waktu: {datetime.utcnow().strftime('%d %B %Y %H:%M')} UTC
+        Alamat IP: {request.remote_addr}
+        
+        Jika Anda tidak melakukan perubahan ini, segera hubungi administrator.
+        
+        Email ini dikirim secara otomatis.
+        """
+        
+        mail.send(msg)
+    except Exception as e:
+        current_app.logger.error(f"Gagal mengirim notifikasi password: {str(e)}")
 
 # Rate limiting implementation
 def check_rate_limit(request):

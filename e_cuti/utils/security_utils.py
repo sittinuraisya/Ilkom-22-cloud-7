@@ -3,6 +3,12 @@ import hashlib
 import secrets
 from datetime import datetime, timedelta
 from flask import current_app
+import string
+
+def generate_secure_password(length=12):
+    """Generate random secure password"""
+    characters = string.ascii_letters + string.digits + "!@#$%^&*"
+    return ''.join(secrets.choice(characters) for _ in range(length))
 
 def generate_secure_token(extra_data=None):
     """Generate a cryptographically secure token"""

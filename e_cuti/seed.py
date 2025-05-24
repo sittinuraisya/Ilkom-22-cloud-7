@@ -18,11 +18,12 @@ def create_initial_users():
             {
                 "username": "superadmin",
                 "email": "superadmin@example.com",
-                "password": "password123",  # Password akan di-hash dengan pbkdf2:sha256
+                "password": "password123",
                 "full_name": "Super Administrator",
                 "role": UserRole.SUPERADMIN,
                 "jabatan": "Direktur Utama",
                 "golongan": "I",
+                "nip": "196808171985031001",
                 "email_verified": True,
                 "is_active": True,
                 "atasan_ref": None
@@ -35,6 +36,7 @@ def create_initial_users():
                 "role": UserRole.ADMIN,
                 "jabatan": "Manajer IT",
                 "golongan": "III",
+                "nip": "198209152006041002",
                 "email_verified": True,
                 "is_active": True,
                 "atasan_ref": "superadmin"
@@ -47,6 +49,7 @@ def create_initial_users():
                 "role": UserRole.ATASAN,
                 "jabatan": "Manager",
                 "golongan": "IV",
+                "nip": "19820915200605003",              
                 "email_verified": True,
                 "is_active": True,
                 "atasan_ref": "superadmin"
@@ -59,6 +62,7 @@ def create_initial_users():
                 "role": UserRole.PEGAWAI,
                 "jabatan": "Staff",
                 "golongan": "II",
+                "nip": "196808171985011007",
                 "email_verified": True,
                 "is_active": True,
                 "atasan_ref": "atasan"
@@ -78,6 +82,7 @@ def create_initial_users():
                     role=user_data["role"],
                     jabatan=user_data["jabatan"],
                     golongan=user_data["golongan"],
+                    nip=user_data["nip"],                   
                     email_verified=user_data["email_verified"],
                     is_active=user_data["is_active"],
                     created_at=datetime.now(timezone.utc)
