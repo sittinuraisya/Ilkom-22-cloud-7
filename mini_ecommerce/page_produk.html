@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>MyProduct - Solusi Hebat untuk Bisnis Anda</title>
+    <style>
+        body {
+            margin:0; padding:0;
+            font-family: 'Segoe UI', sans-serif;
+            line-height:1.6;
+            color:#333;
+            background:#f9f9f9;
+        }
+        header {
+            background: linear-gradient(135deg, #ff6600, #ff9900);
+            color:#fff;
+            padding:100px 20px;
+            text-align:center;
+        }
+        header h1 { font-size:3em; margin:0; }
+        header p { font-size:1.4em; max-width:600px; margin:10px auto 30px; }
+        header button {
+            background:#fff;
+            color:#ff6600;
+            padding:12px 30px;
+            border:none;
+            border-radius:5px;
+            cursor:pointer;
+            font-size:1.1em;
+        }
+        header button:hover {
+            background:#f2f2f2;
+        }
+        .container {
+            max-width:1100px;
+            margin:auto;
+            padding:60px 20px;
+        }
+        h2 {
+            text-align:center;
+            margin-bottom:40px;
+        }
+        .features, .pricing-table, .testimonials, .faq {
+            display:grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap:20px;
+        }
+        .card, .faq-item {
+            background:#fff;
+            padding:20px;
+            border-radius:8px;
+            box-shadow:0 2px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .card:hover, .faq-item:hover {
+            transform:translateY(-5px);
+        }
+        .pricing-table .card {
+            text-align:center;
+        }
+        .pricing-table h3 { margin-top:0; }
+        .pricing-table button {
+            background:#ff6600;
+            color:#fff;
+            border:none;
+            padding:10px 20px;
+            margin-top:10px;
+            cursor:pointer;
+            border-radius:5px;
+        }
+        .pricing-table button:hover {
+            background:#e65500;
+        }
+        .testimonial {
+            font-style:italic;
+        }
+        .faq-item h4 {
+            cursor:pointer;
+            position:relative;
+        }
+        .faq-item p {
+            display:none;
+            margin-top:10px;
+        }
+        footer {
+            background:#333;
+            color:#fff;
+            text-align:center;
+            padding:30px 20px;
+            margin-top:60px;
+        }
+        @media (max-width:600px){
+            header h1 { font-size:2em; }
+            header p { font-size:1em; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>MyProduct</h1>
+    <p>Solusi digital untuk mempercepat pertumbuhan bisnis Anda. Tingkatkan produktivitas dan efisiensi bersama kami.</p>
+    <button>Get Started</button>
+</header>
+
+<div class="container">
+    <h2>Kenapa Memilih MyProduct?</h2>
+    <div class="features">
+        <div class="card"><h3>Hemat Waktu</h3><p>Otomatisasi proses bisnis agar tim fokus pada hal yang lebih penting.</p></div>
+        <div class="card"><h3>Support 24/7</h3><p>Tim kami selalu siap membantu Anda kapan pun dibutuhkan.</p></div>
+        <div class="card"><h3>Integrasi Mudah</h3><p>Dapat dihubungkan dengan tools populer seperti ERP, CRM, dan lainnya.</p></div>
+        <div class="card"><h3>Keamanan Data</h3><p>Data Anda dilindungi dengan enkripsi berstandar industri.</p></div>
+    </div>
+</div>
+
+<div class="container">
+    <h2>Paket Harga</h2>
+    <div class="pricing-table">
+        <div class="card">
+            <h3>Basic</h3>
+            <p><strong>Rp 99.000 / bulan</strong></p>
+            <p>✔ Fitur dasar<br>✔ 10 user<br>✔ Email support</p>
+            <button>Pesan</button>
+        </div>
+        <div class="card">
+            <h3>Pro</h3>
+            <p><strong>Rp 199.000 / bulan</strong></p>
+            <p>✔ Semua fitur Basic<br>✔ 50 user<br>✔ Integrasi API</p>
+            <button>Pesan</button>
+        </div>
+        <div class="card">
+            <h3>Enterprise</h3>
+            <p><strong>Rp 499.000 / bulan</strong></p>
+            <p>✔ Semua fitur Pro<br>✔ Unlimited user<br>✔ Dedicated support</p>
+            <button>Pesan</button>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <h2>Apa Kata Client Kami</h2>
+    <div class="testimonials">
+        <div class="card testimonial"><p>"Luar biasa! MyProduct membantu kami menghemat banyak waktu dan biaya."</p><strong>- Andi, CEO RetailX</strong></div>
+        <div class="card testimonial"><p>"Integrasi sangat mudah, tim support juga sangat responsif."</p><strong>- Sita, CTO StartupAI</strong></div>
+        <div class="card testimonial"><p>"Kami berhasil menaikkan omzet 2x setelah pakai MyProduct."</p><strong>- Rama, Owner FoodMart</strong></div>
+    </div>
+</div>
+
+<div class="container">
+    <h2>FAQ</h2>
+    <div class="faq">
+        <div class="faq-item">
+            <h4>Apa saja metode pembayarannya?</h4>
+            <p>Kami menerima transfer bank, kartu kredit, dan e-wallet populer di Indonesia.</p>
+        </div>
+        <div class="faq-item">
+            <h4>Apakah ada masa percobaan?</h4>
+            <p>Ya, Anda dapat mencoba gratis selama 14 hari tanpa kartu kredit.</p>
+        </div>
+        <div class="faq-item">
+            <h4>Bagaimana jika saya butuh fitur khusus?</h4>
+            <p>Hubungi kami untuk solusi custom sesuai kebutuhan bisnis Anda.</p>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <h2>Hubungi Kami</h2>
+    <form>
+        <input type="text" placeholder="Nama Anda" required>
+        <input type="email" placeholder="Email Anda" required>
+        <textarea rows="5" placeholder="Pesan Anda" required></textarea>
+        <button type="submit">Kirim Pesan</button>
+    </form>
+</div>
+
+<footer>
+    &copy; 2025 MyProduct | Solusi Hebat untuk Bisnis Anda
+</footer>
+
+<script>
+    // FAQ toggle
+    document.querySelectorAll('.faq-item h4').forEach(item => {
+        item.addEventListener('click', () => {
+            const p = item.nextElementSibling;
+            if (p.style.display === "block") {
+                p.style.display = "none";
+            } else {
+                p.style.display = "block";
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

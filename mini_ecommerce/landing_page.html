@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Portfolio | Your Name</title>
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            margin:0; padding:0;
+            font-family: 'Segoe UI', sans-serif;
+            color:#333;
+        }
+        header {
+            background: linear-gradient(135deg, #0077cc, #00aaff);
+            color:#fff;
+            padding:80px 20px;
+            text-align:center;
+        }
+        header h1 { font-size:3em; margin:0; }
+        header p { font-size:1.2em; }
+        nav {
+            background:#004d87;
+            display:flex;
+            justify-content:center;
+            flex-wrap:wrap;
+            position: sticky;
+            top:0;
+            z-index:100;
+        }
+        nav a {
+            color:#fff;
+            padding:12px 18px;
+            text-decoration:none;
+        }
+        nav a:hover {
+            background:#003b6a;
+        }
+        section {
+            max-width:1000px;
+            margin:auto;
+            padding:60px 20px;
+        }
+        .skills, .projects {
+            display:grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap:20px;
+        }
+        .card {
+            background:#fff;
+            border-radius:8px;
+            box-shadow:0 2px 5px rgba(0,0,0,0.1);
+            padding:20px;
+            transition: transform 0.3s;
+        }
+        .card:hover {
+            transform:translateY(-5px);
+        }
+        .alt-bg {
+            background:#f4f4f4;
+        }
+        form input, form textarea, form button {
+            width:100%;
+            padding:12px;
+            margin:6px 0;
+            box-sizing:border-box;
+        }
+        form button {
+            background:#0077cc;
+            color:#fff;
+            border:none;
+            cursor:pointer;
+        }
+        form button:hover {
+            background:#005fa3;
+        }
+        footer {
+            background:#333;
+            color:#fff;
+            text-align:center;
+            padding:15px;
+            margin-top:40px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Your Name</h1>
+    <p>Web Developer | Designer | Freelancer</p>
+</header>
+
+<nav>
+    <a href="#about">About</a>
+    <a href="#skills">Skills</a>
+    <a href="#projects">Projects</a>
+    <a href="#contact">Contact</a>
+</nav>
+
+<section id="about">
+    <h2>About Me</h2>
+    <p>Hallo! Saya seorang web developer dengan fokus pada pembuatan website yang cepat, modern, dan responsive. Saya senang membantu bisnis atau individu membangun kehadiran online yang kuat.</p>
+</section>
+
+<section id="skills" class="alt-bg">
+    <h2>My Skills</h2>
+    <div class="skills">
+        <div class="card"><h3>HTML & CSS</h3><p>Desain modern, responsive, SEO-friendly.</p></div>
+        <div class="card"><h3>JavaScript</h3><p>Interaktivitas & API Integration.</p></div>
+        <div class="card"><h3>Python & Flask</h3><p>Backend ringan & scalable.</p></div>
+        <div class="card"><h3>WordPress</h3><p>Website bisnis & toko online cepat jadi.</p></div>
+    </div>
+</section>
+
+<section id="projects">
+    <h2>My Projects</h2>
+    <div class="projects">
+        <div class="card"><h3>Landing Page Startup</h3><p>Built with HTML, CSS, JS untuk startup fintech.</p></div>
+        <div class="card"><h3>Company Profile</h3><p>WordPress kustom untuk perusahaan manufaktur.</p></div>
+        <div class="card"><h3>E-commerce</h3><p>Flask & SQLite untuk toko kecil, integrasi pembayaran manual.</p></div>
+    </div>
+</section>
+
+<section id="contact" class="alt-bg">
+    <h2>Contact Me</h2>
+    <form>
+        <input type="text" placeholder="Your Name" required>
+        <input type="email" placeholder="Your Email" required>
+        <textarea rows="5" placeholder="Your Message" required></textarea>
+        <button type="submit">Send Message</button>
+    </form>
+</section>
+
+<footer>
+    &copy; 2025 Your Name | Portfolio Online
+</footer>
+
+</body>
+</html>

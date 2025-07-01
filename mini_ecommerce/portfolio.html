@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>My Business Portfolio</title>
+    <style>
+        body {
+            margin:0; padding:0;
+            font-family: 'Segoe UI', sans-serif;
+            line-height:1.6;
+            background:#f9f9f9;
+            color:#333;
+        }
+        header {
+            background:#0077cc;
+            color:#fff;
+            padding:60px 20px;
+            text-align:center;
+        }
+        header h1 {
+            margin-bottom:10px;
+            font-size:2.5em;
+        }
+        nav {
+            background:#005fa3;
+            display:flex;
+            justify-content:center;
+            flex-wrap:wrap;
+        }
+        nav a {
+            color:#fff;
+            padding:14px 20px;
+            text-decoration:none;
+        }
+        nav a:hover {
+            background:#004d87;
+        }
+        section {
+            max-width:1200px;
+            margin:40px auto;
+            padding:0 20px;
+        }
+        .services, .portfolio, .testimonials {
+            display:grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap:20px;
+        }
+        .service, .project, .testimonial {
+            background:#fff;
+            padding:20px;
+            border-radius:8px;
+            box-shadow:0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s, opacity 0.8s;
+            opacity:0;
+        }
+        .service:hover, .project:hover, .testimonial:hover {
+            transform: translateY(-5px);
+        }
+        .fade-in {
+            opacity:1;
+        }
+        .service h3, .project h3, .testimonial h3 {
+            margin-top:0;
+        }
+        form input, form textarea, form button {
+            width:100%;
+            padding:12px;
+            margin:6px 0;
+            box-sizing:border-box;
+        }
+        form button {
+            background:#0077cc;
+            color:#fff;
+            border:none;
+            cursor:pointer;
+        }
+        form button:hover {
+            background:#005fa3;
+        }
+        footer {
+            background:#333;
+            color:#fff;
+            text-align:center;
+            padding:15px;
+            margin-top:40px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>My Business</h1>
+    <p>Solusi terbaik untuk website, branding & digital marketing</p>
+</header>
+
+<nav>
+    <a href="#services">Services</a>
+    <a href="#portfolio">Portfolio</a>
+    <a href="#testimonials">Testimonials</a>
+    <a href="#contact">Contact</a>
+</nav>
+
+<section id="services">
+    <h2 style="text-align:center;">Our Services</h2>
+    <div class="services">
+        <div class="service"> <h3>Web Development</h3><p>Website profesional dengan desain modern & responsive.</p> </div>
+        <div class="service"> <h3>Branding</h3><p>Membangun identitas merek yang kuat, mulai logo hingga guideline.</p> </div>
+        <div class="service"> <h3>Digital Marketing</h3><p>Strategi pemasaran online untuk meningkatkan visibilitas bisnis Anda.</p> </div>
+    </div>
+</section>
+
+<section id="portfolio">
+    <h2 style="text-align:center;">Our Portfolio</h2>
+    <div class="portfolio">
+        <div class="project"> <h3>Project A</h3><p>Website ecommerce modern dengan cart & payment gateway.</p> </div>
+        <div class="project"> <h3>Project B</h3><p>Brand identity lengkap untuk startup teknologi AI.</p> </div>
+        <div class="project"> <h3>Project C</h3><p>Kampanye digital marketing yang meningkatkan leads 3x.</p> </div>
+    </div>
+</section>
+
+<section id="testimonials">
+    <h2 style="text-align:center;">Testimonials</h2>
+    <div class="testimonials">
+        <div class="testimonial">
+            <h3>Andi - CEO TechCorp</h3>
+            <p>"Layanan mereka luar biasa! Website kami naik ranking drastis."</p>
+        </div>
+        <div class="testimonial">
+            <h3>Sita - Founder StartupAI</h3>
+            <p>"Branding yang mereka buat benar-benar memukau investor kami."</p>
+        </div>
+        <div class="testimonial">
+            <h3>Rama - Owner TokoOnline</h3>
+            <p>"Penjualan kami naik 200% sejak pakai strategi marketing mereka."</p>
+        </div>
+    </div>
+</section>
+
+<section id="contact">
+    <h2 style="text-align:center;">Contact Us</h2>
+    <form>
+        <input type="text" placeholder="Your Name" required>
+        <input type="email" placeholder="Your Email" required>
+        <textarea rows="5" placeholder="Your Message" required></textarea>
+        <button type="submit">Send Message</button>
+    </form>
+</section>
+
+<footer>
+    &copy; 2025 My Business | Made with ❤️ by Kamu
+</footer>
+
+<script>
+    // Animasi fade-in saat scroll
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if(entry.isIntersecting){
+                entry.target.classList.add('fade-in');
+            }
+        });
+    }, { threshold: 0.2 });
+
+    document.querySelectorAll('.service, .project, .testimonial').forEach(el => {
+        observer.observe(el);
+    });
+</script>
+
+</body>
+</html>
