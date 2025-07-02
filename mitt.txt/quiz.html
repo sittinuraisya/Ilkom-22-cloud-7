@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz - English Learning</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(to right, #ffe4ec, #f8bbd0);
+            font-family: 'Nunito', sans-serif;
+        }
+        .quiz-container {
+            max-width: 700px;
+            margin: 60px auto;
+            background-color: #fff0f5;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        }
+        .question {
+            font-size: 20px;
+            font-weight: 700;
+            color: #d81b60;
+        }
+        .option {
+            margin-top: 10px;
+            padding: 12px;
+            background: #ffffff;
+            border: 2px dashed #f8bbd0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .option:hover {
+            background: #ffe4ec;
+        }
+        .btn-submit {
+            margin-top: 20px;
+            background-color: #ec407a;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #ad1457;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h1 class="text-center text-2xl font-bold text-pink-700 mb-6">Quiz Vocabulary</h1>
+        <div id="quiz-content">
+            <p class="question" id="question-text">1. What is the correct meaning of the word "brilliant"?</p>
+            <div class="option" onclick="selectOption(this)">A. Boring</div>
+            <div class="option" onclick="selectOption(this)">B. Very smart</div>
+            <div class="option" onclick="selectOption(this)">C. Lazy</div>
+            <div class="option" onclick="selectOption(this)">D. Tired</div>
+            <button class="btn-submit" onclick="checkAnswer()">Submit</button>
+            <div class="result" id="result"></div>
+        </div>
+    </div>
+
+    <script>
+        let selected = null;
+        function selectOption(element) {
+            document.querySelectorAll('.option').forEach(el => el.style.background = '#ffffff');
+            element.style.background = '#ffc1e3';
+            selected = element.innerText;
+        }
+
+        function checkAnswer() {
+            if (!selected) {
+                document.getElementById('result').innerText = 'Please select an answer first!';
+                return;
+            }
+            if (selected.includes('B. Very smart')) {
+                document.getElementById('result').innerText = 'Correct! Great job 🎉';
+            } else {
+                document.getElementById('result').innerText = 'Oops! The correct answer is B. Very smart';
+            }
+        }
+    </script>
+</body>
+</html>
