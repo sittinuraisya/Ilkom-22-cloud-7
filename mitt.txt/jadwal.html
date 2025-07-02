@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Learning System - Jadwal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #fff1f2;
+            font-family: 'Nunito', sans-serif;
+        }
+        .card {
+            background: #fff;
+            border: 2px dashed #f8bbd0;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(248, 187, 208, 0.4);
+            transition: 0.3s ease;
+        }
+        .card:hover {
+            background-color: #ffe6ef;
+        }
+        h1 {
+            background: linear-gradient(to right, #f8bbd0, #ce93d8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .calendar-day {
+            height: 100px;
+            background-color: #fce4ec;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            font-size: 14px;
+            font-weight: 500;
+            color: #ad1457;
+        }
+    </style>
+</head>
+<body class="p-6">
+    <div class="max-w-5xl mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-8">📅 Jadwal Belajar Kamu</h1>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="calendar-day">
+                <span>Senin</span>
+                <span class="text-sm">Vocabulary</span>
+            </div>
+            <div class="calendar-day">
+                <span>Selasa</span>
+                <span class="text-sm">Grammar</span>
+            </div>
+            <div class="calendar-day">
+                <span>Rabu</span>
+                <span class="text-sm">Pronunciation</span>
+            </div>
+            <div class="calendar-day">
+                <span>Kamis</span>
+                <span class="text-sm">Listening</span>
+            </div>
+            <div class="calendar-day">
+                <span>Jumat</span>
+                <span class="text-sm">Speaking</span>
+            </div>
+            <div class="calendar-day">
+                <span>Sabtu</span>
+                <span class="text-sm">Reading</span>
+            </div>
+            <div class="calendar-day">
+                <span>Minggu</span>
+                <span class="text-sm">Writing</span>
+            </div>
+            <div class="calendar-day bg-pink-200">
+                <span>📌 Catatan</span>
+                <span class="text-xs text-center">Jangan lupa review semua materi tiap akhir minggu!</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

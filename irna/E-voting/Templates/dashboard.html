@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Polling</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 500px;
+            margin: auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h2, h3 {
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            resize: vertical;
+        }
+        input[type="submit"] {
+            padding: 8px 16px;
+            background: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background: #0056b3;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            background: #eee;
+            margin-bottom: 8px;
+            padding: 8px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Hai {{ user }}! Pilih grup favoritmu:</h2>
+
+    {% if not voted %}
+    <form method="POST">
+        {% for opt in options %}
+            <label>
+                <input type="radio" name="option" value="{{ opt[0] }}" required> {{ opt[1] }}
+            </label><br>
+        {% endfor %}
+        <br>
+        <input type="submit" value="Vote">
+    </form>
+    {% else %}
+    <p>Terima kasih, kamu sudah memilih!</p>
+
+    <h3>Komentar</h3>
+    <form method="POST" action="/comment/{{ poll_id }}">
+        <textarea nam<!DOCTYPE html>
+<html>
+<head>
+    <title>Polling K-Pop</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="container">
+    <h2>Hai {{ user }}! Pilih grup favoritmu:</h2>
+
+    {% if not voted %}
+    <form method="POST">
+        {% for opt in options %}
+        <label>
+            <input type="radio" name="option" value="{{ opt[0] }}" required>
+            {{ opt[1] }}
+        </label>
+        {% endfor %}
+        <br>
+        <input type="submit" value="Vote">
+    </form>
+    {% else %}
+    <p><strong>✅ Terima kasih, kamu sudah memilih!</strong></p>
+
+    <h3>Komentar</h3>
+    <form method="POST" action="/comment/{{ poll_id }}">
+        <textarea name="content" rows="3" placeholder="Tulis komentarmu..." required></textarea><br>
+        <input type="submit" value="Kirim Komentar">
+    </form>
+    {% endif %}
+
+    <h3>Daftar Komentar</h3>
+    {% if comments %}
+    <ul>
+        {% for comment in comments %}
+        <li>
+            <strong>{{ comment[1] }}</strong> ({{ comment[0] }}):<br>
+            {{ comment[2] }}
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>Belum ada komentar.</p>
+    {% endif %}
+</div>
+</body>
+</html>
+e="content" rows="3" placeholder="Tulis komentarmu..." required></textarea><br>
+        <input type="submit" value="Kirim Komentar">
+    </form>
+    {% endif %}
+
+    <h3>Daftar Komentar</h3>
+    {% if comments %}
+    <ul>
+        {% for comment in comments %}
+        <li><strong>{{ comment[1] }}</strong> ({{ comment[0] }}): {{ comment[2] }}</li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>Belum ada komentar.</p>
+    {% endif %}
+</div>
+</body>
+</html>
