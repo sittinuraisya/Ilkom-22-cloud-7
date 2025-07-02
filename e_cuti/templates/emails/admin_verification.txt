@@ -1,0 +1,12 @@
+Verifikasi Akun Admin
+
+Halo {{ user.full_name }},
+
+Anda telah terdaftar sebagai Administrator di Sistem E-Cuti.
+
+Untuk mengaktifkan akun, silakan verifikasi email Anda dengan mengunjungi link berikut:
+{{ verify_url }}
+
+Jika Anda tidak merasa mendaftar sebagai admin, abaikan email ini.
+
+© {{ current_year }} E-Cuti

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #f8f9fa; padding: 15px; text-align: center; }
+        .content { padding: 20px; }
+        .footer { margin-top: 20px; font-size: 12px; color: #6c757d; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Status Pengajuan Cuti</h2>
+        </div>
+        
+        <div class="content">
+            <p>Halo {{ user.full_name }},</p>
+            
+            <p>Pengajuan cuti Anda dengan detail berikut telah <strong>{{ status }}</strong>:</p>
+            
+            <ul>
+                <li><strong>Jenis Cuti:</strong> {{ leave.jenis_cuti.value }}</li>
+                <li><strong>Tanggal:</strong> {{ leave.tanggal_mulai.strftime('%d %B %Y') }} - {{ leave.tanggal_selesai.strftime('%d %B %Y') }}</li>
+                <li><strong>Jumlah Hari:</strong> {{ leave.jumlah_hari }} hari</li>
+                <li><strong>Disetujui oleh:</strong> {{ approver }}</li>
+                {% if status == 'REJECTED' and rejection_reason %}
+                <li><strong>Alasan Penolakan:</strong> {{ rejection_reason }}</li>
+                {% endif %}
+            </ul>
+            
+            <p>Silakan login ke sistem untuk melihat detail lebih lanjut.</p>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; {{ current_year }} Sistem e-Cuti. Pesan ini dikirim secara otomatis.</p>
+        </div>
+    </div>
+</body>
+</html>

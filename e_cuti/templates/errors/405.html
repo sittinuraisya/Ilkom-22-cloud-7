@@ -1,0 +1,14 @@
+{% extends "errors/_error_base.html" %}
+
+{% block illustration %}
+    <img src="{{ url_for('static', filename='images/405.png') }}" alt="Not Found" class="error-illustration floating" style="width: 300px;">
+{% endblock %}
+
+{% block error_code %}405{% endblock %}
+
+{% block error_message %}Hilang di Alam Digital!{% endblock %}
+
+{% block error_details %}
+    <p>Halaman ini mungkin sedang berpetualang dengan alien! 👽🚀</p>
+    <div class="alien-animation">🛸 🌌 🔍</div>
+{% endblock %}

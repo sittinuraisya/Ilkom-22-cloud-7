@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Error{% endblock %} | Aplikasi Cuti</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/error_styles.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="error-page">
+    <div class="error-container">
+        {% block illustration %}{% endblock %}
+        <div class="error-content">
+            <h1>{% block error_code %}{% endblock %}</h1>
+            <p class="error-message">{% block error_message %}{% endblock %}</p>
+            <div class="error-details">
+                {% block error_details %}{% endblock %}
+            </div>
+            <a href="{{ url_for('common.home') }}" class="home-button">
+                <span class="button-icon">🏠</span> Kembali ke Halaman Utama
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Animasi hover
+        const homeButton = document.querySelector('.home-button');
+        if (homeButton) {
+            homeButton.addEventListener('mouseover', function() {
+                this.innerHTML = '<span class="button-icon">🚀</span> Kembali ke Beranda';
+            });
+            homeButton.addEventListener('mouseout', function() {
+                this.innerHTML = '<span class="button-icon">🏠</span> Kembali ke Halaman Utama';
+            });
+        }
+    </script>
+</body>
+</html>

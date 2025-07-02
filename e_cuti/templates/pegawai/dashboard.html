@@ -1,0 +1,532 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Pegawai{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800">Selamat Datang, {{ current_user.username }}</h1>
+            <p class="mb-0 text-muted small">Dashboard pengajuan cuti pegawai</p>
+        </div>
+        <a href="{{ url_for('pegawai.ajukan_cuti') }}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-circle me-1"></i> Ajukan Cuti
+        </a>
+    </div>
+
+    <!-- Quick Access Cards -->
+    <div class="row g-3 mb-4">
+        {% set quick_links = [
+            {'title': 'Status Pengajuan', 'subtitle': 'Lihat Status Cuti', 'icon': 'clock-history', 'color': 'info', 'url': url_for('pegawai.status_cuti')},
+            {'title': 'Akun', 'subtitle': 'Kelola Profil', 'icon': 'person-lines-fill', 'color': 'warning', 'url': url_for('profile.profil')},
+            {'title': 'Kalender Cuti', 'subtitle': 'Lihat Kalender', 'icon': 'calendar-week', 'color': 'primary', 'url': 'https://calendar.google.com/calendar/embed?src=your_calendar_id', 'target': '_blank'}
+        ] %}
+        
+        {% for link in quick_links %}
+        <div class="col-md-4">
+            <a href="{{ link.url }}" class="text-decoration-none" {% if link.target %}target="{{ link.target }}"{% endif %}>
+                <div class="card stat-card h-100 border-start border-{{ link.color }} border-3">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="bg-{{ link.color }} bg-opacity-10 p-2 rounded me-3">
+                            <i class="bi bi-{{ link.icon }} text-{{ link.color }} fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1 small">{{ link.title }}</h6>
+                            <h5 class="mb-0">{{ link.subtitle }}</h5>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        {% set stats = [
+            {'title': 'Cuti Tersisa', 'value': sisa_cuti, 'icon': 'calendar-check', 'color': 'primary'},
+            {'title': 'Disetujui', 'value': cuti_disetujui, 'icon': 'check-circle', 'color': 'success'},
+            {'title': 'Ditolak', 'value': cuti_ditolak, 'icon': 'x-circle', 'color': 'danger'}
+        ] %}
+        
+        {% for item in stats %}
+        <div class="col-md-4">
+            <div class="card stat-card h-100 border-start border-{{ item.color }} border-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="text-muted small mb-1">{{ item.title }}</h5>
+                            <h2 class="mb-0">{{ item.value }} Hari</h2>
+                        </div>
+                        <div class="bg-{{ item.color }} bg-opacity-10 p-2 rounded">
+                            <i class="bi bi-{{ item.icon }} text-{{ item.color }} fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+
+    <!-- Recent Leave Requests -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Pengajuan Terakhir</h5>
+            <a href="{{ url_for('pegawai.status_cuti') }}" class="btn btn-sm btn-primary">Lihat Semua</a>
+        </div>
+        <div class="card-body">
+            {% if cuti_terakhir %}
+            <div class="table-responsive">
+                <table class="table table-hover small">
+                    <thead>
+                        <tr>
+                            <th>Jenis Cuti</th>
+                            <th>Tanggal</th>
+                            <th>Lama</th>
+                            <th>Status</th>
+                            <th class="text-end">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cuti in cuti_terakhir %}
+                        <tr>
+                            <td>{{ cuti.jenis_cuti.value if cuti.jenis_cuti else '' }}</td>
+                            <td>
+                                {{ cuti.tanggal_mulai|format_date if cuti.tanggal_mulai else '' }} -
+                                {{ cuti.tanggal_selesai|format_date if cuti.tanggal_selesai else '' }}
+                            </td>
+                            <td>{{ cuti.jumlah_hari }} Hari</td>
+                            <td>
+                                {% set status_color = 
+                                    'success' if cuti.status.value == 'APPROVED' else 
+                                    'warning' if cuti.status.value == 'PENDING' else 
+                                    'danger' %}
+                                <span class="badge bg-{{ status_color }}">{{ cuti.status.value }}</span>
+                            </td>
+                            <td class="text-end">
+                                <a href="{{ url_for('pegawai.cetak_surat', cuti_id=cuti.id) }}" 
+                                   class="btn btn-sm btn-outline-secondary" target="_blank">
+                                    <i class="bi bi-printer"></i> Cetak
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="bi bi-calendar-x fs-1 text-muted"></i>
+                <p class="mt-2 small">Belum ada pengajuan cuti</p>
+                <a href="{{ url_for('pegawai.ajukan_cuti') }}" class="btn btn-sm btn-primary mt-2">
+                    <i class="bi bi-plus-circle me-1"></i> Ajukan Cuti
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Calendar and Leave Policy -->
+    <div class="row g-4">
+        <!-- Calendar -->
+        <div class="col-lg-8">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-calendar-week me-2"></i>Kalender Cuti</h5>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-primary active">Bulan</button>
+                        <button class="btn btn-outline-primary">Minggu</button>
+                        <button class="btn btn-outline-primary">Daftar</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="calendar" style="min-height: 400px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leave Policy Section -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h5 class="mb-0 text-primary"><i class="bi bi-info-circle me-2"></i>Ketentuan Cuti</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="accordion accordion-flush small" id="leavePolicy">
+                        <!-- Cuti Tahunan -->
+                        <div class="accordion-item border-bottom">
+                            <h3 class="accordion-header">
+                                <button class="accordion-button collapsed py-3" type="button" 
+                                        data-bs-toggle="collapse" 
+                                        data-bs-target="#policyTahunan">
+                                    <i class="bi bi-calendar-check me-2 text-primary"></i> Cuti Tahunan
+                                </button>
+                            </h3>
+                            <div id="policyTahunan" class="accordion-collapse collapse" 
+                                data-bs-parent="#leavePolicy">
+                                <div class="accordion-body px-3 py-2">
+                                    <ul class="list-unstyled small">
+                                        <li class="mb-2">
+                                            <strong>Hak Cuti:</strong> 
+                                            <ul class="mt-1">
+                                                <li>12 hari kerja per tahun untuk masa kerja ≥ 1 tahun</li>
+                                                <li>1 hari per bulan untuk masa kerja &lt; 1 tahun (maks 6 hari)</li>
+                                            </ul>
+                                        </li>
+                                        <li class="mb-2">
+                                            <strong>Perhitungan:</strong>
+                                            <ul class="mt-1">
+                                                <li>Hari libur nasional tidak dihitung sebagai cuti</li>
+                                                <li>Minimal pengajuan 1 hari kerja</li>
+                                            </ul>
+                                        </li>
+                                        <li class="mb-2">
+                                            <strong>Persyaratan:</strong>
+                                            <ul class="mt-1">
+                                                <li>Diajukan minimal 3 hari kerja sebelumnya</li>
+                                                <li>Tidak boleh digabung dengan cuti lain lebih dari 14 hari</li>
+                                                <li>Maksimal 2x pengajuan per tahun untuk cuti > 5 hari</li>
+                                            </ul>
+                                        </li>
+                                        <li class="mb-2">
+                                            <strong>Keterangan:</strong> Sisa cuti tidak dapat dibawa ke tahun berikutnya
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cuti Sakit -->
+                        <div class="accordion-item border-bottom">
+                            <h3 class="accordion-header">
+                                <button class="accordion-button collapsed py-3" type="button" 
+                                        data-bs-toggle="collapse" 
+                                        data-bs-target="#policySakit">
+                                    <i class="bi bi-hospital me-2 text-primary"></i> Cuti Sakit
+                                </button>
+                            </h3>
+                            <div id="policySakit" class="accordion-collapse collapse" 
+                                data-bs-parent="#leavePolicy">
+                                <div class="accordion-body px-3 py-2">
+                                    <ul class="list-unstyled small">
+                                        <li class="mb-2">
+                                            <strong>Hak Cuti:</strong> 
+                                            <ul class="mt-1">
+                                                <li>14 hari kerja per tahun dengan surat dokter</li>
+                                                <li>3 hari per kejadian tanpa surat dokter (maks 3x per tahun)</li>
+                                            </ul>
+                                        </li>
+                                        <li class="mb-2">
+                                            <strong>Perhitungan:</strong>
+                                            <ul class="mt-1">
+                                                <li>Termasuk hari libur dan weekend</li>
+                                                <li>Diperpanjang otomatis untuk rawat inap</li>
+                                            </ul>
+                                        </li>
+                                        <li class="mb-2">
+                                            <strong>Persyaratan:</strong>
+                                            <ul class="mt-1">
+                                                <li>Surat dokter asli wajib untuk cuti > 3 hari</li>
+                                                <li>Lapor HRD maksimal 1x24 jam sejak pertama sakit</li>
+                                                <li>Untuk operasi besar: lampirkan laporan medis lengkap</li>
+                                            </ul>
+                                        </li>
+                                        <li class="text-danger">
+                                            <small><strong>Pemotongan Gaji:</strong> Berlaku jika melebihi kuota tahunan</small>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cuti Melahirkan -->
+                        <div class="accordion-item border-bottom">
+                            <h3 class="accordion-header">
+                                <button class="accordion-button collapsed py-3" type="button" 
+                                        data-bs-toggle="collapse" 
+                                        data-bs-target="#policyMelahirkan">
+                                    <i class="bi bi-gender-female me-2 text-primary"></i> Cuti Melahirkan
+                                </button>
+                            </h3>
+                            <div id="policyMelahirkan" class="accordion-collapse collapse" 
+                                data-bs-parent="#leavePolicy">
+                                <div class="accordion-body px-3 py-2">
+                                    <ul class="list-unstyled small">
+                                        <li class="mb-2">
+                                            <strong>Hak Cuti:</strong> 
+                                            <ul class="mt-1">
+                                                <li>3 bulan (1.5 bulan sebelum dan 1.5 bulan setelah melahirkan)</li>
+                                                <li>Perpanjangan 1 bulan untuk kondisi medis khusus</li>
+                                            </ul>
+                                        </li>
+                                        <li class="mb-2">
+                                            <strong>Persyaratan:</strong>
+                                            <ul class="mt-1">
+                                                <li>Surat keterangan dokter kandungan</li>
+                                                <li>Akta kelahiran anak wajib dilampirkan setelah cuti</li>
+                                                <li>Pemberitahuan minimal 1 bulan sebelumnya</li>
+                                            </ul>
+                                        </li>
+                                        <li class="mb-2">
+                                            <strong>Khusus:</strong>
+                                            <ul class="mt-1">
+                                                <li>Dapat dibagi menjadi 2 periode dengan persetujuan HRD</li>
+                                                <li>Tidak boleh digabung dengan cuti tahunan</li>
+                                            </ul>
+                                        </li>
+                                        <li class="text-success">
+                                            <small><strong>Hak Gaji:</strong> Dibayar penuh selama cuti</small>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cuti Besar -->
+                        <div class="accordion-item border-bottom">
+                            <h3 class="accordion-header">
+                                <button class="accordion-button collapsed py-3" type="button" 
+                                        data-bs-toggle="collapse" 
+                                        data-bs-target="#policyBesar">
+                                    <i class="bi bi-award me-2 text-primary"></i> Cuti Besar
+                                </button>
+                            </h3>
+                            <div id="policyBesar" class="accordion-collapse collapse" 
+                                data-bs-parent="#leavePolicy">
+                                <div class="accordion-body px-3 py-2">
+                                    <ul class="list-unstyled small">
+                                        <li class="mb-2">
+                                            <strong>Hak Cuti:</strong> 
+                                            <ul class="mt-1">
+                                                <li>3 bulan setelah masa kerja 6 tahun berturut-turut</li>
+                                                <li>Dapat diambil sekaligus atau dicicil</li>
+                                            </ul>
+                                        </li>
+                                        <li class="mb-2">
+                                            <strong>Persyaratan:</strong>
+                                            <ul class="mt-1">
+                                                <li>Pengajuan minimal 3 bulan sebelumnya</li>
+                                                <li>Tidak dapat digabung dengan cuti tahunan</li>
+                                                <li>Wajib melampirkan rencana kegiatan selama cuti</li>
+                                            </ul>
+                                        </li>
+                                        <li class="text-success">
+                                            <small><strong>Hak Gaji:</strong> Dibayar penuh selama cuti</small>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cuti Karena Alasan Penting -->
+                        <div class="accordion-item border-bottom">
+                            <h3 class="accordion-header">
+                                <button class="accordion-button collapsed py-3" type="button" 
+                                        data-bs-toggle="collapse" 
+                                        data-bs-target="#policyPenting">
+                                    <i class="bi bi-exclamation-triangle me-2 text-primary"></i> Cuti Alasan Penting
+                                </button>
+                            </h3>
+                            <div id="policyPenting" class="accordion-collapse collapse" 
+                                data-bs-parent="#leavePolicy">
+                                <div class="accordion-body px-3 py-2">
+                                    <ul class="list-unstyled small">
+                                        <li class="mb-2">
+                                            <strong>Jenis:</strong> 
+                                            <ol class="mt-1">
+                                                <li>Menikah (3 hari)</li>
+                                                <li>Menikahkan anak (2 hari)</li>
+                                                <li>Kelahiran anak (2 hari)</li>
+                                                <li>Khitanan anak (2 hari)</li>
+                                                <li>Kematian keluarga inti (3 hari)</li>
+                                                <li>Kecelakaan berat (5 hari)</li>
+                                            </ol>
+                                        </li>
+                                        <li class="mb-2">
+                                            <strong>Persyaratan:</strong>
+                                            <ul class="mt-1">
+                                                <li>Surat/dokumen pendukung wajib dilampirkan</li>
+                                                <li>Dapat diajukan mendesak (1x24 jam sebelumnya)</li>
+                                                <li>Tidak dapat digabung dengan cuti lain</li>
+                                            </ul>
+                                        </li>
+                                        <li class="mb-2">
+                                            <strong>Ketentuan:</strong>
+                                            <ul class="mt-1">
+                                                <li>Maksimal 2x pengajuan per tahun</li>
+                                                <li>Tidak termasuk dalam perhitungan cuti tahunan</li>
+                                                <li>Untuk kematian: berlaku untuk keluarga inti (orang tua, anak, pasangan)</li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cuti Tanpa Gaji -->
+                        <div class="accordion-item border-bottom">
+                            <h3 class="accordion-header">
+                                <button class="accordion-button collapsed py-3" type="button" 
+                                        data-bs-toggle="collapse" 
+                                        data-bs-target="#policyTanpaGaji">
+                                    <i class="bi bi-cash-coin me-2 text-primary"></i> Cuti Tanpa Gaji
+                                </button>
+                            </h3>
+                            <div id="policyTanpaGaji" class="accordion-collapse collapse" 
+                                data-bs-parent="#leavePolicy">
+                                <div class="accordion-body px-3 py-2">
+                                    <ul class="list-unstyled small">
+                                        <li class="mb-2">
+                                            <strong>Ketentuan:</strong> 
+                                            <ul class="mt-1">
+                                                <li>Maksimal 3 bulan per tahun</li>
+                                                <li>Perpanjangan harus disetujui Direktur</li>
+                                            </ul>
+                                        </li>
+                                        <li class="mb-2">
+                                            <strong>Persyaratan:</strong>
+                                            <ul class="mt-1">
+                                                <li>Pengajuan minimal 1 bulan sebelumnya</li>
+                                                <li>Harus ada alasan yang jelas dan dapat dibuktikan</li>
+                                                <li>Status kepegawaian freeze selama cuti</li>
+                                            </ul>
+                                        </li>
+                                        <li class="text-danger">
+                                            <small><strong>Keterangan:</strong> Tidak mendapat gaji dan tunjangan selama cuti</small>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cuti Istimewa -->
+                        <div class="accordion-item">
+                            <h3 class="accordion-header">
+                                <button class="accordion-button collapsed py-3" type="button" 
+                                        data-bs-toggle="collapse" 
+                                        data-bs-target="#policyIstimewa">
+                                    <i class="bi bi-stars me-2 text-primary"></i> Cuti Istimewa
+                                </button>
+                            </h3>
+                            <div id="policyIstimewa" class="accordion-collapse collapse" 
+                                data-bs-parent="#leavePolicy">
+                                <div class="accordion-body px-3 py-2">
+                                    <ul class="list-unstyled small">
+                                        <li class="mb-2">
+                                            <strong>Jenis:</strong> 
+                                            <ol class="mt-1">
+                                                <li>Tugas negara (sesuai ketentuan pemerintah)</li>
+                                                <li>Bencana alam (maks 14 hari)</li>
+                                                <li>Kondisi khusus lainnya</li>
+                                            </ol>
+                                        </li>
+                                        <li class="mb-2">
+                                            <strong>Persyaratan:</strong>
+                                            <ul class="mt-1">
+                                                <li>Surat/dokumen resmi wajib dilampirkan</li>
+                                                <li>Persetujuan khusus dari Direktur</li>
+                                                <li>Masa kerja minimal 1 tahun</li>
+                                            </ul>
+                                        </li>
+                                        <li class="text-success">
+                                            <small><strong>Hak Gaji:</strong> Dibayar penuh sesuai ketentuan</small>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Calendar Script -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/id.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize calendar
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'id',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,listWeek'
+        },
+        events: [
+            // Add your leave events here
+            // Example:
+            {
+                title: 'Cuti Tahunan',
+                start: '2023-07-10',
+                end: '2023-07-15',
+                color: '#4e73df'
+            }
+        ],
+        eventClick: function(info) {
+            // Handle event click
+        }
+    });
+    calendar.render();
+
+    // Calendar view buttons
+    document.querySelectorAll('.btn-group-sm button').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelector('.btn-group-sm .active').classList.remove('active');
+            this.classList.add('active');
+            
+            if (this.textContent === 'Bulan') {
+                calendar.changeView('dayGridMonth');
+            } else if (this.textContent === 'Minggu') {
+                calendar.changeView('timeGridWeek');
+            } else {
+                calendar.changeView('listWeek');
+            }
+        });
+    });
+});
+</script>
+
+<style>
+.stat-card {
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: rgba(78, 115, 223, 0.05);
+    color: var(--primary);
+}
+
+.accordion-button:focus {
+    box-shadow: none;
+    border-color: rgba(78, 115, 223, 0.25);
+}
+
+#calendar {
+    width: 100%;
+}
+
+.fc .fc-toolbar-title {
+    font-size: 1.1rem;
+}
+
+.fc .fc-button {
+    font-size: 0.85rem;
+    padding: 0.3rem 0.6rem;
+}
+</style>
+
+{% endblock %}

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Pengajuan Cuti</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Nunito', sans-serif;
+      padding: 20px;
+      background: linear-gradient(135deg, #7b2cbf, #fbc2eb); /* Gradien biru, pink, ungu */
+      min-height: 100vh;
+      margin: 0;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      background: linear-gradient(to bottom right, #ffffff, #f2f2ff);
+    }
+    h2 {
+      text-align: center;
+      color: #7b2cbf;
+    }
+    .card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      margin-bottom: 20px;
+      background: #fff;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      border-left: 5px solid #7b2cbf; /* Garis ungu di sebelah kiri */
+    }
+    .card h3 {
+      margin-top: 0;
+      color: #7b2cbf;
+    }
+    .card p {
+      color: #4a148c; /* Warna ungu gelap */
+    }
+    .card .info {
+      text-align: right;
+    }
+    .card .info p {
+      margin: 0;
+      color: #7b2cbf;
+    }
+    .card .info span {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #ff6ec4; /* Pink untuk highlight status */
+    }
+    .btn-container {
+      text-align: center;
+      margin-top: 30px;
+    }
+    button {
+      background: linear-gradient(to right, #7b2cbf, #ff6ec4); /* Biru ke Pink */
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      padding: 15px 30px;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: linear-gradient(to right, #5a189a, #ff4fa7); /* Hover dengan gradien ungu dan pink */
+    }
+    .table-container {
+      margin-top: 40px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+      text-align: left;
+      padding: 12px;
+    }
+    th {
+      background-color: #7b2cbf;
+      color: white;
+    }
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+    tr:hover {
+      background-color: #ffe6f1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Dashboard Pengajuan Cuti</h2>
+
+    <!-- Card Pengajuan Cuti -->
+    <div class="card">
+      <div class="info">
+        <h3>Status Pengajuan Cuti</h3>
+        <p><strong>Nama:</strong> John Doe</p>
+        <p><strong>Status:</strong> <span>Menunggu</span></p>
+      </div>
+      <div class="info">
+        <p><strong>Tanggal Mulai:</strong> 2025-04-20</p>
+        <p><strong>Tanggal Selesai:</strong> 2025-04-25</p>
+      </div>
+    </div>
+
+    <!-- Button Ajukan Cuti -->
+    <div class="btn-container">
+      <button onclick="window.location.href='form_cuti.html'">Ajukan Cuti</button>
+    </div>
+
+    <!-- Tabel Pengajuan Cuti -->
+    <div class="table-container">
+      <h3>Riwayat Pengajuan Cuti</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Nama</th>
+            <th>NIP/NIM</th>
+            <th>Status</th>
+            <th>Tanggal Mulai</th>
+            <th>Tanggal Selesai</th>
+            <th>Alasan</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>John Doe</td>
+            <td>12345678</td>
+            <td><span style="color: #ff6ec4;">Menunggu</span></td>
+            <td>2025-04-20</td>
+            <td>2025-04-25</td>
+            <td>Sakit</td>
+          </tr>
+          <tr>
+            <td>Jane Smith</td>
+            <td>87654321</td>
+            <td><span style="color: #7b2cbf;">Disetujui</span></td>
+            <td>2025-05-01</td>
+            <td>2025-05-07</td>
+            <td>Liburan Keluarga</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</body>
+</html>

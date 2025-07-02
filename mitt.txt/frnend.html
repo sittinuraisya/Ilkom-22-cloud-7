@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Informasi Perizinan Cuti</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Nunito', sans-serif;
+      padding: 20px;
+      background: linear-gradient(135deg, #a18cd1, #fbc2eb);
+      min-height: 100vh;
+      margin: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      background: linear-gradient(to bottom right, #ffffff, #f2f2ff);
+    }
+    h2 {
+      text-align: center;
+      color: #7b2cbf;
+    }
+    label {
+      font-weight: 600;
+      color: #4a148c;
+    }
+    input, textarea, select, button {
+      font-family: 'Nunito', sans-serif;
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+    button {
+      background: linear-gradient(to right, #7b2cbf, #ff6ec4);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: linear-gradient(to right, #5a189a, #ff4fa7);
+    }
+    #hasil {
+      background: #f0f0ff;
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+    }
+    h3 {
+      color: #4a148c;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Form Pengajuan Cuti</h2>
+    <form id="cutiForm">
+      <label for="nama">Nama:</label>
+      <input type="text" id="nama" name="nama" required>
+
+      <label for="nip">NIP/NIM:</label>
+      <input type="text" id="nip" name="nip" required>
+
+      <label for="tanggalMulai">Tanggal Mulai:</label>
+      <input type="date" id="tanggalMulai" name="tanggalMulai" required>
+
+      <label for="tanggalSelesai">Tanggal Selesai:</label>
+      <input type="date" id="tanggalSelesai" name="tanggalSelesai" required>
+
+      <label for="alasan">Alasan Cuti:</label>
+      <textarea id="alasan" name="alasan" rows="4" required></textarea>
+
+      <button type="submit">Ajukan Cuti</button>
+    </form>
+    <div id="hasil"></div>
+  </div>
+
+  <script>
+    document.getElementById('cutiForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const nama = document.getElementById('nama').value;
+      const nip = document.getElementById('nip').value;
+      const mulai = document.getElementById('tanggalMulai').value;
+      const selesai = document.getElementById('tanggalSelesai').value;
+      const alasan = document.getElementById('alasan').value;
+
+      const hasilDiv = document.getElementById('hasil');
+      hasilDiv.innerHTML = `
+        <h3>Pengajuan Diterima</h3>
+        <p><strong>Nama:</strong> ${nama}</p>
+        <p><strong>NIP/NIM:</strong> ${nip}</p>
+        <p><strong>Mulai:</strong> ${mulai}</p>
+        <p><strong>Selesai:</strong> ${selesai}</p>
+        <p><strong>Alasan:</strong> ${alasan}</p>
+      `;
+
+      document.getElementById('cutiForm').reset();
+    });
+  </script>
+</body>
+</html>

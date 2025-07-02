@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Learning System - Sign Up & Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .auth-container {
+            background-image: linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)), 
+                              url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/e45a08e6-5613-441b-bff4-090837c78374.png');
+            background-size: cover;
+            background-position: center;
+        }
+        .form-switch {
+            transition: all 0.3s ease;
+        }
+        .form-switch.active {
+            background-color: #fda4af;
+            color: #881337;
+        }
+    </style>
+</head>
+<body class="bg-rose-50 min-h-screen flex items-center justify-center p-4">
+    <div class="auth-container w-full max-w-4xl bg-white/90 rounded-xl shadow-lg overflow-hidden backdrop-blur-sm">
+        <div class="flex flex-col md:flex-row">
+            <!-- Left Side - Illustration -->
+            <div class="hidden md:block md:w-1/2 bg-rose-100/50 p-8 flex flex-col justify-center items-center">
+                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/250f9e1a-946d-411e-b69a-9dd47f27559a.png" alt="Happy students learning English online with laptops and books" class="mb-6 rounded-lg" />
+                <h2 class="text-2xl font-bold text-rose-700 mb-2">Start Your English Journey</h2>
+                <p class="text-rose-800/80 text-center">Join thousands of students improving their English skills with our interactive platform.</p>
+            </div>
+            
+            <!-- Right Side - Forms -->
+            <div class="w-full md:w-1/2 p-8">
+                <!-- Tabs -->
+                <div class="flex mb-8 bg-rose-100/30 rounded-lg p-1">
+                    <button id="login-tab" class="form-switch w-1/2 py-2 px-4 rounded-lg font-medium active">Login</button>
+                    <button id="signup-tab" class="form-switch w-1/2 py-2 px-4 rounded-lg font-medium">Sign Up</button>
+                </div>
+                
+                <!-- Login Form -->
+                <form id="login-form" class="space-y-4">
+                    <h3 class="text-xl font-bold text-rose-900/90 mb-6">Welcome Back!</h3>
+                    
+                    <div>
+                        <label for="login-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" id="login-email" required
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <input type="password" id="login-password" required
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <div class="flex justify-end mt-1">
+                            <a href="#" class="text-sm text-rose-700 hover:underline">Forgot password?</a>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-rose-500 text-white py-2 px-4 rounded-lg hover:bg-rose-600 transition duration-200">
+                        Login
+                    </button>
+                    
+                    <div class="flex items-center justify-center space-x-2 my-4">
+                        <div class="h-px bg-gray-300 w-full"></div>
+                        <span class="text-sm text-gray-500">OR</span>
+                        <div class="h-px bg-gray-300 w-full"></div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" class="flex items-center justify-center space-x-2 border border-gray-300 rounded-lg py-2 px-4 hover:bg-gray-50">
+                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/9cf45496-4f9a-41bb-8de9-e51d2e92f873.png" alt="Google logo" class="w-5 h-5" />
+                            <span class="text-sm">Google</span>
+                        </button>
+                        <button type="button" class="flex items-center justify-center space-x-2 border border-gray-300 rounded-lg py-2 px-4 hover:bg-gray-50">
+                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/3a51a2e5-5dac-47dd-88bc-2e9960c7026b.png" alt="Facebook logo" class="w-5 h-5" />
+                            <span class="text-sm">Facebook</span>
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Sign Up Form -->
+                <form id="signup-form" class="space-y-4 hidden">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">Create Your Account</h3>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="signup-firstname" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                            <input type="text" id="signup-firstname" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label for="signup-lastname" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                            <input type="text" id="signup-lastname" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="signup-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" id="signup-email" required
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="signup-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <input type="password" id="signup-password" required
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <p class="text-xs text-gray-500 mt-1">At least 8 characters with 1 number and 1 special character</p>
+                    </div>
+                    
+                    <div>
+                        <label for="signup-confirm-password" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                        <input type="password" id="signup-confirm-password" required
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <input type="checkbox" id="signup-terms" required
+                               class="mt-1 mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                        <label for="signup-terms" class="text-sm text-gray-700">
+                            I agree to the <a href="#" class="text-blue-600 hover:underline">Terms of Service</a> and <a href="#" class="text-blue-600 hover:underline">Privacy Policy</a>
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200">
+                        Create Account
+                    </button>
+                    
+                    <p class="text-sm text-gray-600 text-center">
+                        Already have an account? <a href="#" class="text-blue-600 hover:underline login-link">Login</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is already logged in
+        if(localStorage.getItem('els_loggedIn')) {
+            document.body.innerHTML = `
+            <div class="min-h-screen bg-rose-50">
+                <nav class="bg-white shadow-sm">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="flex justify-between h-16">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <img class="h-8 w-8" src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/069a268d-acb2-4a24-989a-842af632cb32.png" alt="Logo">
+                                </div>
+                                <div class="hidden sm:ml-6 sm:block">
+                                    <div class="flex space-x-4">
+                                        <a href="#" class="text-gray-700 hover:bg-rose-50 px-3 py-2 rounded-md text-sm font-medium">Dashboard</a>
+                                        <a href="#" class="text-gray-500 hover:bg-rose-50 px-3 py-2 rounded-md text-sm font-medium">Lessons</a>
+                                        <a href="#" class="text-gray-500 hover:bg-rose-50 px-3 py-2 rounded-md text-sm font-medium">Progress</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <span class="text-gray-700 hidden md:inline">Welcome back!</span>
+                                <button id="logout-btn" class="bg-rose-100 text-rose-700 px-3 py-1 rounded hover:bg-rose-200">Logout</button>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+
+                <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+                    <div class="px-4 py-6 sm:px-0">
+                        <div class="border-4 border-dashed border-gray-200 rounded-lg p-8 flex flex-col items-center">
+                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/582563b2-be3f-4fea-8269-222d015d1681.png" alt="English learning dashboard" class="mb-6 rounded-lg">
+                            <h2 class="text-2xl font-bold text-rose-700 mb-4">Continue Your English Journey!</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+                                <div class="bg-white p-4 rounded-lg shadow">
+                                    <h3 class="text-lg font-semibold mb-2">Your Progress</h3>
+                                    <div class="h-2 bg-gray-200 rounded-full">
+                                        <div class="h-2 bg-rose-500 rounded-full" style="width: 75%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            `;
+
+            document.getElementById('logout-btn').addEventListener('click', function() {
+                localStorage.removeItem('els_loggedIn');
+                localStorage.removeItem('els_email');
+                window.location.reload();
+            });
+            return;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginTab = document.getElementById('login-tab');
+            const signupTab = document.getElementById('signup-tab');
+            const loginForm = document.getElementById('login-form');
+            const signupForm = document.getElementById('signup-form');
+            
+            // Switch between forms
+            function showLogin() {
+                loginTab.classList.add('active');
+                signupTab.classList.remove('active');
+                loginForm.classList.remove('hidden');
+                signupForm.classList.add('hidden');
+            }
+            
+            function showSignup() {
+                loginTab.classList.remove('active');
+                signupTab.classList.add('active');
+                loginForm.classList.add('hidden');
+                signupForm.classList.remove('hidden');
+            }
+            
+            loginTab.addEventListener('click', showLogin);
+            signupTab.addEventListener('click', showSignup);
+            
+            // Handle login links in signup form
+            document.querySelectorAll('.login-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    showLogin();
+                });
+            });
+            
+            // Form validation and submission
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+                
+                // Here you would typically send this data to your backend
+                console.log('Login attempt with:', { email, password });
+                // Simulate successful login
+                document.body.innerHTML = `
+                <div class="min-h-screen bg-rose-50">
+                    <nav class="bg-white shadow-sm">
+                        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div class="flex justify-between h-16">
+                                <div class="flex items-center">
+                                    <h1 class="text-xl font-bold text-rose-700">English Learning System</h1>
+                                </div>
+                                <div class="flex items-center space-x-4">
+                                    <span class="text-gray-700">Welcome, ${email}</span>
+                                    <button id="logout-btn" class="bg-rose-100 text-rose-700 px-3 py-1 rounded">Logout</button>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+                        <div class="px-4 py-6 sm:px-0">
+                            <div class="border-4 border-dashed border-gray-200 rounded-lg p-8 flex flex-col items-center">
+                                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/8313fa6a-f2cc-4089-b572-9b585910c028.png" alt="English learning dashboard" class="mb-6 rounded-lg">
+                                <h2 class="text-2xl font-bold text-rose-700 mb-4">Welcome to Your English Journey!</h2>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+                                    <div class="bg-white p-4 rounded-lg shadow">
+                                        <h3 class="text-lg font-semibold mb-2">Lessons</h3>
+                                        <p class="text-gray-600">Start your daily English lessons</p>
+                                    </div>
+                                    <div class="bg-white p-4 rounded-lg shadow">
+                                        <h3 class="text-lg font-semibold mb-2">Progress</h3>
+                                        <p class="text-gray-600">Track your learning progress</p>
+                                    </div>
+                                    <div class="bg-white p-4 rounded-lg shadow">
+                                        <h3 class="text-lg font-semibold mb-2">Community</h3>
+                                        <p class="text-gray-600">Connect with other learners</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                `;
+
+                // Add logout functionality
+                document.getElementById('logout-btn').addEventListener('click', function() {
+                    window.location.reload();
+                });
+            });
+            
+            signupForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const firstName = document.getElementById('signup-firstname').value;
+                const lastName = document.getElementById('signup-lastname').value;
+                const email = document.getElementById('signup-email').value;
+                const password = document.getElementById('signup-password').value;
+                const confirmPassword = document.getElementById('signup-confirm-password').value;
+                
+                if (password !== confirmPassword) {
+                    alert('Passwords do not match!');
+                    return;
+                }
+                
+                // Here you would typically send this data to your backend
+                console.log('Signup attempt with:', { firstName, lastName, email, password });
+                alert('Account created successfully (this would connect to your backend in a real application)');
+            });
+        });
+    </script>
+</body>
+</html>

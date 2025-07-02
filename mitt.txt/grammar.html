@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Belajar Grammar - English Learning</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Nunito', sans-serif;
+      margin: 0;
+      padding: 40px 20px;
+      background: url('https://images.unsplash.com/photo-1505765050516-f72dcac9c60b?auto=format&fit=crop&w=1950&q=80') no-repeat center center fixed;
+      background-size: cover;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(6px);
+      z-index: -1;
+    }
+    .container {
+      max-width: 1240px;
+      background: linear-gradient(135deg, #fff1f8, #f3e5f5);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      animation: fadeIn 0.8s ease-in-out;
+      color: #ec407a;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 46px;
+      font-weight: 900;
+      color: #ec407a;
+      background: none;
+      -webkit-background-clip: unset;
+      -webkit-text-fill-color: unset;
+    }
+    .grammar-section {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .grammar-card {
+      background: #fff8fb;
+      border: 2px dashed #f8bbd0;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 16px rgba(248, 187, 208, 0.4);
+      transition: 0.3s ease;
+      color: #ec407a;
+    }
+    .grammar-card:hover {
+      transform: scale(1.02);
+      background-color: #ffe6ef;
+    }
+    .grammar-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #ec407a;
+      margin-bottom: 8px;
+    }
+    .grammar-description {
+      font-size: 14px;
+      color: #ec407a;
+      margin-bottom: 6px;
+    }
+    .grammar-example {
+      font-size: 13px;
+      color: #ec407a;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Belajar Tata Bahasa: Grammar</h1>
+    <div class="grammar-section">
+      <div class="grammar-card">
+        <div class="grammar-title">Simple Present Tense</div>
+        <div class="grammar-description">Digunakan untuk menyatakan fakta atau kebiasaan.</div>
+        <div class="grammar-example">She walks to school every day.</div>
+      </div>
+      <div class="grammar-card">
+        <div class="grammar-title">Past Tense</div>
+        <div class="grammar-description">Digunakan untuk menyatakan kejadian yang sudah terjadi di masa lalu.</div>
+        <div class="grammar-example">He watched a movie last night.</div>
+      </div>
+      <div class="grammar-card">
+        <div class="grammar-title">Present Continuous</div>
+        <div class="grammar-description">Digunakan untuk menyatakan tindakan yang sedang berlangsung sekarang.</div>
+        <div class="grammar-example">I am studying English now.</div>
+      </div>
+      <div class="grammar-card">
+        <div class="grammar-title">Future Tense</div>
+        <div class="grammar-description">Digunakan untuk menyatakan tindakan yang akan dilakukan di masa depan.</div>
+        <div class="grammar-example">They will go to Bali next week.</div>
+      </div>
+      <div class="grammar-card">
+        <div class="grammar-title">Present Perfect</div>
+        <div class="grammar-description">Digunakan untuk menyatakan tindakan yang telah dilakukan tetapi masih relevan dengan sekarang.</div>
+        <div class="grammar-example">She has finished her homework.</div>
+      </div>
+      <div class="grammar-card">
+        <div class="grammar-title">Modal Verbs</div>
+        <div class="grammar-description">Kata kerja bantu yang menunjukkan kemampuan, kemungkinan, izin, atau kewajiban.</div>
+        <div class="grammar-example">You should study harder.</div>
+      </div>
+      <div class="grammar-card">
+        <div class="grammar-title">Conditional Sentences</div>
+        <div class="grammar-description">Kalimat pengandaian, biasanya menggunakan if.</div>
+        <div class="grammar-example">If I were you, I would do it.</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

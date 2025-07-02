@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tebak Kata - Eng-Study</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(to right, #fde2e4, #fce4ec);
+      font-family: 'Nunito', sans-serif;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6">
+  <div class="bg-white/90 backdrop-blur-md rounded-3xl p-10 shadow-xl max-w-xl w-full text-center space-y-6">
+    <h1 class="text-2xl font-bold text-pink-600">🎯 Tebak Kata</h1>
+    <p class="text-pink-700 text-lg">Apa bahasa Inggris dari:</p>
+    <div id="question" class="text-3xl font-bold text-rose-600">kucing</div>
+    
+    <input type="text" id="answer" placeholder="Tulis jawabanmu..."
+           class="w-full p-3 border-2 border-rose-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300" />
+    
+    <button onclick="checkAnswer()"
+            class="bg-pink-400 hover:bg-pink-500 text-white font-bold py-2 px-4 rounded-lg transition">
+      Cek Jawaban
+    </button>
+    
+    <div id="feedback" class="text-lg font-semibold text-rose-800"></div>
+    <div class="text-sm text-rose-500">Skor: <span id="score">0</span></div>
+
+    <button onclick="nextWord()" class="mt-4 text-sm text-pink-700 hover:underline">➡️ Kata Berikutnya</button>
+  </div>
+
+  <script>
+    const words = [
+      {indo: "kucing", eng: "cat"},
+      {indo: "anjing", eng: "dog"},
+      {indo: "buku", eng: "book"},
+      {indo: "apel", eng: "apple"},
+      {indo: "rumah", eng: "house"},
+      {indo: "kursi", eng: "chair"},
+      {indo: "meja", eng: "table"}
+    ];
+    
+    let current = 0;
+    let score = 0;
+    
+    function showWord() {
+      document.getElementById('question').innerText = words[current].indo;
+      document.getElementById('answer').value = '';
+      document.getElementById('feedback').innerText = '';
+    }
+    
+    function checkAnswer() {
+      const userAnswer = document.getElementById('answer').value.trim().toLowerCase();
+      const correct = words[current].eng;
+      const feedback = document.getElementById('feedback');
+
+      if (userAnswer === correct) {
+        score++;
+        feedback.innerText = "✅ Benar!";
+        feedback.classList.remove('text-red-600');
+        feedback.classList.add('text-green-600');
+      } else {
+        feedback.innerText = `❌ Salah! Jawaban yang benar: ${correct}`;
+        feedback.classList.remove('text-green-600');
+        feedback.classList.add('text-red-600');
+      }
+      
+      document.getElementById('score').innerText = score;
+    }
+
+    function nextWord() {
+      current = (current + 1) % words.length;
+      showWord();
+    }
+
+    // Initialize first word
+    showWord();
+  </script>
+</body>
+</html>

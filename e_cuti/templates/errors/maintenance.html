@@ -1,0 +1,105 @@
+{% extends "errors/_error_base.html" %}
+
+{% block title %}Sedang Dalam Perbaikan{% endblock %}
+
+{% block illustration %}
+    <img src="{{ url_for('static', filename='images/maintenance.png') }}" 
+         alt="Maintenance" 
+         class="error-illustration floating"
+         style="max-width: 300px;">
+{% endblock %}
+
+{% block error_code %}503{% endblock %}
+
+{% block error_message %}Sedang Tukang Perbaikan!{% endblock %}
+
+{% block error_details %}
+    <div class="maintenance-details">
+        <p>Tim kami sedang bekerja keras memperbaiki aplikasi, seperti hamster yang berlari di roda!</p>
+        <div class="construction-animation">
+            <img src="{{ url_for('static', filename='images/hamster.png') }}" 
+                 alt="Hamster Bekerja" 
+                 class="hamster-wheel"
+                 style="width: 100px;">
+            <span class="tools">🔧 🛠️ ⚡</span>
+        </div>
+        <p class="countdown">Akan kembali dalam: <span id="countdown-timer">30:00</span></p>
+    </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .maintenance-details {
+        background: #FFF9E6;
+        padding: 20px;
+        border-radius: 15px;
+        border: 2px dashed #FFB347;
+        margin: 20px 0;
+    }
+    
+    .construction-animation {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        margin: 20px 0;
+    }
+    
+    .hamster-wheel {
+        animation: spin 2s linear infinite;
+    }
+    
+    .tools {
+        font-size: 2rem;
+        animation: bounce 1s infinite alternate;
+    }
+    
+    .countdown {
+        font-weight: bold;
+        color: #E74C3C;
+        font-size: 1.2rem;
+        margin-top: 15px;
+    }
+    
+    #countdown-timer {
+        font-family: monospace;
+        background: #333;
+        color: #FFF;
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    @keyframes bounce {
+        from { transform: translateY(0); }
+        to { transform: translateY(-10px); }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Countdown timer 30 menit
+    let timeLeft = 30 * 60; // 30 menit dalam detik
+    
+    const countdown = setInterval(() => {
+        const minutes = Math.floor(timeLeft / 60);
+        let seconds = timeLeft % 60;
+        seconds = seconds < 10 ? '0' + seconds : seconds;
+        
+        document.getElementById('countdown-timer').textContent = `${minutes}:${seconds}`;
+        
+        if (timeLeft <= 0) {
+            clearInterval(countdown);
+            document.getElementById('countdown-timer').textContent = "Segera!";
+            document.querySelector('.hamster-wheel').style.animation = 'none';
+        } else {
+            timeLeft--;
+        }
+    }, 1000);
+</script>
+{% endblock %}

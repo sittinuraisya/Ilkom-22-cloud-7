@@ -1,0 +1,12 @@
+<div class="notification-item {% if not notification.is_read %}unread{% endif %}" data-id="{{ notification.id }}">
+    <div class="notification-header">
+      <h6>{{ notification.title }}</h6>
+      <small class="text-muted">{{ notification.created_at|time_ago }}</small>
+    </div>
+    <div class="notification-body">
+      <p>{{ notification.message }}</p>
+      {% if notification.link %}
+      <a href="{{ notification.link }}" class="btn btn-sm btn-outline-primary">Lihat Detail</a>
+      {% endif %}
+    </div>
+  </div>

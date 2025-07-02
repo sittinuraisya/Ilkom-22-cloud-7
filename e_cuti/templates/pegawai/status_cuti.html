@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+
+{% block title %}Status Cuti{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800">Status Cuti</h1>
+            <p class="mb-0 text-muted small">Daftar pengajuan cuti Anda</p>
+        </div>
+        <a href="{{ url_for('pegawai.ajukan_cuti') }}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-circle me-1"></i> Ajukan Cuti
+        </a>
+    </div>
+
+    <!-- Main Card -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white border-bottom-0 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-list-check me-2"></i>Daftar Pengajuan</h5>
+            <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown">
+                    <i class="bi bi-funnel me-1"></i> Filter
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="#">Semua Status</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#">Pending</a></li>
+                    <li><a class="dropdown-item" href="#">Disetujui</a></li>
+                    <li><a class="dropdown-item" href="#">Ditolak</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" style="table-layout: fixed;">
+                    <thead>
+                        <tr>
+                            <th style="width: 5%">No</th>
+                            <th style="width: 10%">Jenis Cuti</th>
+                            <th style="width: 10%">Tanggal Pengajuan</th>
+                            <th style="width: 15%">Tanggal Cuti</th>
+                            <th style="width: 8%">Durasi</th>
+                            <th style="width: 25%">Alasan Cuti</th>
+                            <th style="width: 10%">Lampiran</th>
+                            <th style="width: 12%">Status</th>
+                            <th style="width: 15%" class="text-end">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if cuti_list %}
+                        {% for item in cuti_list %}
+                        <tr>
+                            <td>{{ loop.index + ((page - 1) * per_page) }}</td>
+                            <td>{{ item['jenis_cuti_display'] }}</td>
+                            <td>{{ item['cuti'].created_at.strftime('%d/%m/%Y') }}</td>
+                            <td>
+                                {{ item['cuti'].tanggal_mulai.strftime('%d/%m/%Y') }}<br>
+                                <small class="text-muted">s/d {{ item['cuti'].tanggal_selesai.strftime('%d/%m/%Y') }}</small>
+                            </td>
+                            <td>{{ item['cuti'].jumlah_hari }} Hari</td>
+                            <td style="word-wrap: break-word; white-space: normal;">
+                                {{ item['cuti'].perihal_cuti }}
+                            </td>
+                            <td>
+                                {% if item['cuti'].lampiran %}
+                                <a href="{{ url_for('static', filename='uploads/' + item['cuti'].lampiran.split('uploads/')[-1]) }}" 
+                                   target="_blank" 
+                                   class="badge bg-light text-dark text-decoration-none">
+                                    <i class="bi bi-paperclip me-1"></i> Lihat
+                                </a>
+                                {% else %}
+                                <span class="badge bg-light text-muted">Tidak ada</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% set status_color = 
+                                    'success' if item['cuti'].status == 'APPROVED' else 
+                                    'danger' if item['cuti'].status == 'REJECTED' else 
+                                    'warning' %}
+                                <span class="badge bg-{{ status_color }}">
+                                    {{ item['status_display'] if item['status_display'] in ['PENDING', 'APPROVED', 'REJECTED'] else item['cuti'].status }}
+                                </span>
+                                {% if item['cuti'].status == 'REJECTED' and item['cuti'].alasan_penolakan %}
+                                <div class="mt-1">
+                                    <small class="text-danger">{{ item['cuti'].alasan_penolakan|truncate(30) }}</small>
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ url_for('pegawai.cetak_surat', cuti_id=item['cuti'].id) }}" 
+                                       class="btn btn-outline-primary"
+                                       target="_blank">
+                                        <i class="bi bi-printer"></i>
+                                    </a>
+                                    {% if item['cuti'].status == 'PENDING' %}
+                                    <button class="btn btn-outline-warning" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#cancelModal-{{ item['cuti'].id }}">
+                                        <i class="bi bi-x-circle"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#deleteModal-{{ item['cuti'].id }}">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="9" class="text-center py-4">
+                                <i class="bi bi-calendar-x fs-1 text-muted"></i>
+                                <p class="mt-2">Belum ada pengajuan cuti</p>
+                                <a href="{{ url_for('pegawai.ajukan_cuti') }}" class="btn btn-primary btn-sm mt-2">
+                                    <i class="bi bi-plus-circle me-1"></i> Ajukan Cuti
+                                </a>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        {% if total_pages > 1 %}
+        <div class="card-footer bg-white">
+            <nav aria-label="Page navigation">
+                <ul class="pagination pagination-sm justify-content-center mb-0">
+                    <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('pegawai.status_cuti', page=page-1) }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% for p in range(1, total_pages + 1) %}
+                    <li class="page-item {% if p == page %}active{% endif %}">
+                        <a class="page-link" href="{{ url_for('pegawai.status_cuti', page=p) }}">{{ p }}</a>
+                    </li>
+                    {% endfor %}
+                    <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('pegawai.status_cuti', page=page+1) }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Cancel Modal -->
+{% for item in cuti_list if item['cuti'].status == 'PENDING' %}
+<div class="modal fade" id="cancelModal-{{ item['cuti'].id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Batalkan Pengajuan Cuti</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Anda yakin ingin membatalkan pengajuan cuti ini?</p>
+                <div class="alert alert-light">
+                    <strong>{{ item['jenis_cuti_display'] }}</strong><br>
+                    {{ item['cuti'].tanggal_mulai.strftime('%d/%m/%Y') }} - {{ item['cuti'].tanggal_selesai.strftime('%d/%m/%Y') }}<br>
+                    ({{ item['cuti'].jumlah_hari }} Hari)
+                </div>
+                <form action="{{ url_for('pegawai.batalkan_cuti', cuti_id=item['cuti'].id) }}" method="POST">
+                    <div class="mb-3">
+                        <label for="cancel_reason" class="form-label">Alasan Pembatalan</label>
+                        <textarea class="form-control" id="cancel_reason" name="cancel_reason" rows="3" required></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                        <button type="submit" class="btn btn-danger">Batalkan Cuti</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Delete Modal -->
+{% for item in cuti_list if item['cuti'].status == 'PENDING' %}
+<div class="modal fade" id="deleteModal-{{ item['cuti'].id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Hapus Pengajuan Cuti</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Anda yakin ingin menghapus pengajuan cuti ini?</p>
+                <div class="alert alert-light">
+                    <strong>{{ item['jenis_cuti_display'] }}</strong><br>
+                    {{ item['cuti'].tanggal_mulai.strftime('%d/%m/%Y') }} - {{ item['cuti'].tanggal_selesai.strftime('%d/%m/%Y') }}<br>
+                    ({{ item['cuti'].jumlah_hari }} Hari)
+                </div>
+                <p class="text-danger"><small>Penghapusan bersifat permanen dan tidak dapat dikembalikan</small></p>
+                <form action="{{ url_for('pegawai.hapus_cuti', cuti_id=item['cuti'].id) }}" method="POST">
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                        <button type="submit" class="btn btn-danger">Hapus Permanen</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<style>
+    .table th {
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #6c757d;
+    }
+    
+    .badge {
+        font-weight: 500;
+        padding: 0.35em 0.65em;
+    }
+    
+    .btn-group-sm > .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    /* Custom table styling */
+    .table {
+        width: 100%;
+    }
+    
+    .table td {
+        vertical-align: middle;
+    }
+    
+    /* Make table responsive */
+    @media (max-width: 992px) {
+        .table-responsive {
+            display: block;
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .table {
+            display: block;
+            width: 100%;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        .table td, .table th {
+            white-space: normal;
+        }
+    }
+</style>
+
+<script>
+    // Enable tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+
+{% endblock %}

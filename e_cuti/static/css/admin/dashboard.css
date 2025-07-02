@@ -1,0 +1,43 @@
+/* Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Stats Cards */
+.admin-stat-card {
+    border-left: 0.25rem solid;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.admin-stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.admin-stat-card .card-body {
+    padding: 1.5rem;
+}
+
+.admin-stat-icon {
+    font-size: 2rem;
+    opacity: 0.2;
+    position: absolute;
+    right: 1.5rem;
+    top: 1.5rem;
+}
+
+.admin-stat-primary {
+    border-left-color: var(--primary);
+}
+
+.admin-stat-warning {
+    border-left-color: var(--warning);
+}
+
+.admin-stat-success {
+    border-left-color: var(--success);
+}
+
+/* Charts Container */
+.admin-chart-container {
+    position: relative;
+    height: 250px;
+}

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Selamat Datang di Eng-Study</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Nunito', sans-serif;
+      margin: 0;
+      padding: 40px 20px;
+      background: #ffe4ec;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1240px;
+      background: #ffe4ec;
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 32px;
+      color: #d81b60;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #d81b60;
+      margin: 30px 0 10px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      border: 2px dashed #f8bbd0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: 0.3s ease;
+    }
+
+    .card:hover {
+      background: #ffd4e4;
+    }
+
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      color: #d81b60;
+    }
+
+    .card p {
+      margin: 0;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .progress-container {
+      margin: 30px 0;
+    }
+
+    .progress-bar {
+      background: #fce4ec;
+      border-radius: 12px;
+      overflow: hidden;
+      height: 20px;
+      margin-top: 10px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 65%;
+      background: #f06292;
+    }
+
+    .btn-start {
+      padding: 10px 18px;
+      background: #f06292;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .btn-start:hover {
+      background: #e91e63;
+    }
+
+    .top-left-text {
+      position: absolute;
+      top: 20px;
+      left: 30px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #d81b60;
+      background: #fff;
+      padding: 8px 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      text-decoration: none;
+    }
+
+    .top-left-text:hover {
+      background: #ffd4e4;
+    }
+
+    .quote-box {
+      background: #fff0f5;
+      border-left: 5px solid #f06292;
+      padding: 20px;
+      border-radius: 12px;
+      font-style: italic;
+      margin-bottom: 30px;
+      color: #c2185b;
+    }
+
+    .summary-box {
+      background: #fce4ec;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 30px;
+      color: #880e4f;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+  </style>
+</head>
+<body>
+  <a href="pilihanmateri.html" class="top-left-text">Mulai Belajar</a>
+  <div class="container">
+    <h1>Selamat Datang di Eng-Study</h1>
+
+    <div class="quote-box">
+      "Belajar bahasa Inggris setiap hari bisa menjadi langkah kecil yang membuat perubahan besar. Semangat belajar hari ini!"
+    </div>
+
+    <div class="section-title">Riwayat Belajar Hari Ini</div>
+    <div class="card">
+      <div>
+        <h3>Grammar: Present Simple</h3>
+        <p>Kamu telah mempelajari struktur dasar kalimat Present Simple.</p>
+      </div>
+      <button class="btn-start">Lihat</button>
+    </div>
+    <div class="card">
+      <div>
+        <h3>Vocabulary: Daily Activities</h3>
+        <p>Pelajari kosakata seputar aktivitas sehari-hari.</p>
+      </div>
+      <button class="btn-start">Lihat</button>
+    </div>
+
+    <div class="section-title">Progress Belajar</div>
+    <div class="progress-container">
+      <label>Grammar</label>
+      <div class="progress-bar">
+        <div class="progress-fill"></div>
+      </div>
+    </div>
+
+    <div class="section-title">Latihan Interaktif</div>
+    <div class="card">
+      <div>
+        <h3>Kuis Grammar</h3>
+        <p>Uji pemahamanmu tentang tata bahasa hari ini.</p>
+      </div>
+      <button class="btn-start">Mulai</button>
+    </div>
+    <div class="card">
+      <div>
+        <h3>Latihan Kalimat</h3>
+        <p>Susun kalimat dari kata-kata acak dengan struktur grammar yang tepat.</p>
+      </div>
+      <button class="btn-start">Mulai</button>
+    </div>
+
+    <div class="summary-box">
+      Total waktu belajar hari ini: <strong>45 menit</strong><br>
+      Kamu sudah menyelesaikan <strong>65%</strong> dari target harianmu. Pertahankan semangatmu! 💪
+    </div>
+
+  </div>
+</body>
+</html>

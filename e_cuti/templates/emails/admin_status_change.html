@@ -1,0 +1,41 @@
+<!-- templates/emails/admin_status_change.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Status Akun Admin</title>
+</head>
+<body>
+    <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif;">
+        <h2 style="color: #4361ee;">
+            {% if is_active %}
+            Akun Admin Anda Telah Diaktifkan Kembali
+            {% else %}
+            Akun Admin Anda Telah Dinonaktifkan
+            {% endif %}
+        </h2>
+        
+        <p>Halo {{ user.full_name }},</p>
+        
+        <p>
+            {% if is_active %}
+            Akun admin Anda dengan username <strong>{{ user.username }}</strong> telah diaktifkan kembali oleh <strong>{{ action_by.username }}</strong>.
+            {% else %}
+            Akun admin Anda dengan username <strong>{{ user.username }}</strong> telah dinonaktifkan oleh <strong>{{ action_by.username }}</strong>.
+            {% endif %}
+        </p>
+        
+        <p>
+            {% if not is_active %}
+            Anda tidak akan dapat login ke sistem sampai akun Anda diaktifkan kembali.
+            {% endif %}
+        </p>
+        
+        <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #eee;">
+            <p style="font-size: 0.9em; color: #777;">
+                Jika Anda merasa ini adalah kesalahan, silakan hubungi super administrator.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% block title %}Ajukan Cuti{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4">
+  <div class="row justify-content-center">
+    <div class="col-xl-8 col-lg-10">
+      <!-- Header Section -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h1 class="h3 fw-bold text-primary mb-1">
+            <i class="bi bi-file-earmark-plus me-2"></i>Pengajuan Cuti
+          </h1>
+          <p class="text-muted mb-0">Isi formulir berikut untuk mengajukan cuti</p>
+        </div>
+        <a href="{{ url_for('pegawai.dashboard') }}" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-arrow-left me-1"></i>Kembali
+        </a>
+      </div>
+
+      <!-- Form Card -->
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <form method="POST" action="{{ url_for('pegawai.ajukan_cuti') }}" enctype="multipart/form-data" id="form-ajukan-cuti" onsubmit="return validateForm()">
+            <!-- Jenis Cuti -->
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Jenis Cuti</label>
+              <select class="form-select" name="jenis_cuti" required>
+                <option value="">Pilih Jenis Cuti</option>
+                {% for jenis in jenis_cuti_options %}
+                  <option value="{{ jenis }}" {% if request.form.get('jenis_cuti') == jenis %}selected{% endif %}>{{ jenis }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Tanggal Cuti -->
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Tanggal Mulai</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                  <input type="date" class="form-control" 
+                    name="tanggal_mulai" id="tanggal_mulai" required
+                    min="{{ min_date }}" max="{{ max_date }}"
+                    value="{{ request.form.get('tanggal_mulai') }}">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Tanggal Selesai</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                  <input type="date" class="form-control" 
+                    name="tanggal_selesai" id="tanggal_selesai" required
+                    min="{{ min_date }}" max="{{ max_date }}"
+                    value="{{ request.form.get('tanggal_selesai') }}">
+                </div>
+              </div>
+            </div>
+
+            <!-- Perihal Cuti -->
+            <div class="mb-3">
+              <label for="perihal_cuti" class="form-label fw-semibold">
+                <i class="bi bi-pencil-square me-1"></i>Alasan Cuti
+              </label>
+              <textarea class="form-control" id="perihal_cuti" 
+                name="perihal_cuti" rows="4" placeholder="Tuliskan alasan cuti Anda..." required></textarea>
+              <div class="form-text">Minimal 20 karakter</div>
+            </div>
+
+            <!-- Lampiran -->
+            <div class="mb-4">
+              <label class="form-label fw-semibold">
+                <i class="bi bi-paperclip me-1"></i>Lampiran Dokumen
+              </label>
+              <input type="file" class="form-control" 
+                name="lampiran" accept=".pdf,.jpg,.jpeg,.png">
+              <div class="form-text">Format: PDF/JPG/PNG (Maks. 2MB)</div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="d-grid mt-4">
+              <button type="submit" class="btn btn-primary" id="submit-button">
+                <span id="submit-text">
+                  <i class="bi bi-send-check-fill me-1"></i>Ajukan Sekarang
+                </span>
+                <span id="submit-spinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="loading-overlay d-none">
+  <div class="loading-content text-center">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <h5 class="mt-3 text-primary fw-bold">Mengirim pengajuan...</h5>
+    <p class="text-muted">Harap tunggu sebentar</p>
+  </div>
+</div>
+
+<!-- Script -->
+<script>
+  function validateForm() {
+    const start = document.getElementById('tanggal_mulai').value;
+    const end = document.getElementById('tanggal_selesai').value;
+    const perihal = document.getElementById('perihal_cuti').value;
+
+    if (end < start) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Tanggal Tidak Valid',
+        text: 'Tanggal selesai harus setelah tanggal mulai',
+        confirmButtonColor: '#0d6efd'
+      });
+      return false;
+    }
+
+    if (perihal.length < 20) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Alasan Terlalu Pendek',
+        text: 'Harap jelaskan alasan cuti minimal 20 karakter',
+        confirmButtonColor: '#0d6efd'
+      });
+      return false;
+    }
+
+    return true;
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('tanggal_mulai').min = today;
+
+    // Date validation
+    document.getElementById('tanggal_mulai').addEventListener('change', function() {
+      const endDate = document.getElementById('tanggal_selesai');
+      if (this.value) {
+        endDate.min = this.value;
+        if (endDate.value && endDate.value < this.value) {
+          endDate.value = this.value;
+        }
+      }
+    });
+
+    // Form submission handler
+    document.getElementById('form-ajukan-cuti').addEventListener('submit', function() {
+      const submitBtn = document.getElementById('submit-button');
+      const submitText = document.getElementById('submit-text');
+      const spinner = document.getElementById('submit-spinner');
+      
+      submitText.innerHTML = 'Memproses...';
+      spinner.classList.remove('d-none');
+      submitBtn.disabled = true;
+      document.getElementById('loading-overlay').classList.remove('d-none');
+    });
+  });
+</script>
+
+<!-- Style -->
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f8f9fc;
+  }
+
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.9);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .loading-content {
+    max-width: 300px;
+  }
+
+  .form-control:focus, .form-select:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
+  }
+
+  .card {
+    border-radius: 8px;
+  }
+
+  @media (max-width: 768px) {
+    .container-fluid {
+      padding: 1rem;
+    }
+  }
+</style>
+{% endblock %}

@@ -1,0 +1,85 @@
+/* Detail Header */
+.admin-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Detail Sections */
+.admin-detail-section {
+    margin-bottom: 2rem;
+}
+
+.admin-detail-section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Detail Rows */
+.admin-detail-row {
+    display: flex;
+    margin-bottom: 1rem;
+}
+
+.admin-detail-label {
+    flex: 0 0 200px;
+    font-weight: 500;
+    color: var(--gray);
+}
+
+.admin-detail-value {
+    flex: 1;
+    color: var(--dark);
+}
+
+/* Timeline */
+.admin-timeline {
+    position: relative;
+    padding-left: 2rem;
+    margin: 2rem 0;
+}
+
+.admin-timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e0e0e0;
+}
+
+.admin-timeline-item {
+    position: relative;
+    padding-bottom: 1.5rem;
+}
+
+.admin-timeline-dot {
+    position: absolute;
+    left: -2rem;
+    top: 0;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--primary);
+}
+
+.admin-timeline-date {
+    font-size: 0.85rem;
+    color: var(--gray);
+    margin-bottom: 0.25rem;
+}
+
+.admin-timeline-content {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: var(--card-shadow);
+}

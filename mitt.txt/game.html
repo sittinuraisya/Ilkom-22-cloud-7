@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Games - English Learning</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(to right, #ffe4e6, #fce7f3);
+      font-family: 'Nunito', sans-serif;
+    }
+    .card {
+      background-color: #fff0f6;
+      border: 2px dashed #f9a8d4;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(248, 187, 208, 0.4);
+      padding: 20px;
+      transition: transform 0.3s ease;
+    }
+    .card:hover {
+      transform: scale(1.03);
+    }
+    h1 {
+      background: linear-gradient(to right, #ec4899, #d946ef);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center px-4 py-10">
+  <h1 class="text-3xl mb-8">🎮 Games Edukatif - EngStudy</h1>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
+    <div class="card">
+      <h2 class="text-lg font-bold text-pink-600 mb-2">1. Tebak Arti Kata</h2>
+      <p class="text-pink-800 mb-3">Tebak arti dari kosakata bahasa Inggris yang muncul secara acak.</p>
+      <button class="bg-pink-500 text-white py-2 px-4 rounded hover:bg-pink-600">Mulai Main</button>
+    </div>
+
+    <div class="card">
+      <h2 class="text-lg font-bold text-pink-600 mb-2">2. Matching Word</h2>
+      <p class="text-pink-800 mb-3">Cocokkan kata dalam bahasa Inggris dengan artinya dalam bahasa Indonesia.</p>
+      <button class="bg-pink-500 text-white py-2 px-4 rounded hover:bg-pink-600">Mulai Main</button>
+    </div>
+
+    <div class="card">
+      <h2 class="text-lg font-bold text-pink-600 mb-2">3. Sentence Builder</h2>
+      <p class="text-pink-800 mb-3">Susun kata acak menjadi kalimat yang benar dalam bahasa Inggris.</p>
+      <button class="bg-pink-500 text-white py-2 px-4 rounded hover:bg-pink-600">Mulai Main</button>
+    </div>
+
+    <div class="card">
+      <h2 class="text-lg font-bold text-pink-600 mb-2">4. Listening Quiz</h2>
+      <p class="text-pink-800 mb-3">Dengarkan audio dan pilih kalimat yang kamu dengar.</p>
+      <button class="bg-pink-500 text-white py-2 px-4 rounded hover:bg-pink-600">Mulai Main</button>
+    </div>
+  </div>
+</body>
+</html>

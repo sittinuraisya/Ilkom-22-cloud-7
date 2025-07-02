@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Pengajuan Cuti | E-Cuti: Sistem Digitalisasi Pengelolaan Cuti Pegawai</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #4e73df;
+            --secondary: #858796;
+            --success: #1cc88a;
+            --warning: #f6c23e;
+            --danger: #e74a3b;
+            --light: #f8f9fc;
+            --dark: #5a5c69;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fc;
+            color: #343a40;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        .detail-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+            padding: 1.5rem;
+            flex: 1;
+        }
+
+        .detail-header {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .detail-header h2 i {
+            margin-right: 0.75rem;
+        }
+
+        .detail-header p {
+            font-size: 0.85rem;
+            color: var(--secondary);
+        }
+
+        .detail-card {
+            margin-bottom: 1.5rem;
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+        }
+
+        .detail-card-header {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 10px 10px 0 0;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .detail-card-header h5 {
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .detail-card-header h5 i {
+            margin-right: 0.5rem;
+        }
+
+        .detail-card-body {
+            padding: 1.25rem;
+        }
+
+        .detail-row {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-row .fw-bold {
+            width: 25%;
+            font-size: 0.85rem;
+            color: var(--secondary);
+            font-weight: 500;
+        }
+
+        .detail-row > div:last-child {
+            width: 75%;
+            font-size: 0.9rem;
+        }
+
+        .status-badge {
+            font-size: 0.8rem;
+            font-weight: 500;
+            padding: 0.35em 0.75em;
+            border-radius: 20px;
+        }
+
+        .action-buttons {
+            margin-top: 2rem;
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .btn i {
+            margin-right: 0.5rem;
+        }
+
+        footer {
+            background: white;
+            padding: 0.75rem;
+            text-align: center;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            margin-top: auto;
+            font-size: 0.75rem;
+            color: var(--secondary);
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .footer-brand {
+            font-weight: 600;
+            color: var(--secondary);
+            font-size: 0.8rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .footer-copyright {
+            font-size: 0.7rem;
+            color: var(--secondary);
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .detail-container {
+                margin: 1rem;
+                padding: 1.25rem;
+            }
+
+            .detail-row .fw-bold {
+                width: 100%;
+                margin-bottom: 0.25rem;
+            }
+
+            .detail-row > div:last-child {
+                width: 100%;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="detail-container">
+        <div class="detail-header">
+            <h2 class="mb-1">
+                <i class="bi bi-file-text"></i> Detail Pengajuan Cuti
+            </h2>
+            <p class="text-muted mb-0">ID: #{{ cuti.id }}</p>
+        </div>
+
+        <!-- Card Informasi Cuti -->
+        <div class="card detail-card">
+            <div class="card-header detail-card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Informasi Cuti</h5>
+            </div>
+            <div class="card-body detail-card-body">
+                <div class="detail-row">
+                    <div class="fw-bold">Jenis Cuti</div>
+                    <div>{{ cuti.jenis_cuti }}</div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="fw-bold">Status</div>
+                    <div>
+                        <span class="status-badge badge bg-{% if cuti.status == 'DISETUJUI' %}success{% elif cuti.status == 'PENDING' %}warning{% else %}danger{% endif %}">
+                            {{ cuti.status }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="fw-bold">Tanggal Pengajuan</div>
+                    <div>{{ cuti.tanggal_pengajuan }}</div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="fw-bold">Periode Cuti</div>
+                    <div>
+                        {{ cuti.tanggal_mulai }} sampai {{ cuti.tanggal_selesai }}
+                        <span class="text-muted">({{ cuti.lama_cuti }} hari)</span>
+                    </div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="fw-bold">Alasan</div>
+                    <div>{{ cuti.alasan }}</div>
+                </div>
+                
+                {% if cuti.catatan %}
+                <div class="detail-row">
+                    <div class="fw-bold">Catatan</div>
+                    <div>{{ cuti.catatan }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Card Informasi Pemohon -->
+        <div class="card detail-card">
+            <div class="card-header detail-card-header">
+                <h5 class="mb-0"><i class="bi bi-person"></i> Informasi Pemohon</h5>
+            </div>
+            <div class="card-body detail-card-body">
+                <div class="detail-row">
+                    <div class="fw-bold">Nama Lengkap</div>
+                    <div>{{ cuti.pemohon.nama }}</div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="fw-bold">NIP</div>
+                    <div>{{ cuti.pemohon.nip }}</div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="fw-bold">Jabatan</div>
+                    <div>{{ cuti.pemohon.jabatan }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card Informasi Penyetuju (jika ada) -->
+        {% if cuti.penyetuju %}
+        <div class="card detail-card">
+            <div class="card-header detail-card-header">
+                <h5 class="mb-0"><i class="bi bi-person-check"></i> Informasi Penyetuju</h5>
+            </div>
+            <div class="card-body detail-card-body">
+                <div class="detail-row">
+                    <div class="fw-bold">Nama</div>
+                    <div>{{ cuti.penyetuju.nama }}</div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="fw-bold">Jabatan</div>
+                    <div>{{ cuti.penyetuju.jabatan }}</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Tombol Aksi -->
+        <div class="action-buttons">
+            <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Kembali ke Daftar
+            </a>
+            
+            {% if cuti.status == 'PENDING' and current_user.id == cuti.user_id %}
+            <a href="{{ url_for('cuti.edit_cuti', cuti_id=cuti.id) }}" class="btn btn-warning">
+                <i class="bi bi-pencil"></i> Edit Pengajuan
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-brand">{{ app_name }}</div>
+            <div class="footer-copyright">{{ organization }} © {{ now.year }} - All Rights Reserved</div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
