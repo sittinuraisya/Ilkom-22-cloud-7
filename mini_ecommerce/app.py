@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, url_for
 import sqlite3, os
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -91,12 +91,12 @@ def admin_orders():
     if session.get('role') != 'admin':
         return redirect('/login')
     conn = get_db_connection()
-    orders = conn.execute("""
+    orders = conn.execute('''
         SELECT o.id, u.username, p.name AS product_name, o.quantity
         FROM orders o
         JOIN users u ON o.user_id = u.id
         JOIN products p ON o.product_id = p.id
-    """).fetchall()
+    ''').fetchall()
     conn.close()
     return render_template('admin_orders.html', orders=orders)
 
