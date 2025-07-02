@@ -1,6 +1,6 @@
 [
     {
-        "id_resep": "31dc43bf-3f08-4c9b-acbb-ef4b30bebf7a",
+        "id_resep": "5617913f-fba7-4b33-b390-a75b3adaac21",
         "nama": "Nasi Goreng",
         "kategori": "Masakan Utama",
         "bahan": [
@@ -17,10 +17,10 @@
             "Tambahkan kecap",
             "Masukkan telur"
         ],
-        "dibuat": "2025-04-14T15:47:48.571171"
+        "dibuat": "2025-04-14T17:43:20.561280"
     },
     {
-        "id_resep": "7904bfcb-f260-4c1c-a61c-aa2db7bdbf2b",
+        "id_resep": "50ab92b9-a2be-4f72-aee3-71742b5c6403",
         "nama": "Jus Alpukat",
         "kategori": "Minuman",
         "bahan": [
@@ -29,10 +29,10 @@
             "Es Batu"
         ],
         "langkah": [],
-        "dibuat": "2025-04-14T15:47:48.571171"
+        "dibuat": "2025-04-14T17:43:20.561280"
     },
     {
-        "id_resep": "713a70bb-2082-4680-be9a-c9a1509428a0",
+        "id_resep": "55479d19-86a8-401a-8673-0f727f5ff426",
         "nama": "Ayam Goreng",
         "kategori": "Masakan Utama",
         "bahan": [
@@ -47,10 +47,10 @@
             "Diamkan 30 menit",
             "Goreng hingga matang"
         ],
-        "dibuat": "2025-04-14T15:47:48.571171"
+        "dibuat": "2025-04-14T17:43:20.561280"
     },
     {
-        "id_resep": "e97866f4-d8ea-489c-8043-96a334b7d82a",
+        "id_resep": "9b78d239-c3c6-4e63-b192-cf691da0bc91",
         "nama": "Mie Goreng",
         "kategori": "Masakan Utama",
         "bahan": [
@@ -66,10 +66,10 @@
             "Masukkan mie dan telur",
             "Tambahkan kecap"
         ],
-        "dibuat": "2025-04-14T15:47:48.571171"
+        "dibuat": "2025-04-14T17:43:20.561280"
     },
     {
-        "id_resep": "765fcf86-b482-4846-b601-10edea32feb6",
+        "id_resep": "a7ef7831-2bc6-4db6-8c81-d849092087e3",
         "nama": "Sate Ayam",
         "kategori": "Makanan",
         "bahan": [
@@ -85,6 +85,6 @@
             "Bakar sate",
             "Sajikan dengan bumbu kacang"
         ],
-        "dibuat": "2025-04-14T15:47:48.571171"
+        "dibuat": "2025-04-14T17:43:20.561280"
     }
 ]
