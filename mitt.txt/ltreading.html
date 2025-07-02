@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reading Comprehension - Eng-Study</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(135deg, #fff1f8, #f3e5f5);
+      padding: 2rem;
+      color: #4a154b;
+    }
+    h1 {
+      font-size: 2rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      color: #d63384;
+      font-weight: 700;
+    }
+    .card {
+      background-color: #fff;
+      border-radius: 1rem;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    .question {
+      margin-top: 1rem;
+      font-weight: 600;
+    }
+    .answer {
+      margin-top: 0.5rem;
+    }
+    button {
+      background-color: #f472b6;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      margin-top: 1rem;
+    }
+    button:hover {
+      background-color: #ec4899;
+    }
+  </style>
+</head>
+<body>
+  <h1>Reading Comprehension</h1>
+
+  <div class="card">
+    <p><strong>Reading Passage:</strong></p>
+    <p>
+      Sarah is a young girl who loves animals. Every day after school, she visits the animal shelter near her house. She helps feed the dogs and cats, cleans their cages, and plays with them. Sarah hopes to become a veterinarian when she grows up.
+    </p>
+    
+    <div class="question">1. What does Sarah do after school?</div>
+    <div class="answer">
+      <label><input type="radio" name="q1"> Goes to the park</label><br>
+      <label><input type="radio" name="q1"> Visits an animal shelter</label><br>
+      <label><input type="radio" name="q1"> Studies with friends</label>
+    </div>
+
+    <div class="question">2. What does Sarah want to be in the future?</div>
+    <div class="answer">
+      <label><input type="radio" name="q2"> A doctor</label><br>
+      <label><input type="radio" name="q2"> A zookeeper</label><br>
+      <label><input type="radio" name="q2"> A veterinarian</label>
+    </div>
+
+    <button onclick="checkAnswers()">Submit Answers</button>
+    <div id="result" class="mt-4 font-bold"></div>
+  </div>
+
+  <script>
+    function checkAnswers() {
+      const q1 = document.querySelector('input[name="q1"]:checked');
+      const q2 = document.querySelector('input[name="q2"]:checked');
+      let score = 0;
+      if (q1 && q1.nextSibling.textContent.includes("animal shelter")) score++;
+      if (q2 && q2.nextSibling.textContent.includes("veterinarian")) score++;
+
+      document.getElementById('result').innerText = `You got ${score} out of 2 questions correct.`;
+    }
+  </script>
+</body>
+</html>
