@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head><title>Hasil Voting</title></head>
+<body>
+    <h2>Hasil Voting Grup K-Pop Gen 3</h2>
+    <ul>
+        {% for group, votes in results %}
+            <li>{{ group }} - {{ votes }} suara</li>
+        {% endfor %}
+    </ul>
+    <a href="/dashboard">Kembali</a>
+</body>
+</html>
