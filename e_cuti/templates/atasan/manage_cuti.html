@@ -416,7 +416,7 @@
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        {% set profile_img_url = cuti.pemohon.foto_profil_url if hasattr(cuti.pemohon, 'foto_profil_url') else url_for('static', filename='images/profile-default.png') %}
+                                        {% set profile_img_url = url_for('static', filename='images/profile-default.png') if not cuti.pemohon.foto_profil_url else cuti.pemohon.foto_profil_url %}
                                         <img src="{{ profile_img_url }}" 
                                              class="rounded-circle me-3 profile-img" 
                                              width="40" height="40" 
